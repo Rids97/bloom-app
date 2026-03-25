@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bloom AI — Sign In</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0f0b;
+      --surface: #13160f;
+      --border: #2a2e24;
+      --accent: #a8c97f;
+      --accent-dim: #6b8f4a;
+      --text: #e8ead4;
+      --text-muted: #7a8066;
+      --error: #c97f7f;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      overflow: hidden;
+    }
+
+    /* Organic background */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 20% 80%, rgba(168,201,127,0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 60% at 80% 20%, rgba(107,143,74,0.05) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    /* SVG botanical lines */
+    .botanical {
+      position: fixed;
+      opacity: 0.12;
+      pointer-events: none;
+    }
+    .botanical-left { bottom: -40px; left: -60px; width: 380px; }
+    .botanical-right { top: -40px; right: -60px; width: 280px; transform: rotate(180deg); }
+
+    .container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 400px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 52px 44px 48px;
+      position: relative;
+      animation: fadeUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0.6;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 36px;
+    }
+
+    .logo-icon {
+      width: 28px; height: 28px;
+      border: 1.5px solid var(--accent);
+      border-radius: 50%;
+      position: relative;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .logo-icon::after {
+      content: '';
+      width: 8px; height: 8px;
+      background: var(--accent);
+      border-radius: 50%;
+    }
+
+    .logo-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px;
+      font-weight: 300;
+      letter-spacing: 0.12em;
+      color: var(--text);
+    }
+
+    h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 32px;
+      font-weight: 300;
+      font-style: italic;
+      letter-spacing: -0.01em;
+      color: var(--text);
+      margin-bottom: 8px;
+      line-height: 1.1;
+    }
+
+    .subtitle {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      margin-bottom: 36px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 0;
+      margin-bottom: 28px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tab {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      background: none;
+      border: none;
+      padding: 8px 0;
+      margin-right: 28px;
+      cursor: pointer;
+      position: relative;
+      transition: color 0.2s;
+    }
+
+    .tab.active { color: var(--accent); }
+
+    .tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px; left: 0; right: 0;
+      height: 1px;
+      background: var(--accent);
+    }
+
+    .field {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    input {
+      width: 100%;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      padding: 12px 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus { border-color: var(--accent-dim); }
+    input::placeholder { color: var(--text-muted); opacity: 0.5; }
+
+    .btn {
+      width: 100%;
+      margin-top: 8px;
+      padding: 14px;
+      background: var(--accent);
+      color: var(--bg);
+      border: none;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn:hover { background: #bde090; }
+    .btn:active { transform: scale(0.99); }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .msg {
+      margin-top: 14px;
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      min-height: 16px;
+      text-align: center;
+      color: var(--text-muted);
+      transition: color 0.2s;
+    }
+
+    .msg.error { color: var(--error); }
+    .msg.success { color: var(--accent); }
+
+    .divider {
+      display: flex; align-items: center; gap: 12px;
+      margin: 20px 0;
+    }
+
+    .divider::before, .divider::after {
+      content: ''; flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .divider span {
+      font-size: 10px;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Botanical SVGs -->
+  <svg class="botanical botanical-left" viewBox="0 0 300 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M60 400 Q80 320 120 280 Q160 240 140 180 Q120 120 160 80" stroke="#a8c97f" stroke-width="1.5" fill="none"/>
+    <path d="M120 280 Q80 260 50 230 Q20 200 30 170" stroke="#a8c97f" stroke-width="1" fill="none"/>
+    <path d="M120 280 Q155 265 170 240 Q185 215 175 195" stroke="#a8c97f" stroke-width="1" fill="none"/>
+    <path d="M140 180 Q105 160 90 135 Q75 110 85 90" stroke="#a8c97f" stroke-width="1" fill="none"/>
+    <path d="M140 180 Q170 165 180 145 Q190 125 182 108" stroke="#a8c97f" stroke-width="1" fill="none"/>
+    <ellipse cx="30" cy="170" rx="18" ry="28" transform="rotate(-30 30 170)" stroke="#a8c97f" stroke-width="0.8" fill="none"/>
+    <ellipse cx="175" cy="195" rx="16" ry="24" transform="rotate(20 175 195)" stroke="#a8c97f" stroke-width="0.8" fill="none"/>
+    <ellipse cx="85" cy="90" rx="14" ry="22" transform="rotate(-15 85 90)" stroke="#a8c97f" stroke-width="0.8" fill="none"/>
+    <ellipse cx="182" cy="108" rx="13" ry="20" transform="rotate(25 182 108)" stroke="#a8c97f" stroke-width="0.8" fill="none"/>
+  </svg>
+
+  <svg class="botanical botanical-right" viewBox="0 0 300 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M60 400 Q80 320 120 280 Q160 240 140 180 Q120 120 160 80" stroke="#a8c97f" stroke-width="1.5" fill="none"/>
+    <path d="M120 280 Q80 260 50 230 Q20 200 30 170" stroke="#a8c97f" stroke-width="1" fill="none"/>
+    <path d="M140 180 Q105 160 90 135 Q75 110 85 90" stroke="#a8c97f" stroke-width="1" fill="none"/>
+    <ellipse cx="30" cy="170" rx="18" ry="28" transform="rotate(-30 30 170)" stroke="#a8c97f" stroke-width="0.8" fill="none"/>
+  </svg>
+
+  <div class="container">
+    <div class="card">
+      <div class="logo">
+        <div class="logo-icon"></div>
+        <span class="logo-text">BLOOM AI</span>
+      </div>
+
+      <h1>Welcome<br/>back.</h1>
+      <p class="subtitle">INTELLIGENT CONVERSATION</p>
+
+      <div class="tabs">
+        <button class="tab active" id="tab-login" onclick="switchTab('login')">SIGN IN</button>
+        <button class="tab" id="tab-signup" onclick="switchTab('signup')">CREATE ACCOUNT</button>
+      </div>
+
+      <div class="field">
+        <label for="email">Email address</label>
+        <input type="email" id="email" placeholder="you@example.com" />
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="••••••••" onkeydown="if(event.key==='Enter') handleSubmit()" />
+      </div>
+
+      <button class="btn" id="submit-btn" onclick="handleSubmit()">CONTINUE →</button>
+
+      <p class="msg" id="msg"></p>
+    </div>
+  </div>
+
+  <script>
+    let mode = 'login';
+
+    function switchTab(newMode) {
+      mode = newMode;
+      document.getElementById('tab-login').classList.toggle('active', mode === 'login');
+      document.getElementById('tab-signup').classList.toggle('active', mode === 'signup');
+      document.getElementById('submit-btn').textContent = mode === 'login' ? 'CONTINUE →' : 'CREATE ACCOUNT →';
+      setMsg('', '');
+    }
+
+    function setMsg(text, type = '') {
+      const el = document.getElementById('msg');
+      el.textContent = text;
+      el.className = 'msg' + (type ? ' ' + type : '');
+    }
+
+    async function handleSubmit() {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const btn = document.getElementById('submit-btn');
+
+      if (!email || !password) { setMsg('Please fill in all fields.', 'error'); return; }
+
+      btn.disabled = true;
+      setMsg('');
+
+      try {
+        const res = await fetch('/' + mode, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+
+        const data = await res.json();
+
+        if (mode === 'signup') {
+          setMsg('Account created — sign in now.', 'success');
+          switchTab('login');
+        } else {
+          if (data.token) {
+            localStorage.setItem('token', data.token);
+            setMsg('Signing you in...', 'success');
+            setTimeout(() => window.location = '/index.html', 600);
+          } else {
+            setMsg(data || 'Invalid credentials.', 'error');
+          }
+        }
+      } catch {
+        setMsg('Something went wrong. Try again.', 'error');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>
