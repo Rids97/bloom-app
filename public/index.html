@@ -207,7 +207,7 @@
     <div class="sidebar-bottom">
       <div class="upgrade-card" id="upgrade-card">
         <div class="upgrade-card-title">Unlock more</div>
-        <div class="upgrade-card-text">Unlimited chat ₹200/mo · Personalised plan ₹1,200/mo.</div>
+        <div class="upgrade-card-text">Unlimited chat ₹200/mo · Personalised plan ₹800/mo total.</div>
         <button class="btn-upgrade-sm" onclick="openUpgradeModal()">Upgrade plan</button>
       </div>
       <div class="user-row">
@@ -362,7 +362,7 @@ function applyUserState() {
     document.getElementById('upgrade-card').style.display = 'none';
     document.getElementById('plan-lock-badge').style.display = 'none';
   } else if (plan === 'pro') {
-    document.getElementById('upgrade-card').querySelector('.upgrade-card-text').textContent = 'Add a personalised fertility plan for ₹1,000/mo more.';
+    document.getElementById('upgrade-card').querySelector('.upgrade-card-text').textContent = 'Add a personalised fertility plan for ₹600/mo more.';
   }
   const name  = USER.profile?.name;
   const hour  = new Date().getHours();
@@ -475,8 +475,8 @@ function renderLocked(c) {
         <div class="plan-locked-icon">🌿</div>
         <h2>Your personalised<br/><em>fertility plan</em></h2>
         <p>A fully personalised roadmap — nutrition, supplements, lifestyle, and a monthly action plan — built entirely around your unique journey.</p>
-        <div class="plan-locked-price">₹1,000<span style="font-size:18px;color:var(--muted)">/mo</span></div>
-        <div class="plan-locked-price-sub">Added to Bloom Pro (₹200) = ₹1,200/month total</div>
+        <div class="plan-locked-price">₹600<span style="font-size:18px;color:var(--muted)">/mo</span></div>
+        <div class="plan-locked-price-sub">Added to Bloom Pro (₹200) = ₹800/month total</div>
         <ul class="plan-locked-features">
           <li>AI-generated personalised fertility plan</li>
           <li>Nutrition, supplement & lifestyle roadmap</li>
