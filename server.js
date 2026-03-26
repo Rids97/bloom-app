@@ -13,7 +13,6 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, “public”)));
 
-// ─── DB ────────────────────────────────────────────────────────────────────
 let isConnected = false;
 
 async function connectDB() {
@@ -31,7 +30,6 @@ console.error(“MongoDB error:”, err.message);
 
 connectDB();
 
-// ─── MODELS ────────────────────────────────────────────────────────────────
 const UserSchema = new mongoose.Schema({
 email:        { type: String, required: true, unique: true },
 password:     { type: String, required: true },
@@ -67,7 +65,6 @@ createdAt:       { type: Date, default: Date.now },
 
 const Order = mongoose.models.Order || mongoose.model(“Order”, OrderSchema);
 
-// ─── CLIENTS ───────────────────────────────────────────────────────────────
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 const razorpay = new Razorpay({
@@ -75,42 +72,45 @@ key_id:     process.env.RAZORPAY_KEY_ID || “dummy”,
 key_secret: process.env.RAZORPAY_KEY_SECRET || “dummy”,
 });
 
-// ─── PRICING ───────────────────────────────────────────────────────────────
 const PLANS = {
 pro:      { amount: 20000, label: “Bloom Pro”,      monthly: 200 },
 complete: { amount: 80000, label: “Bloom Complete”,  monthly: 800 },
 };
 
-// ─── MIDDLEWARE ────────────────────────────────────────────────────────────
 function auth(req, res, next) {
 const token = req.headers.authorization;
 if (!token) return res.status(401).json({ error: “No token” });
 try {
 req.user = jwt.verify(token, process.env.JWT_SECRET || “BLOOM_SECRET”);
 next();
-} catch {
+} catch (e) {
 res.status(401).json({ error: “Invalid token” });
 }
 }
 
-// ─── TEST ROUTE ────────────────────────────────────────────────────────────
 app.get(”/test”, (req, res) => {
 res.json({
 status:   “ok”,
-mongo:    process.env.MONGO_URI    ? “✅ set” : “❌ missing”,
-groq:     process.env.GROQ_API_KEY ? “✅ set” : “❌ missing”,
-jwt:      process.env.JWT_SECRET   ? “✅ set” : “❌ missing”,
-razorpay: process.env.RAZORPAY_KEY_ID ? “✅ set” : “❌ missing”,
-dbState:  mongoose.connection.readyState === 1 ? “✅ connected” : “❌ disconnected”,
+mongo:    process.env.MONGO_URI    ? “set” : “missing”,
+groq:     process.env.GROQ_API_KEY ? “set” : “missing”,
+jwt:      process.env.JWT_SECRET   ? “set” : “missing”,
+razorpay: process.env.RAZORPAY_KEY_ID ? “set” : “missing”,
+dbState:  mongoose.connection.readyState === 1 ? “connected” : “disconnected”,
 });
 });
 
-// ─── ROUTES ────────────────────────────────────────────────────────────────
-app.get(”/”,      (req, res) => res.sendFile(path.join(__dirname, “public/landing.html”)));
-app.get(”/app”,   (req, res) => res.sendFile(path.join(__dirname, “public/index.html”)));
-app.get(”/login”, (req, res) => res.sendFile(path.join(__dirname, “public/login.html”)));
+app.get(”/”, (req, res) => {
+res.sendFile(path.join(__dirname, “public”, “landing.html”));
+});
 
-// ── Auth ──────────────────────────────────────────────────────────────────
+app.get(”/app”, (req, res) => {
+res.sendFile(path.join(__dirname, “public”, “index.html”));
+});
+
+app.get(”/login”, (req, res) => {
+res.sendFile(path.join(__dirname, “public”, “login.html”));
+});
+
 app.post(”/signup”, async (req, res) => {
 try {
 await connectDB();
@@ -147,7 +147,6 @@ res.status(500).json({ error: “Login failed: “ + err.message });
 }
 });
 
-// ── Profile ───────────────────────────────────────────────────────────────
 app.get(”/me”, auth, async (req, res) => {
 try {
 await connectDB();
@@ -174,7 +173,6 @@ res.status(500).json({ error: “Could not update profile” });
 }
 });
 
-// ── Chat ──────────────────────────────────────────────────────────────────
 app.post(”/chat”, auth, async (req, res) => {
 try {
 await connectDB();
@@ -194,19 +192,13 @@ user.messageCount++;
 await user.save();
 
 const profile = user.profile || {};
-let systemPrompt = `You are Bloom, a warm, knowledgeable, and compassionate AI fertility companion.
-```
+let systemPrompt = "You are Bloom, a warm, knowledgeable, and compassionate AI fertility companion. You provide accurate, evidence-based information about fertility, menstrual cycles, IVF, PCOS, and reproductive health. You are supportive, non-judgmental, and always remind users to consult their doctor for medical decisions. Keep responses warm, clear, and concise.";
 
-You provide accurate, evidence-based information about fertility, menstrual cycles, IVF, PCOS, and reproductive health.
-You are supportive, non-judgmental, and always remind users to consult their doctor for medical decisions.
-Keep responses warm, clear, and concise.`;
-
-```
 if (profile.journeyStage) {
-  systemPrompt += `\n\nUser context: ${profile.name || "This user"} is on a ${profile.journeyStage} journey.`;
-  if (profile.age) systemPrompt += ` Age: ${profile.age}.`;
-  if (profile.cycleLength) systemPrompt += ` Average cycle: ${profile.cycleLength} days.`;
-  if (profile.symptoms?.length) systemPrompt += ` Noted symptoms: ${profile.symptoms.join(", ")}.`;
+  systemPrompt += " User context: " + (profile.name || "This user") + " is on a " + profile.journeyStage + " journey.";
+  if (profile.age) systemPrompt += " Age: " + profile.age + ".";
+  if (profile.cycleLength) systemPrompt += " Average cycle: " + profile.cycleLength + " days.";
+  if (profile.symptoms && profile.symptoms.length) systemPrompt += " Noted symptoms: " + profile.symptoms.join(", ") + ".";
 }
 
 const response = await groq.chat.completions.create({
@@ -231,7 +223,6 @@ res.status(500).json({ error: “Something went wrong: “ + err.message });
 }
 });
 
-// ── Fertility Plan ─────────────────────────────────────────────────────────
 app.get(”/fertility-plan”, auth, async (req, res) => {
 try {
 await connectDB();
@@ -242,12 +233,12 @@ if (!user) return res.status(404).json({ error: “User not found” });
 if (user.plan !== "complete") {
   return res.status(403).json({
     error: "upgrade_required",
-    message: "Personalised fertility plans are part of Bloom Complete (₹800/month).",
+    message: "Personalised fertility plans are part of Bloom Complete.",
   });
 }
 
 const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-if (user.fertilityPlan?.content && user.fertilityPlan.generatedAt > thirtyDaysAgo) {
+if (user.fertilityPlan && user.fertilityPlan.content && user.fertilityPlan.generatedAt > thirtyDaysAgo) {
   return res.json({ plan: user.fertilityPlan.content, generatedAt: user.fertilityPlan.generatedAt, cached: true });
 }
 
@@ -257,18 +248,13 @@ const response = await groq.chat.completions.create({
   messages: [
     {
       role: "system",
-      content: `You are Bloom's senior fertility advisor AI. Generate detailed, personalised, evidence-based fertility plans in structured markdown format.
-```
-
-Always include: introduction, cycle insights, nutrition plan, supplement recommendations, lifestyle adjustments, stress management, and monthly roadmap.
-Be warm, specific, and actionable. Always remind the user this complements (not replaces) medical care.`,
-},
-{ role: “user”, content: buildPlanPrompt(profile) },
-],
-max_tokens: 2000,
+      content: "You are Bloom's senior fertility advisor AI. Generate detailed, personalised, evidence-based fertility plans in structured markdown format. Always include: introduction, cycle insights, nutrition plan, supplement recommendations, lifestyle adjustments, stress management, and monthly roadmap. Be warm, specific, and actionable.",
+    },
+    { role: "user", content: buildPlanPrompt(profile) },
+  ],
+  max_tokens: 2000,
 });
 
-```
 const planContent = response.choices[0].message.content;
 await User.findByIdAndUpdate(req.user.id, {
   fertilityPlan: { content: planContent, generatedAt: new Date() },
@@ -297,7 +283,7 @@ const response = await groq.chat.completions.create({
   messages: [
     {
       role: "system",
-      content: `You are Bloom's senior fertility advisor AI. Generate detailed personalised fertility plans in markdown format. Be warm and actionable.`,
+      content: "You are Bloom's senior fertility advisor AI. Generate detailed personalised fertility plans in markdown format. Be warm and actionable.",
     },
     { role: "user", content: buildPlanPrompt(profile) },
   ],
@@ -318,29 +304,26 @@ res.status(500).json({ error: “Could not regenerate plan: “ + err.message })
 });
 
 function buildPlanPrompt(profile) {
-return `Please generate a personalised fertility plan for this user:
-Name: ${profile.name || “Not provided”}
-Age: ${profile.age || “Not provided”}
-Journey stage: ${profile.journeyStage || “general fertility support”}
-Average cycle length: ${profile.cycleLength ? profile.cycleLength + “ days” : “Not provided”}
-Average period length: ${profile.periodLength ? profile.periodLength + “ days” : “Not provided”}
-Current symptoms: ${profile.symptoms?.join(”, “) || “None noted”}
-Current medications: ${profile.medications?.join(”, “) || “None”}
-Additional notes: ${profile.notes || “None”}
+return “Please generate a personalised fertility plan for this user:\n” +
+“Name: “ + (profile.name || “Not provided”) + “\n” +
+“Age: “ + (profile.age || “Not provided”) + “\n” +
+“Journey stage: “ + (profile.journeyStage || “general fertility support”) + “\n” +
+“Average cycle length: “ + (profile.cycleLength ? profile.cycleLength + “ days” : “Not provided”) + “\n” +
+“Average period length: “ + (profile.periodLength ? profile.periodLength + “ days” : “Not provided”) + “\n” +
+“Current symptoms: “ + (profile.symptoms && profile.symptoms.length ? profile.symptoms.join(”, “) : “None noted”) + “\n” +
+“Current medications: “ + (profile.medications && profile.medications.length ? profile.medications.join(”, “) : “None”) + “\n” +
+“Additional notes: “ + (profile.notes || “None”) + “\n\n” +
+“Create a comprehensive personalised fertility plan with these sections:\n” +
+“1. Personal Overview and Key Insights\n” +
+“2. Understanding Your Cycle\n” +
+“3. Nutrition Plan\n” +
+“4. Supplement Protocol\n” +
+“5. Lifestyle Adjustments\n” +
+“6. Stress and Emotional Wellbeing\n” +
+“7. 4-Week Action Roadmap\n” +
+“8. When to Speak to Your Doctor”;
+}
 
-Create a comprehensive personalised fertility plan with these sections:
-
-1. Personal Overview & Key Insights
-1. Understanding Your Cycle
-1. Nutrition Plan
-1. Supplement Protocol
-1. Lifestyle Adjustments
-1. Stress & Emotional Wellbeing
-1. 4-Week Action Roadmap
-1. When to Speak to Your Doctor`;
-   }
-
-// ── Payments ──────────────────────────────────────────────────────────────
 app.post(”/create-order”, auth, async (req, res) => {
 try {
 await connectDB();
@@ -351,13 +334,13 @@ if (!PLANS[plan]) return res.status(400).json({ error: “Invalid plan” });
 const razorpayOrder = await razorpay.orders.create({
   amount:   PLANS[plan].amount,
   currency: "INR",
-  notes:    { userId: req.user.id.toString(), plan },
+  notes:    { userId: req.user.id.toString(), plan: plan },
 });
 
 await Order.create({
   razorpayOrderId: razorpayOrder.id,
   userId:          req.user.id,
-  plan,
+  plan:            plan,
   amount:          PLANS[plan].amount,
 });
 
@@ -365,7 +348,7 @@ res.json({
   orderId:   razorpayOrder.id,
   amount:    razorpayOrder.amount,
   currency:  razorpayOrder.currency,
-  plan,
+  plan:      plan,
   planLabel: PLANS[plan].label,
 });
 ```
@@ -379,12 +362,15 @@ res.status(500).json({ error: “Could not create order” });
 app.post(”/verify-payment”, auth, async (req, res) => {
 try {
 await connectDB();
-const { razorpay_order_id, razorpay_payment_id, razorpay_signature, plan } = req.body;
+const razorpay_order_id   = req.body.razorpay_order_id;
+const razorpay_payment_id = req.body.razorpay_payment_id;
+const razorpay_signature  = req.body.razorpay_signature;
+const plan                = req.body.plan;
 
 ```
 const expectedSig = crypto
   .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
-  .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+  .update(razorpay_order_id + "|" + razorpay_payment_id)
   .digest("hex");
 
 if (expectedSig !== razorpay_signature) {
@@ -395,7 +381,7 @@ await Order.findOneAndUpdate({ razorpayOrderId: razorpay_order_id }, { status: "
 
 const updatedUser = await User.findByIdAndUpdate(
   req.user.id,
-  { plan, isPremium: true },
+  { plan: plan, isPremium: true },
   { new: true }
 );
 
@@ -422,18 +408,17 @@ if (!user) return res.status(404).json({ error: “User not found” });
 res.json({
 plan:            user.plan,
 messageCount:    user.messageCount,
-hasPlan:         !!user.fertilityPlan?.content,
-planGeneratedAt: user.fertilityPlan?.generatedAt,
+hasPlan:         !!(user.fertilityPlan && user.fertilityPlan.content),
+planGeneratedAt: user.fertilityPlan ? user.fertilityPlan.generatedAt : null,
 });
 } catch (err) {
 res.status(500).json({ error: err.message });
 }
 });
 
-// ─── VERCEL + LOCAL ────────────────────────────────────────────────────────
-module.exports = app;
-
-if (require.main === module) {
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Bloom running on port ${PORT}`));
-}
+app.listen(PORT, function() {
+console.log(“Bloom running on port “ + PORT);
+});
+
+module.exports = app;
