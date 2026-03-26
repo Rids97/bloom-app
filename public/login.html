@@ -337,7 +337,7 @@
             setMsg('Signing you in...', 'success');
             setTimeout(() => window.location = '/index.html', 600);
           } else {
-            setMsg(data || 'Invalid credentials.', 'error');
+            setMsg(data.error || 'Invalid credentials.', 'error');
           }
         }
       } catch {
