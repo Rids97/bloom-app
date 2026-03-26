@@ -65,7 +65,7 @@ const razorpay = new Razorpay({
 // ─── PRICING ───────────────────────────────────────────────────────────────
 const PLANS = {
   pro:      { amount: 20000,  label: "Bloom Pro",     monthly: 200  },
-  complete: { amount: 120000, label: "Bloom Complete", monthly: 1200 },
+  complete: { amount: 80000,  label: "Bloom Complete", monthly: 800  },
 };
 
 // ─── MIDDLEWARE ────────────────────────────────────────────────────────────
