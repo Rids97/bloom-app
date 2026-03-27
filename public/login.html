@@ -335,7 +335,7 @@
           if (data.token) {
             localStorage.setItem('bloom_token', data.token);
             setMsg('Signing you in...', 'success');
-            setTimeout(() => window.location = '/index.html', 600);
+            setTimeout(() => window.location = '/app', 600);
           } else {
             setMsg(data.error || 'Invalid credentials.', 'error');
           }
