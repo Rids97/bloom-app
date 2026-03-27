@@ -409,7 +409,6 @@ app.get("/plan-status", auth, async (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-const crypto = require('crypto');
 
 app.post('/webhook/razorpay', express.raw({type: 'application/json'}), (req, res) => {
   const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
