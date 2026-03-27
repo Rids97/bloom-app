@@ -351,6 +351,8 @@ app.post("/create-order", auth, async (req, res) => {
 
 app.post("/verify-payment", auth, async (req, res) => {
   try {
+    console.log("Payment body:", JSON.stringify(req.body));
+    console.log("Secret loaded:", !!process.env.RAZORPAY_KEY_SECRET);
     await connectDB();
     const razorpay_order_id   = req.body.razorpay_order_id;
     const razorpay_payment_id = req.body.razorpay_payment_id;
