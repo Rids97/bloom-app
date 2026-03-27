@@ -410,7 +410,7 @@ app.get("/plan-status", auth, async (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.post('/webhook/razorpay', express.raw({type: 'application/json'}), (req, res) => {
+app.post('/webhook/razorpay', express.raw({type: 'application/json'}), async(req, res) => {
   const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
   
   const signature = req.headers['x-razorpay-signature'];
