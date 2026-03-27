@@ -363,6 +363,9 @@ app.post("/verify-payment", auth, async (req, res) => {
       .digest("hex");
 
     if (expectedSig !== razorpay_signature) {
+      console.error("Signature mismatch");
+      console.error("Expected:", expectedSig);
+      console.error("Got:", razorpay_signature);
       return res.status(400).json({ error: "Payment verification failed." });
     }
 
@@ -383,7 +386,7 @@ app.post("/verify-payment", auth, async (req, res) => {
     res.json({ success: true, plan: updatedUser.plan, token: newToken });
   } catch (err) {
     console.error("Verify error:", err.message);
-    res.status(500).json({ error: "Payment verification failed" });
+    res.status(500).json({ error: "Payment verification failed: " + err.message });
   }
 });
 
