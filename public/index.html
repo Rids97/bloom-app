@@ -588,7 +588,7 @@ async function startPayment(plan) {
   try {
     const order = await api('POST','/create-order',{plan});
     const opts = {
-      key:         'YOUR_RAZORPAY_KEY_ID', // ← replace this
+      key:         'rzp_live_SVqR0pPOujJGiL', // ← replace this
       amount:      order.amount,
       currency:    order.currency,
       order_id:    order.orderId,
