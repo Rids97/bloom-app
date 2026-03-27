@@ -409,6 +409,33 @@ app.get("/plan-status", auth, async (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
+const crypto = require('crypto');
+
+app.post('/webhook/razorpay', express.raw({type: 'application/json'}), (req, res) => {
+  const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
+  
+  const signature = req.headers['x-razorpay-signature'];
+  const digest = crypto.createHmac('sha256', secret).update(req.body).digest('hex');
+  
+  if (signature !== digest) {
+    return res.status(400).json({ message: 'Invalid signature' });
+  }
+
+  const event = JSON.parse(req.body);
+  
+  if (event.event === 'payment.captured') {
+    const payment = event.payload.payment.entity;
+    const userEmail = payment.notes.email; // make sure you pass email in notes when creating order
+    
+    // Update user plan in MongoDB
+    await User.findOneAndUpdate(
+      { email: userEmail },
+      { plan: 'pro', planActivatedAt: new Date() }
+    );
+  }
+
+  res.json({ status: 'ok' });
+});
 app.listen(PORT, function() {
   console.log("Bloom running on port " + PORT);
 });
