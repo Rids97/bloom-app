@@ -44,7 +44,7 @@
   .logout-btn:hover { color: var(--terra); }
 
   /* LAYOUT */
-  .layout { display: grid; grid-template-columns: 270px 1fr 300px; min-height: calc(100vh - 58px); }
+  .layout { display: grid; grid-template-columns: 270px 1fr; min-height: calc(100vh - 58px); }
 
   /* SIDEBAR */
   .sidebar { padding: 1.5rem 1.25rem; border-right: 1px solid var(--border); display: flex; flex-direction: column; gap: 1.25rem; }
@@ -150,7 +150,6 @@
   .upgrade-btn { font-size: 12px; font-weight: 500; background: var(--terra); color: white; border: none; border-radius: 20px; padding: 5px 14px; cursor: pointer; }
 
   /* RIGHT PANEL */
-  .right-panel { padding: 1.5rem 1.25rem; border-left: 1px solid var(--border); display: flex; flex-direction: column; gap: 1.25rem; overflow-y: auto; }
   .tool-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; cursor: pointer; transition: border-color 0.15s, transform 0.15s; }
   .tool-card:hover { border-color: var(--terra); transform: translateY(-1px); }
   .tool-icon { font-size: 20px; margin-bottom: 6px; }
@@ -206,7 +205,7 @@
   .fade-in { animation: fadeUp 0.4s ease both; }
   @keyframes fadeUp { from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:translateY(0);} }
 
-  @media(max-width:1100px){.layout{grid-template-columns:240px 1fr;}.right-panel{display:none;}}
+  @media(max-width:1100px){.layout{grid-template-columns:240px 1fr;}}
   @media(max-width:700px){.layout{grid-template-columns:1fr;}.sidebar{display:none;}.stat-row{grid-template-columns:1fr 1fr;}}
 </style>
 </head>
@@ -239,8 +238,6 @@
       <div class="s-title">Navigation</div>
       <a class="s-item active" href="#"><span class="s-icon">🏠</span> Dashboard</a>
       <a class="s-item" href="#" onclick="openModal('cycleCalcModal');return false;"><span class="s-icon">📅</span> Cycle Calculator</a>
-      <a class="s-item" href="#" onclick="openModal('fertileModal');return false;"><span class="s-icon">🌿</span> Fertile Window</a>
-      <a class="s-item" href="#" onclick="openModal('pcosModal');return false;"><span class="s-icon">🔍</span> PCOS Quiz</a>
       <a class="s-item" href="#" onclick="openModal('bmiModal');return false;"><span class="s-icon">⚖️</span> BMI & Fertility</a>
       <a class="s-item" href="/report"><span class="s-icon">🧪</span> Report Analyzer</a>
     </div>
@@ -350,152 +347,6 @@
     </div>
   </main>
 
-  <!-- RIGHT PANEL -->
-  <aside class="right-panel fade-in" style="animation-delay:0.2s">
-    <div>
-      <div class="s-title">Tools & Calculators</div>
-      <div class="tools-grid">
-        <div class="tool-card" onclick="openModal('cycleCalcModal')">
-          <div class="tool-icon">📅</div>
-          <div class="tool-title">Cycle Calc</div>
-          <div class="tool-desc">Next period & ovulation dates</div>
-        </div>
-        <div class="tool-card" onclick="openModal('fertileModal')">
-          <div class="tool-icon">🌿</div>
-          <div class="tool-title">Fertile Window</div>
-          <div class="tool-desc">Best days to conceive</div>
-        </div>
-        <div class="tool-card" onclick="openModal('pcosModal')">
-          <div class="tool-icon">🔍</div>
-          <div class="tool-title">PCOS Quiz</div>
-          <div class="tool-desc">Quick risk assessment</div>
-        </div>
-        <div class="tool-card" onclick="openModal('bmiModal')">
-          <div class="tool-icon">⚖️</div>
-          <div class="tool-title">BMI & Fertility</div>
-          <div class="tool-desc">Weight impact on fertility</div>
-        </div>
-        <!-- ── REPORT ANALYZER ── -->
-        <div class="tool-card" onclick="window.location.href='/report'" style="border-color:#E2C4B4;background:var(--terra-l);">
-          <div class="tool-icon">🧪</div>
-          <div class="tool-title">Report Analyzer</div>
-          <div class="tool-desc">Upload & analyze reports</div>
-        </div>
-        <div class="tool-card" onclick="openProfileModal()">
-          <div class="tool-icon">👤</div>
-          <div class="tool-title">My Profile</div>
-          <div class="tool-desc">Update your health info</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="plan-teaser">
-      <div class="plan-teaser-title">Your Personalised Fertility Plan</div>
-      <div class="plan-teaser-desc" id="planTeaserDesc">Get a custom nutrition, supplement & lifestyle roadmap based on your profile — in Bloom Complete.</div>
-      <button class="plan-teaser-btn" onclick="goToPlan()">Get My Plan 🌸</button>
-    </div>
-
-    <div>
-      <div class="s-title">Did you know?</div>
-      <div id="didYouKnow" style="font-size:13px;color:var(--muted);line-height:1.7;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;"></div>
-    </div>
-  </aside>
-</div>
-
-<!-- ══════════════════════════════════════
-     PROFILE EDIT MODAL
-══════════════════════════════════════ -->
-<div class="modal-overlay" id="profileModal">
-  <div class="modal" style="width:480px;">
-    <button class="modal-close" onclick="closeModal('profileModal')">✕</button>
-    <div class="modal-title">My Profile</div>
-    <p style="font-size:12px;color:var(--muted);margin:-6px 0 14px;">Bloom uses this to personalise your tips, chat responses, and fertility plan.</p>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;" class="form-row">
-      <div>
-        <label class="form-label">Your name</label>
-        <input type="text" class="form-input" id="p-name" placeholder="e.g. Priya"/>
-      </div>
-      <div>
-        <label class="form-label">Age</label>
-        <input type="number" class="form-input" id="p-age" placeholder="e.g. 28" min="16" max="60"/>
-      </div>
-    </div>
-
-    <div class="form-row">
-      <label class="form-label">My fertility journey</label>
-      <select class="form-input" id="p-journey">
-        <option value="">Select your journey…</option>
-        <option value="ttc_natural">Trying to conceive (naturally)</option>
-        <option value="ttc_ivf">Fertility treatment (IVF / IUI)</option>
-        <option value="pcos">Managing PCOS</option>
-        <option value="cycle_tracking">General cycle tracking</option>
-        <option value="perimenopause">Perimenopause / approaching menopause</option>
-        <option value="postpartum">Postpartum / after pregnancy</option>
-        <option value="understanding">Understanding my hormones</option>
-      </select>
-    </div>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;" class="form-row">
-      <div>
-        <label class="form-label">Cycle length (days)</label>
-        <input type="number" class="form-input" id="p-cycle" placeholder="28" min="21" max="60"/>
-      </div>
-      <div>
-        <label class="form-label">Period length (days)</label>
-        <input type="number" class="form-input" id="p-period" placeholder="5" min="1" max="10"/>
-      </div>
-    </div>
-
-    <div class="form-row">
-      <label class="form-label">Symptoms I experience</label>
-      <div class="chip-grid" id="symptom-chips">
-        <div class="chip-opt" data-val="Irregular periods" onclick="toggleChip(this)">Irregular periods</div>
-        <div class="chip-opt" data-val="Heavy bleeding" onclick="toggleChip(this)">Heavy bleeding</div>
-        <div class="chip-opt" data-val="Painful cramps" onclick="toggleChip(this)">Painful cramps</div>
-        <div class="chip-opt" data-val="PCOS diagnosed" onclick="toggleChip(this)">PCOS diagnosed</div>
-        <div class="chip-opt" data-val="Acne" onclick="toggleChip(this)">Acne</div>
-        <div class="chip-opt" data-val="Hair loss" onclick="toggleChip(this)">Hair loss</div>
-        <div class="chip-opt" data-val="Excess facial hair" onclick="toggleChip(this)">Excess facial hair</div>
-        <div class="chip-opt" data-val="Weight gain" onclick="toggleChip(this)">Weight gain</div>
-        <div class="chip-opt" data-val="Mood swings" onclick="toggleChip(this)">Mood swings</div>
-        <div class="chip-opt" data-val="Fatigue" onclick="toggleChip(this)">Fatigue</div>
-        <div class="chip-opt" data-val="Bloating" onclick="toggleChip(this)">Bloating</div>
-        <div class="chip-opt" data-val="Hot flashes" onclick="toggleChip(this)">Hot flashes</div>
-        <div class="chip-opt" data-val="Anxiety" onclick="toggleChip(this)">Anxiety</div>
-        <div class="chip-opt" data-val="Low libido" onclick="toggleChip(this)">Low libido</div>
-      </div>
-    </div>
-
-    <div class="form-row">
-      <label class="form-label">Current medications / supplements</label>
-      <div class="chip-grid" id="meds-chips">
-        <div class="chip-opt" data-val="Metformin" onclick="toggleChip(this)">Metformin</div>
-        <div class="chip-opt" data-val="Letrozole" onclick="toggleChip(this)">Letrozole</div>
-        <div class="chip-opt" data-val="Clomiphene" onclick="toggleChip(this)">Clomiphene</div>
-        <div class="chip-opt" data-val="Progesterone" onclick="toggleChip(this)">Progesterone</div>
-        <div class="chip-opt" data-val="Birth control pill" onclick="toggleChip(this)">Birth control pill</div>
-        <div class="chip-opt" data-val="Prenatal vitamins" onclick="toggleChip(this)">Prenatal vitamins</div>
-        <div class="chip-opt" data-val="Iron supplements" onclick="toggleChip(this)">Iron supplements</div>
-        <div class="chip-opt" data-val="Vitamin D" onclick="toggleChip(this)">Vitamin D</div>
-        <div class="chip-opt" data-val="Inositol" onclick="toggleChip(this)">Inositol</div>
-        <div class="chip-opt" data-val="Folic acid" onclick="toggleChip(this)">Folic acid</div>
-        <div class="chip-opt" data-val="Thyroid medication" onclick="toggleChip(this)">Thyroid medication</div>
-        <div class="chip-opt" data-val="No medications" onclick="toggleChip(this)">No medications</div>
-      </div>
-    </div>
-
-    <div class="form-row">
-      <label class="form-label">Anything else Bloom should know?</label>
-      <textarea class="form-input" id="p-notes" rows="3"
-        placeholder="e.g. Diagnosed with PCOS in 2022, had a miscarriage last year, currently on cycle day 8…"
-        style="resize:vertical;"></textarea>
-    </div>
-
-    <button class="calc-btn" onclick="saveProfile()">Save Profile</button>
-    <div class="profile-save-msg" id="profileSaveMsg">✓ Profile saved! Bloom will now personalise your experience 🌸</div>
-  </div>
-</div>
 
 <!-- CYCLE CALC MODAL -->
 <div class="modal-overlay" id="cycleCalcModal">
