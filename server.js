@@ -14,6 +14,9 @@ app.use((req, res, next) => {
   if (req.path === '/webhook/razorpay') return next();
   express.json()(req, res, next);
 });
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'landing.html'));
+});
 app.use(express.static(path.join(__dirname, "public")));
 
 let isConnected = false;
