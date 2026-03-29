@@ -416,7 +416,7 @@ const FREE_LIMIT = 5;
 
 async function init() {
   try {
-    const res = await fetch('/me', { headers: { Authorization: TOKEN } });
+    const res = await fetch('/me', { headers: { Authorization: 'Bearer '+ TOKEN } });
     if (!res.ok) { logout(); return; }
     userData = await res.json();
     messageCount = userData.messageCount || 0;
