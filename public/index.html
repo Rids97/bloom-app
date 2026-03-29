@@ -462,7 +462,8 @@ function renderProfile() {
   const badge = document.getElementById('planBadge');
   badge.textContent = userPlan === 'complete' ? 'Bloom Complete' : userPlan === 'pro' ? 'Bloom Pro' : 'Free';
   badge.className = 'plan-badge ' + (userPlan === 'complete' ? 'complete' : userPlan === 'pro' ? 'pro' : '');
-  if (userPlan === 'complete') document.querySelector('.plan-teaser-desc').textContent = 'Your personalised fertility plan is ready.';
+  const teaserDesc = document.querySelector('.plan-teaser-desc');
+  if (userPlan === 'complete' && teaserDesc) teaserDesc.textContent = 'Your personalised fertility plan is ready.';
   if (p.cycleLength) { document.getElementById('ccCycleLen').value = p.cycleLength; document.getElementById('fwCycleLen').value = p.cycleLength; }
   if (p.periodLength) document.getElementById('ccPeriodLen').value = p.periodLength;
   const saved = localStorage.getItem('bloom_last_period');
