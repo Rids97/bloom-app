@@ -599,6 +599,7 @@ Rules:
     res.status(500).json({ error: "Analysis failed: " + err.message });
   }
 });
+app.get("/roadmap", (req, res) => { res.sendFile(path.join(__dirname, "public", "roadmap.html")); });
 app.listen(PORT, function() {
   console.log("Bloom running on port " + PORT);
 });
