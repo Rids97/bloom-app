@@ -223,7 +223,7 @@ ${knowledgeBase}
     }
 
     const response = await groq.chat.completions.create({
-      model: "llama-3.1-8b-instant",
+      model: "llama-3.3-70b-versatile",
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user",   content: req.body.message },
@@ -263,7 +263,7 @@ app.get("/fertility-plan", auth, async (req, res) => {
 
     const profile = user.profile || {};
     const response = await groq.chat.completions.create({
-      model: "llama-3.1-8b-instant",
+      model: "llama-3.3-70b-versatile",
       messages: [
         {
           role: "system",
@@ -301,7 +301,7 @@ app.post("/fertility-plan/regenerate", auth, async (req, res) => {
 
     const profile = user.profile || {};
     const response = await groq.chat.completions.create({
-      model: "llama-3.1-8b-instant",
+      model: "llama-3.3-70b-versatile",
       messages: [
         {
           role: "system",
