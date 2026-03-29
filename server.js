@@ -13,7 +13,7 @@ const crypto = require("crypto");
 const app = express();
 app.use((req, res, next) => {
   if (req.path === '/webhook/razorpay') return next();
-  express.json()(req, res, next);
+  express.json({ limit: '20mb' })(req, res, next);
 });
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'landing.html'));
