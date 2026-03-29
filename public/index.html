@@ -48,7 +48,9 @@
 
   /* SIDEBAR */
   .sidebar { padding: 1.5rem 1.25rem; border-right: 1px solid var(--border); display: flex; flex-direction: column; gap: 1.25rem; }
-  .profile-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; text-align: center; }
+  .profile-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; text-align: center; position: relative; }
+  .profile-edit-btn { position: absolute; top: 10px; right: 10px; background: none; border: 1px solid var(--border); border-radius: 20px; font-size: 11px; color: var(--muted); padding: 3px 10px; cursor: pointer; transition: all 0.15s; }
+  .profile-edit-btn:hover { border-color: var(--terra); color: var(--terra); }
   .profile-avatar { width: 56px; height: 56px; border-radius: 50%; background: var(--terra-l); display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-size: 22px; color: var(--terra-d); margin: 0 auto 10px; border: 2px solid #E2C4B4; }
   .profile-name { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
   .profile-stage { font-size: 12px; color: var(--muted); text-transform: capitalize; }
@@ -103,6 +105,11 @@
   .stat-val.terra { color: var(--terra-d); }
   .stat-val.gold { color: var(--gold); }
   .stat-label { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+  /* PERSONALISED INSIGHT BANNER */
+  .insight-banner { background: var(--card); border: 1px solid var(--border); border-left: 3px solid var(--sage); border-radius: var(--radius); padding: 1rem 1.25rem; margin-bottom: 1rem; display: none; }
+  .insight-label { font-size: 10px; font-weight: 500; color: var(--sage-d); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+  .insight-text { font-size: 13px; color: var(--text); line-height: 1.6; }
 
   /* TIP */
   .tip-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; margin-bottom: 1rem; display: flex; gap: 12px; align-items: flex-start; border-left: 3px solid var(--terra); }
@@ -174,6 +181,13 @@
   .result-key { color: var(--muted); }
   .result-val { font-weight: 500; color: var(--terra-d); }
 
+  /* CHIP SELECTOR (profile modal) */
+  .chip-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+  .chip-opt { font-size: 12px; padding: 5px 12px; border-radius: 20px; background: var(--cream); color: var(--muted); border: 1px solid var(--border); cursor: pointer; transition: all 0.15s; user-select: none; }
+  .chip-opt:hover { border-color: var(--terra-l); }
+  .chip-opt.selected { background: var(--terra-l); color: var(--terra-d); border-color: #E2C4B4; }
+  .profile-save-msg { text-align: center; font-size: 13px; color: var(--sage-d); margin-top: 10px; display: none; }
+
   /* QUIZ */
   .quiz-q { font-size: 13px; margin-bottom: 10px; color: var(--text); line-height: 1.5; }
   .quiz-options { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
@@ -212,6 +226,7 @@
   <!-- LEFT SIDEBAR -->
   <aside class="sidebar fade-in">
     <div class="profile-card">
+      <button class="profile-edit-btn" onclick="openProfileModal()">Edit profile</button>
       <div class="profile-avatar" id="sideAvatar">🌸</div>
       <div class="profile-name" id="sideName">Loading...</div>
       <div class="profile-stage" id="sideStage">—</div>
@@ -227,6 +242,7 @@
       <a class="s-item" href="#" onclick="openModal('fertileModal');return false;"><span class="s-icon">🌿</span> Fertile Window</a>
       <a class="s-item" href="#" onclick="openModal('pcosModal');return false;"><span class="s-icon">🔍</span> PCOS Quiz</a>
       <a class="s-item" href="#" onclick="openModal('bmiModal');return false;"><span class="s-icon">⚖️</span> BMI & Fertility</a>
+      <a class="s-item" href="/report"><span class="s-icon">🧪</span> Report Analyzer</a>
     </div>
     <div id="symptomsSection" style="display:none">
       <div class="s-title">Your Symptoms</div>
@@ -239,6 +255,12 @@
     <div class="greeting">
       <div class="greeting-sub" id="greetDate">—</div>
       <div class="greeting-title" id="greetTitle">Good morning, <em>there</em> 🌸</div>
+    </div>
+
+    <!-- PERSONALISED INSIGHT (shown when profile is filled) -->
+    <div class="insight-banner" id="insightBanner">
+      <div class="insight-label">🌿 Personalised for you</div>
+      <div class="insight-text" id="insightText"></div>
     </div>
 
     <div class="cycle-hero">
@@ -353,6 +375,17 @@
           <div class="tool-title">BMI & Fertility</div>
           <div class="tool-desc">Weight impact on fertility</div>
         </div>
+        <!-- ── REPORT ANALYZER ── -->
+        <div class="tool-card" onclick="window.location.href='/report'" style="border-color:#E2C4B4;background:var(--terra-l);">
+          <div class="tool-icon">🧪</div>
+          <div class="tool-title">Report Analyzer</div>
+          <div class="tool-desc">Upload & analyze reports</div>
+        </div>
+        <div class="tool-card" onclick="openProfileModal()">
+          <div class="tool-icon">👤</div>
+          <div class="tool-title">My Profile</div>
+          <div class="tool-desc">Update your health info</div>
+        </div>
       </div>
     </div>
 
@@ -367,6 +400,101 @@
       <div id="didYouKnow" style="font-size:13px;color:var(--muted);line-height:1.7;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;"></div>
     </div>
   </aside>
+</div>
+
+<!-- ══════════════════════════════════════
+     PROFILE EDIT MODAL
+══════════════════════════════════════ -->
+<div class="modal-overlay" id="profileModal">
+  <div class="modal" style="width:480px;">
+    <button class="modal-close" onclick="closeModal('profileModal')">✕</button>
+    <div class="modal-title">My Profile</div>
+    <p style="font-size:12px;color:var(--muted);margin:-6px 0 14px;">Bloom uses this to personalise your tips, chat responses, and fertility plan.</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;" class="form-row">
+      <div>
+        <label class="form-label">Your name</label>
+        <input type="text" class="form-input" id="p-name" placeholder="e.g. Priya"/>
+      </div>
+      <div>
+        <label class="form-label">Age</label>
+        <input type="number" class="form-input" id="p-age" placeholder="e.g. 28" min="16" max="60"/>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label class="form-label">My fertility journey</label>
+      <select class="form-input" id="p-journey">
+        <option value="">Select your journey…</option>
+        <option value="ttc_natural">Trying to conceive (naturally)</option>
+        <option value="ttc_ivf">Fertility treatment (IVF / IUI)</option>
+        <option value="pcos">Managing PCOS</option>
+        <option value="cycle_tracking">General cycle tracking</option>
+        <option value="perimenopause">Perimenopause / approaching menopause</option>
+        <option value="postpartum">Postpartum / after pregnancy</option>
+        <option value="understanding">Understanding my hormones</option>
+      </select>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;" class="form-row">
+      <div>
+        <label class="form-label">Cycle length (days)</label>
+        <input type="number" class="form-input" id="p-cycle" placeholder="28" min="21" max="60"/>
+      </div>
+      <div>
+        <label class="form-label">Period length (days)</label>
+        <input type="number" class="form-input" id="p-period" placeholder="5" min="1" max="10"/>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label class="form-label">Symptoms I experience</label>
+      <div class="chip-grid" id="symptom-chips">
+        <div class="chip-opt" data-val="Irregular periods" onclick="toggleChip(this)">Irregular periods</div>
+        <div class="chip-opt" data-val="Heavy bleeding" onclick="toggleChip(this)">Heavy bleeding</div>
+        <div class="chip-opt" data-val="Painful cramps" onclick="toggleChip(this)">Painful cramps</div>
+        <div class="chip-opt" data-val="PCOS diagnosed" onclick="toggleChip(this)">PCOS diagnosed</div>
+        <div class="chip-opt" data-val="Acne" onclick="toggleChip(this)">Acne</div>
+        <div class="chip-opt" data-val="Hair loss" onclick="toggleChip(this)">Hair loss</div>
+        <div class="chip-opt" data-val="Excess facial hair" onclick="toggleChip(this)">Excess facial hair</div>
+        <div class="chip-opt" data-val="Weight gain" onclick="toggleChip(this)">Weight gain</div>
+        <div class="chip-opt" data-val="Mood swings" onclick="toggleChip(this)">Mood swings</div>
+        <div class="chip-opt" data-val="Fatigue" onclick="toggleChip(this)">Fatigue</div>
+        <div class="chip-opt" data-val="Bloating" onclick="toggleChip(this)">Bloating</div>
+        <div class="chip-opt" data-val="Hot flashes" onclick="toggleChip(this)">Hot flashes</div>
+        <div class="chip-opt" data-val="Anxiety" onclick="toggleChip(this)">Anxiety</div>
+        <div class="chip-opt" data-val="Low libido" onclick="toggleChip(this)">Low libido</div>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label class="form-label">Current medications / supplements</label>
+      <div class="chip-grid" id="meds-chips">
+        <div class="chip-opt" data-val="Metformin" onclick="toggleChip(this)">Metformin</div>
+        <div class="chip-opt" data-val="Letrozole" onclick="toggleChip(this)">Letrozole</div>
+        <div class="chip-opt" data-val="Clomiphene" onclick="toggleChip(this)">Clomiphene</div>
+        <div class="chip-opt" data-val="Progesterone" onclick="toggleChip(this)">Progesterone</div>
+        <div class="chip-opt" data-val="Birth control pill" onclick="toggleChip(this)">Birth control pill</div>
+        <div class="chip-opt" data-val="Prenatal vitamins" onclick="toggleChip(this)">Prenatal vitamins</div>
+        <div class="chip-opt" data-val="Iron supplements" onclick="toggleChip(this)">Iron supplements</div>
+        <div class="chip-opt" data-val="Vitamin D" onclick="toggleChip(this)">Vitamin D</div>
+        <div class="chip-opt" data-val="Inositol" onclick="toggleChip(this)">Inositol</div>
+        <div class="chip-opt" data-val="Folic acid" onclick="toggleChip(this)">Folic acid</div>
+        <div class="chip-opt" data-val="Thyroid medication" onclick="toggleChip(this)">Thyroid medication</div>
+        <div class="chip-opt" data-val="No medications" onclick="toggleChip(this)">No medications</div>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label class="form-label">Anything else Bloom should know?</label>
+      <textarea class="form-input" id="p-notes" rows="3"
+        placeholder="e.g. Diagnosed with PCOS in 2022, had a miscarriage last year, currently on cycle day 8…"
+        style="resize:vertical;"></textarea>
+    </div>
+
+    <button class="calc-btn" onclick="saveProfile()">Save Profile</button>
+    <div class="profile-save-msg" id="profileSaveMsg">✓ Profile saved! Bloom will now personalise your experience 🌸</div>
+  </div>
 </div>
 
 <!-- CYCLE CALC MODAL -->
@@ -450,6 +578,7 @@ async function init() {
     renderTip();
     renderWelcome();
     renderDidYouKnow();
+    renderInsight();
     updateMsgLimit();
   } catch(e) { console.error(e); }
 }
@@ -461,7 +590,13 @@ function renderProfile() {
   document.getElementById('avatarEl').textContent = initials;
   document.getElementById('sideAvatar').textContent = initials;
   document.getElementById('sideName').textContent = p.name || 'My Profile';
-  document.getElementById('sideStage').textContent = p.journeyStage || 'General wellness';
+  const journeyLabels = {
+    ttc_natural:'Trying to conceive', ttc_ivf:'Fertility treatment (IVF/IUI)',
+    pcos:'Managing PCOS', cycle_tracking:'Cycle tracking',
+    perimenopause:'Perimenopause', postpartum:'Postpartum',
+    understanding:'Understanding hormones'
+  };
+  document.getElementById('sideStage').textContent = journeyLabels[p.journeyStage] || p.journeyStage || 'General wellness';
   document.getElementById('statCycle').textContent = p.cycleLength ? p.cycleLength + 'd' : '—';
   document.getElementById('statPeriod').textContent = p.periodLength ? p.periodLength + 'd' : '—';
   const h = new Date().getHours();
@@ -482,9 +617,36 @@ function renderProfile() {
   if (saved) { document.getElementById('lastPeriodDate').value = saved; updateCycle(); }
 }
 
+// ── Personalised insight banner based on profile ──
+function renderInsight() {
+  const p = userData.profile || {};
+  if (!p.journeyStage && (!p.symptoms || !p.symptoms.length)) return;
+  const banner = document.getElementById('insightBanner');
+  const text = document.getElementById('insightText');
+  let msg = '';
+  if (p.journeyStage === 'ttc_natural') {
+    msg = 'You\'re trying to conceive naturally. Bloom will prioritise ovulation timing, fertile window alerts, and conception tips in your experience.';
+  } else if (p.journeyStage === 'ttc_ivf') {
+    msg = 'You\'re on a fertility treatment journey. Bloom will focus on IVF/IUI support, progesterone timing, and evidence-based guidance from clinical research.';
+  } else if (p.journeyStage === 'pcos') {
+    msg = 'Managing PCOS is your focus. Bloom will prioritise insulin resistance, cycle regulation, androgen management, and evidence-based PCOS tips.';
+  } else if (p.journeyStage === 'perimenopause') {
+    msg = 'Bloom will support you through the menopause transition — covering hormone changes, symptom management, and long-term health.';
+  } else if (p.journeyStage === 'postpartum') {
+    msg = 'Postpartum recovery is different for everyone. Bloom will focus on cycle return, hormonal rebalancing, and postnatal wellbeing.';
+  } else {
+    msg = 'Bloom is personalised for your health profile. Your tips, chat responses, and recommendations are all tailored to you.';
+  }
+  // Add symptom callout
+  if (p.symptoms && p.symptoms.includes('PCOS diagnosed')) msg += ' PCOS has been noted in your profile — Bloom will always consider this in its responses.';
+  if (p.medications && p.medications.includes('Metformin')) msg += ' Metformin use has been noted.';
+  text.textContent = msg;
+  banner.style.display = 'block';
+}
+
 function updateCycle() {
   const v = document.getElementById('lastPeriodDate').value;
-  if (v) { localStorage.setItem('bloom_last_period', v); renderCycle(); }
+  if (v) { localStorage.setItem('bloom_last_period', v); renderCycle(); renderTip(); }
 }
 
 function renderCycle() {
@@ -510,10 +672,23 @@ function renderCycle() {
   document.getElementById('cycleProgressFill').style.width = pct + '%';
   let phase, desc;
   const pms = ['pm1','pm2','pm3','pm4'];
-  if (day <= periodLen) { phase='Menstrual Phase'; desc='Your period is active. Rest and be gentle with yourself. Iron-rich foods like leafy greens can help replenish what is lost.'; pms.forEach((id,i)=>document.getElementById(id).classList.toggle('active',i===0)); }
-  else if (day <= ovulDay - 2) { phase='Follicular Phase'; desc='Estrogen is rising and energy improving. A great time to exercise, plan, and nourish your body with zinc and vitamin D.'; pms.forEach((id,i)=>document.getElementById(id).classList.toggle('active',i===1)); }
-  else if (day <= ovulDay + 1) { phase='Ovulation Phase ✨'; desc='You may be ovulating — your peak fertile window! Look for clear, stretchy cervical mucus as a natural fertility sign.'; pms.forEach((id,i)=>document.getElementById(id).classList.toggle('active',i===2)); }
-  else { phase='Luteal Phase'; desc='Progesterone rises after ovulation. Some women notice bloating or mood changes — normal signs of your body preparing.'; pms.forEach((id,i)=>document.getElementById(id).classList.toggle('active',i===3)); }
+  if (day <= periodLen) {
+    phase='Menstrual Phase';
+    desc='Your period is active. Rest and be gentle with yourself. Iron-rich foods like leafy greens can help replenish what is lost.';
+    pms.forEach((id,i)=>document.getElementById(id).classList.toggle('active',i===0));
+  } else if (day <= ovulDay - 2) {
+    phase='Follicular Phase';
+    desc='Estrogen is rising and energy improving. A great time to exercise, plan, and nourish your body with zinc and vitamin D.';
+    pms.forEach((id,i)=>document.getElementById(id).classList.toggle('active',i===1));
+  } else if (day <= ovulDay + 1) {
+    phase='Ovulation Phase ✨';
+    desc='You may be ovulating — your peak fertile window! Look for clear, stretchy cervical mucus as a natural fertility sign.';
+    pms.forEach((id,i)=>document.getElementById(id).classList.toggle('active',i===2));
+  } else {
+    phase='Luteal Phase';
+    desc='Progesterone rises after ovulation. Some women notice bloating or mood changes — normal signs of your body preparing.';
+    pms.forEach((id,i)=>document.getElementById(id).classList.toggle('active',i===3));
+  }
   document.getElementById('phaseLabel').textContent = phase;
   document.getElementById('phaseDesc').textContent = desc;
   const inFertile = day >= fertStart && day <= fertEnd;
@@ -530,6 +705,8 @@ const TIPS = {
   follicular: ['Rising estrogen in the follicular phase boosts energy and mood. This is a great time to start new habits, exercise more intensely, or have important conversations.','As ovulation approaches, your cervical mucus becomes clearer and more stretchy — like egg whites. This is a natural fertility sign worth tracking.','FSH is rising to grow your dominant follicle. Support it with zinc-rich foods like pumpkin seeds, nuts, and eggs, plus adequate vitamin D.'],
   ovulation: ['You\'re in your fertile window! If trying to conceive, this is the best time. Sperm can survive 3–5 days, so the days before ovulation also count.','The LH surge (detectable with ovulation test strips) happens 24–36 hours before ovulation. This is the most accurate way to pinpoint your peak day.','Ovulation pain (mittelschmerz) — a mild cramp on one side — is completely normal and lasts a few hours. It confirms that ovulation is happening.'],
   luteal: ['Progesterone rises after ovulation to prepare your uterine lining. It can cause bloating, breast tenderness, and mood changes — all completely normal.','PMS symptoms in the late luteal phase may be eased by magnesium (300mg/day), vitamin B6, and reducing sugar and caffeine intake this week.','If you\'re trying to conceive, the two-week wait begins now. Implantation takes 6–10 days post-ovulation — testing too early gives unreliable results.'],
+  pcos: ['Women with PCOS have higher insulin levels that drive androgen production. A low-glycemic diet significantly reduces free testosterone and improves cycle regularity.','Inositol (especially myo-inositol + D-chiro-inositol in a 40:1 ratio) has strong evidence for improving ovulation frequency and insulin sensitivity in PCOS.','Even 5–10% weight loss in women with PCOS can restore ovulation without medication. Small consistent changes compound over time.'],
+  ttc: ['The most fertile days are the 2 days before ovulation and the day of ovulation itself. Timing intercourse on these days maximises conception chances.','Folic acid (400–800 mcg/day) should be started at least 3 months before trying to conceive to reduce neural tube defect risk.','Sperm health matters too — encourage your partner to take zinc, selenium, and CoQ10, and avoid heat exposure (laptops, hot baths) which reduces sperm quality.'],
   general: ['Tracking your cycle for 2–3 months reveals powerful patterns about your hormonal health. Timing, symptoms, and mood are all useful data points.','Stress raises cortisol, which can suppress the LH surge and delay ovulation. Even 10 minutes of daily mindfulness makes a measurable difference.','Vitamin D deficiency is very common in India and strongly linked to PCOS, irregular cycles, and implantation issues. Ask your doctor to check your levels.']
 };
 
@@ -539,7 +716,10 @@ function renderTip() {
   const cycleLen = p.cycleLength || 28;
   const periodLen = p.periodLength || 5;
   let phase = 'general';
-  if (saved) {
+  // Journey-specific tips override
+  if (p.journeyStage === 'pcos' || (p.symptoms && p.symptoms.includes('PCOS diagnosed'))) phase = 'pcos';
+  else if (p.journeyStage === 'ttc_natural' || p.journeyStage === 'ttc_ivf') phase = 'ttc';
+  else if (saved) {
     const last = new Date(saved); last.setHours(0,0,0,0);
     const today = new Date(); today.setHours(0,0,0,0);
     const day = (Math.floor((today - last) / 86400000) % cycleLen) + 1;
@@ -567,7 +747,8 @@ function renderDidYouKnow() { document.getElementById('didYouKnow').textContent 
 function renderWelcome() {
   const p = userData.profile || {};
   let msg = 'Hello' + (p.name ? ', ' + p.name : '') + '! I\'m Bloom 🌸 I\'m here to support your fertility and reproductive health journey.';
-  if (p.journeyStage) msg += ' I see you\'re on a ' + p.journeyStage + ' journey — I\'m here to help every step of the way.';
+  if (p.journeyStage) msg += ' I see you\'re on a ' + p.journeyStage.replace(/_/g,' ') + ' journey — I\'m here to help every step of the way.';
+  if (p.symptoms && p.symptoms.length) msg += ' I\'ve noted your symptoms and will keep them in mind when answering your questions.';
   msg += ' What would you like to know today?';
   document.getElementById('welcomeMsg').textContent = msg;
 }
@@ -621,6 +802,60 @@ function appendTyping() {
   wrap.appendChild(div);
   wrap.scrollTop = wrap.scrollHeight;
   return div;
+}
+
+// ── PROFILE MODAL ──
+function toggleChip(el) { el.classList.toggle('selected'); }
+
+function openProfileModal() {
+  const p = userData.profile || {};
+  if (p.name) document.getElementById('p-name').value = p.name;
+  if (p.age) document.getElementById('p-age').value = p.age;
+  if (p.journeyStage) document.getElementById('p-journey').value = p.journeyStage;
+  if (p.cycleLength) document.getElementById('p-cycle').value = p.cycleLength;
+  if (p.periodLength) document.getElementById('p-period').value = p.periodLength;
+  if (p.notes) document.getElementById('p-notes').value = p.notes;
+  // Pre-select chips
+  if (p.symptoms) p.symptoms.forEach(s => {
+    const el = document.querySelector('#symptom-chips [data-val="' + s + '"]');
+    if (el) el.classList.add('selected');
+  });
+  if (p.medications) p.medications.forEach(m => {
+    const el = document.querySelector('#meds-chips [data-val="' + m + '"]');
+    if (el) el.classList.add('selected');
+  });
+  openModal('profileModal');
+}
+
+async function saveProfile() {
+  const symptoms = [...document.querySelectorAll('#symptom-chips .chip-opt.selected')].map(e => e.dataset.val);
+  const medications = [...document.querySelectorAll('#meds-chips .chip-opt.selected')].map(e => e.dataset.val);
+  const payload = {
+    name:         document.getElementById('p-name').value.trim(),
+    age:          parseInt(document.getElementById('p-age').value) || null,
+    journeyStage: document.getElementById('p-journey').value,
+    cycleLength:  parseInt(document.getElementById('p-cycle').value) || 28,
+    periodLength: parseInt(document.getElementById('p-period').value) || 5,
+    notes:        document.getElementById('p-notes').value.trim(),
+    symptoms, medications
+  };
+  try {
+    const res = await fetch('/profile', {
+      method: 'PUT',
+      headers: { 'Content-Type':'application/json', Authorization: TOKEN },
+      body: JSON.stringify(payload)
+    });
+    userData = await res.json();
+    renderProfile();
+    renderTip();
+    renderInsight();
+    renderWelcome();
+    document.getElementById('profileSaveMsg').style.display = 'block';
+    setTimeout(() => {
+      document.getElementById('profileSaveMsg').style.display = 'none';
+      closeModal('profileModal');
+    }, 1800);
+  } catch(e) { alert('Could not save profile. Please try again.'); }
 }
 
 function openModal(id) { document.getElementById(id).classList.add('open'); }
