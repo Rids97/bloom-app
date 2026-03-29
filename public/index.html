@@ -515,8 +515,8 @@ function renderCycle() {
   const ovulDay = cycleLen - 14;
   const fertStart = ovulDay - 5;
   const fertEnd = ovulDay + 1;
-  const daysToOvul = Math.max(ovulDay - day, 0);
-  const daysToNext = Math.max(cycleLen - day + 1, 0);
+  const daysToOvul = ovulDay - day;
+  const daysToNext = cycleLen - day + 1;
   document.getElementById('cycleDayBig').firstChild.textContent = day;
   document.getElementById('cycleProgressFill').style.width = pct + '%';
   let phase, desc;
