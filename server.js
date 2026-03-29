@@ -2,6 +2,7 @@ require("dotenv").config();
 
 const express = require("express");
 const path = require("path");
+const fs = require("fs");
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -18,6 +19,12 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'landing.html'));
 });
 app.use(express.static(path.join(__dirname, "public")));
+
+// Load knowledge base once at startup
+const knowledgeBase = fs.readFileSync(
+  path.join(__dirname, 'data', 'bloom_ai_system_prompt_kb.md'),
+  'utf8'
+);
 
 let isConnected = false;
 
@@ -197,10 +204,19 @@ app.post("/chat", auth, async (req, res) => {
     await user.save();
 
     const profile = user.profile || {};
-    let systemPrompt = "You are Bloom, a warm, knowledgeable, and compassionate AI fertility companion. You provide accurate, evidence-based information about fertility, menstrual cycles, IVF, PCOS, and reproductive health. You are supportive, non-judgmental, and always remind users to consult their doctor for medical decisions. Keep responses warm, clear, and concise.";
 
+    // ── BLOOM AI SYSTEM PROMPT WITH KNOWLEDGE BASE ──
+    let systemPrompt = `You are Bloom, a warm, knowledgeable, and compassionate AI fertility companion. You provide accurate, evidence-based information about fertility, menstrual cycles, IVF, PCOS, and reproductive health. You are supportive, non-judgmental, and always remind users to consult their doctor for medical decisions. Keep responses warm, clear, and concise.
+
+Use the following clinical knowledge base to give accurate, helpful answers. Explain things in simple friendly language — not medical jargon.
+
+--- CLINICAL KNOWLEDGE BASE ---
+${knowledgeBase}
+--- END OF KNOWLEDGE BASE ---`;
+
+    // Personalise with user profile if available
     if (profile.journeyStage) {
-      systemPrompt += " User context: " + (profile.name || "This user") + " is on a " + profile.journeyStage + " journey.";
+      systemPrompt += "\n\nUser context: " + (profile.name || "This user") + " is on a " + profile.journeyStage + " journey.";
       if (profile.age) systemPrompt += " Age: " + profile.age + ".";
       if (profile.cycleLength) systemPrompt += " Average cycle: " + profile.cycleLength + " days.";
       if (profile.symptoms && profile.symptoms.length) systemPrompt += " Noted symptoms: " + profile.symptoms.join(", ") + ".";
@@ -212,7 +228,7 @@ app.post("/chat", auth, async (req, res) => {
         { role: "system", content: systemPrompt },
         { role: "user",   content: req.body.message },
       ],
-      max_tokens: 500,
+      max_tokens: 800,
     });
 
     res.json({
@@ -251,7 +267,12 @@ app.get("/fertility-plan", auth, async (req, res) => {
       messages: [
         {
           role: "system",
-          content: "You are Bloom's senior fertility advisor AI. Generate detailed, personalised, evidence-based fertility plans in structured markdown format. Always include: introduction, cycle insights, nutrition plan, supplement recommendations, lifestyle adjustments, stress management, and monthly roadmap. Be warm, specific, and actionable.",
+          content: `You are Bloom's senior fertility advisor AI. Generate detailed, personalised, evidence-based fertility plans in structured markdown format. Always include: introduction, cycle insights, nutrition plan, supplement recommendations, lifestyle adjustments, stress management, and monthly roadmap. Be warm, specific, and actionable.
+
+Use this clinical knowledge base to ensure accuracy:
+--- CLINICAL KNOWLEDGE BASE ---
+${knowledgeBase}
+--- END OF KNOWLEDGE BASE ---`,
         },
         { role: "user", content: buildPlanPrompt(profile) },
       ],
@@ -284,7 +305,12 @@ app.post("/fertility-plan/regenerate", auth, async (req, res) => {
       messages: [
         {
           role: "system",
-          content: "You are Bloom's senior fertility advisor AI. Generate detailed personalised fertility plans in markdown format. Be warm and actionable.",
+          content: `You are Bloom's senior fertility advisor AI. Generate detailed personalised fertility plans in markdown format. Be warm and actionable.
+
+Use this clinical knowledge base to ensure accuracy:
+--- CLINICAL KNOWLEDGE BASE ---
+${knowledgeBase}
+--- END OF KNOWLEDGE BASE ---`,
         },
         { role: "user", content: buildPlanPrompt(profile) },
       ],
@@ -430,9 +456,8 @@ app.post('/webhook/razorpay', express.raw({type: 'application/json'}), async(req
   
   if (event.event === 'payment.captured') {
     const payment = event.payload.payment.entity;
-    const userEmail = payment.notes.email; // make sure you pass email in notes when creating order
+    const userEmail = payment.notes.email;
     
-    // Update user plan in MongoDB
     await User.findOneAndUpdate(
       { email: userEmail },
       { plan: 'pro', planActivatedAt: new Date() }
@@ -441,6 +466,7 @@ app.post('/webhook/razorpay', express.raw({type: 'application/json'}), async(req
 
   res.json({ status: 'ok' });
 });
+
 app.listen(PORT, function() {
   console.log("Bloom running on port " + PORT);
 });
