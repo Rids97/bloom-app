@@ -467,6 +467,138 @@ app.post('/webhook/razorpay', express.raw({type: 'application/json'}), async(req
   res.json({ status: 'ok' });
 });
 
+// ── ADD THIS ENTIRE BLOCK TO server.js ──
+// Place it just before the final app.listen() line
+
+app.get("/report", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "report.html"));
+});
+
+app.post("/analyze-report", auth, async (req, res) => {
+  try {
+    await connectDB();
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    // Complete plan only
+    if (user.plan !== "complete") {
+      return res.status(403).json({ error: "Report analysis is available on Bloom Complete only." });
+    }
+
+    const { imageBase64, reportType } = req.body;
+    if (!imageBase64) return res.status(400).json({ error: "No image provided" });
+
+    const profile = user.profile || {};
+
+    // Build profile context string
+    const profileContext = [
+      profile.name      ? `Name: ${profile.name}`                             : null,
+      profile.age       ? `Age: ${profile.age}`                               : null,
+      profile.journeyStage ? `Journey: ${profile.journeyStage}`               : null,
+      profile.cycleLength  ? `Cycle length: ${profile.cycleLength} days`      : null,
+      profile.symptoms && profile.symptoms.length
+                        ? `Symptoms: ${profile.symptoms.join(", ")}`           : null,
+      profile.medications && profile.medications.length
+                        ? `Medications: ${profile.medications.join(", ")}`     : null,
+      profile.notes     ? `Notes: ${profile.notes}`                           : null,
+    ].filter(Boolean).join("\n");
+
+    const reportTypeLabels = {
+      hormone:   "Hormone Panel (FSH, LH, AMH, estradiol, progesterone, prolactin, testosterone)",
+      thyroid:   "Thyroid Function Test (TSH, T3, T4, Anti-TPO)",
+      ultrasound:"Pelvic / Transvaginal Ultrasound Report",
+      semen:     "Semen Analysis Report",
+      blood:     "Blood Test / Complete Blood Count / metabolic panel",
+      general:   "General Medical Report",
+    };
+
+    const systemPrompt = `You are Bloom's expert medical report analyzer — a specialist in reproductive endocrinology and fertility medicine with deep knowledge from Speroff's Clinical Gynecologic Endocrinology and Infertility (9th edition).
+
+A patient has uploaded their ${reportTypeLabels[reportType] || "medical report"}. Analyze it thoroughly and return a JSON object ONLY — no markdown, no preamble, no explanation outside the JSON.
+
+Patient profile:
+${profileContext || "No profile provided"}
+
+Your JSON must follow this exact structure:
+{
+  "values": [
+    {
+      "name": "FSH",
+      "description": "Follicle Stimulating Hormone",
+      "value": "7.2 IU/L",
+      "normalRange": "3–10 IU/L",
+      "status": "normal"
+    }
+  ],
+  "summary": "Overall plain-English summary of findings in 2-3 sentences, personalised to this patient's journey",
+  "concerns": [
+    { "title": "Elevated LH:FSH ratio", "detail": "Detailed explanation of what this means and why it matters for fertility, referencing clinical significance" }
+  ],
+  "positives": [
+    { "title": "AMH within normal range", "detail": "What this means positively for the patient" }
+  ],
+  "personalised": "2-3 sentences specifically connecting these results to their journey stage, symptoms, and profile",
+  "nextSteps": [
+    "Book appointment with gynaecologist to discuss LH:FSH ratio",
+    "Request day 21 progesterone test to confirm ovulation",
+    "Consider transabdominal ultrasound to assess antral follicle count"
+  ]
+}
+
+Rules:
+- status must be one of: "normal", "low", "high", "borderline", "na"
+- Extract EVERY value visible in the report — do not skip any
+- Use Indian clinical reference ranges where applicable
+- Be specific and clinical in concerns/positives — reference actual fertility implications
+- nextSteps should be 3-5 actionable, specific recommendations
+- If the report is not readable or not a medical report, return: {"error": "Could not read report. Please upload a clearer image."}
+- Return ONLY valid JSON. No text before or after.`;
+
+    // Use Groq vision model
+    const response = await groq.chat.completions.create({
+      model: "llama-3.2-11b-vision-preview",
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "image_url",
+              image_url: {
+                url: `data:image/jpeg;base64,${imageBase64}`,
+              },
+            },
+            {
+              type: "text",
+              text: systemPrompt,
+            },
+          ],
+        },
+      ],
+      max_tokens: 2000,
+      temperature: 0.1,
+    });
+
+    const rawText = response.choices[0].message.content.trim();
+
+    // Parse JSON safely
+    let parsed;
+    try {
+      const cleaned = rawText.replace(/```json|```/g, "").trim();
+      parsed = JSON.parse(cleaned);
+    } catch(e) {
+      console.error("JSON parse error:", rawText.substring(0, 200));
+      return res.status(500).json({ error: "Could not parse report analysis. Please try with a clearer image." });
+    }
+
+    if (parsed.error) return res.status(400).json({ error: parsed.error });
+
+    res.json(parsed);
+
+  } catch (err) {
+    console.error("Report analysis error:", err.message);
+    res.status(500).json({ error: "Analysis failed: " + err.message });
+  }
+});
 app.listen(PORT, function() {
   console.log("Bloom running on port " + PORT);
 });
