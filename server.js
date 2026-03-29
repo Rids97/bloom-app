@@ -10,7 +10,10 @@ const Groq = require("groq-sdk");
 const crypto = require("crypto");
 
 const app = express();
-app.use(express.json());
+app.use((req, res, next) => {
+  if (req.path === '/webhook/razorpay') return next();
+  express.json()(req, res, next);
+});
 app.use(express.static(path.join(__dirname, "public")));
 
 let isConnected = false;
