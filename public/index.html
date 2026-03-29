@@ -298,7 +298,7 @@
       <div class="stat-card ovulation">
         <div class="stat-icon">✨</div>
         <div class="stat-val terra" id="ovulVal">—</div>
-        <div class="stat-label">Days to ovulation</div>
+        <div class="stat-label" id="ovulLabel">Days to ovulation</div>
       </div>
       <div class="stat-card period">
         <div class="stat-icon">🗓️</div>
@@ -547,7 +547,18 @@ function renderCycle() {
   const inFertile = day >= fertStart && day <= fertEnd;
   document.getElementById('fertileVal').textContent = inFertile ? 'Now 🌿' : 'Day ' + fertStart + '–' + fertEnd;
   document.getElementById('fertileLabel').textContent = inFertile ? 'You are fertile today!' : 'Fertile window';
-  document.getElementById('ovulVal').textContent = daysToOvul === 0 ? 'Today!' : daysToOvul + 'd';
+  const ovulVal = document.getElementById('ovulVal');
+const ovulLabel = document.getElementById('ovulLabel');
+if (daysToOvul === 0) {
+  ovulVal.textContent = 'Today!';
+  ovulLabel.textContent = 'Ovulation day 🌟';
+} else if (daysToOvul > 0) {
+  ovulVal.textContent = daysToOvul + 'd';
+  ovulLabel.textContent = 'Days to ovulation';
+} else {
+  ovulVal.textContent = Math.abs(daysToOvul) + 'd ago';
+  ovulLabel.textContent = 'Since ovulation';
+}
   document.getElementById('nextPeriodVal').textContent = daysToNext + 'd';
   document.getElementById('ccLastPeriod').value = dateVal;
   document.getElementById('fwLastPeriod').value = dateVal;
