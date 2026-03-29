@@ -802,5 +802,153 @@ document.getElementById('quizContent').innerHTML = '<div style="text-align:cente
 
 init();
 </script>
-</body>
+<!-- ══════════════════════════════
+     PROFILE FIX
+     Add this ENTIRE block just before </body> in your index.html
+     It adds the profile modal + fixes the edit button
+══════════════════════════════ -->
+
+<!-- Profile Modal -->
+<div id="profileModal" style="position:fixed;inset:0;z-index:300;background:rgba(44,36,32,0.45);display:none;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:14px;padding:1.75rem;width:480px;max-width:95vw;max-height:90vh;overflow-y:auto;position:relative;border:1px solid #E8DDD5;">
+    <button onclick="document.getElementById('profileModal').style.display='none'" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:18px;color:#8C7468;cursor:pointer;">✕</button>
+    <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:#2C2420;margin-bottom:4px;">My Profile</div>
+    <p style="font-size:12px;color:#8C7468;margin-bottom:1rem;">Bloom uses this to personalise your tips, advice, and chat responses.</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+      <div>
+        <label style="font-size:12px;color:#8C7468;display:block;margin-bottom:4px;">Your name</label>
+        <input type="text" id="pf-name" placeholder="e.g. Priya" style="width:100%;padding:8px 12px;border:1px solid #E8DDD5;border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:#FAF6F1;color:#2C2420;outline:none;"/>
+      </div>
+      <div>
+        <label style="font-size:12px;color:#8C7468;display:block;margin-bottom:4px;">Age</label>
+        <input type="number" id="pf-age" placeholder="28" min="16" max="60" style="width:100%;padding:8px 12px;border:1px solid #E8DDD5;border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:#FAF6F1;color:#2C2420;outline:none;"/>
+      </div>
+    </div>
+
+    <div style="margin-bottom:12px;">
+      <label style="font-size:12px;color:#8C7468;display:block;margin-bottom:4px;">My fertility journey</label>
+      <select id="pf-journey" style="width:100%;padding:8px 12px;border:1px solid #E8DDD5;border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:#FAF6F1;color:#2C2420;outline:none;">
+        <option value="">Select your journey…</option>
+        <option value="ttc_natural">Trying to conceive (naturally)</option>
+        <option value="ttc_ivf">Fertility treatment (IVF / IUI)</option>
+        <option value="pcos">Managing PCOS</option>
+        <option value="cycle_tracking">General cycle tracking</option>
+        <option value="perimenopause">Perimenopause / menopause</option>
+        <option value="postpartum">Postpartum / after pregnancy</option>
+        <option value="understanding">Understanding my hormones</option>
+      </select>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+      <div>
+        <label style="font-size:12px;color:#8C7468;display:block;margin-bottom:4px;">Cycle length (days)</label>
+        <input type="number" id="pf-cycle" placeholder="28" min="21" max="60" style="width:100%;padding:8px 12px;border:1px solid #E8DDD5;border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:#FAF6F1;color:#2C2420;outline:none;"/>
+      </div>
+      <div>
+        <label style="font-size:12px;color:#8C7468;display:block;margin-bottom:4px;">Period length (days)</label>
+        <input type="number" id="pf-period" placeholder="5" min="1" max="10" style="width:100%;padding:8px 12px;border:1px solid #E8DDD5;border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:#FAF6F1;color:#2C2420;outline:none;"/>
+      </div>
+    </div>
+
+    <div style="margin-bottom:12px;">
+      <label style="font-size:12px;color:#8C7468;display:block;margin-bottom:6px;">Symptoms I experience</label>
+      <div id="pf-sym-grid" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+    </div>
+
+    <div style="margin-bottom:12px;">
+      <label style="font-size:12px;color:#8C7468;display:block;margin-bottom:6px;">Medications / supplements</label>
+      <div id="pf-med-grid" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+    </div>
+
+    <div style="margin-bottom:12px;">
+      <label style="font-size:12px;color:#8C7468;display:block;margin-bottom:4px;">Anything else Bloom should know?</label>
+      <textarea id="pf-notes" rows="3" placeholder="e.g. Diagnosed with PCOS in 2022, had a miscarriage last year…" style="width:100%;padding:8px 12px;border:1px solid #E8DDD5;border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:#FAF6F1;color:#2C2420;outline:none;resize:vertical;"></textarea>
+    </div>
+
+    <button onclick="pfSave()" style="width:100%;padding:11px;background:#C4704F;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;">Save Profile</button>
+    <div id="pf-saved-msg" style="display:none;text-align:center;font-size:13px;color:#4F7A5E;margin-top:10px;">✓ Profile saved! 🌸</div>
+  </div>
+</div>
+
+<script>
+// Profile chip setup
+const PF_SYMPTOMS = ['Irregular periods','Heavy bleeding','Painful cramps','PCOS diagnosed','Acne','Hair loss','Excess facial hair','Weight gain','Mood swings','Fatigue','Bloating','Hot flashes','Anxiety','Low libido'];
+const PF_MEDS = ['Metformin','Letrozole','Clomiphene','Progesterone','Birth control pill','Prenatal vitamins','Iron supplements','Vitamin D','Inositol','Folic acid','Thyroid medication','No medications'];
+
+function pfBuildChips() {
+  ['pf-sym-grid','pf-med-grid'].forEach((id,i) => {
+    const arr = i === 0 ? PF_SYMPTOMS : PF_MEDS;
+    const el = document.getElementById(id);
+    if (el.children.length) return;
+    arr.forEach(item => {
+      const d = document.createElement('div');
+      d.textContent = item;
+      d.dataset.val = item;
+      d.style.cssText = 'font-size:12px;padding:5px 12px;border-radius:20px;background:#FAF6F1;color:#8C7468;border:1px solid #E8DDD5;cursor:pointer;user-select:none;transition:all 0.15s;';
+      d.onclick = () => {
+        const sel = d.dataset.selected === '1';
+        d.dataset.selected = sel ? '0' : '1';
+        d.style.background = sel ? '#FAF6F1' : '#F2E4DA';
+        d.style.color = sel ? '#8C7468' : '#9E5238';
+        d.style.borderColor = sel ? '#E8DDD5' : '#E2C4B4';
+      };
+      el.appendChild(d);
+    });
+  });
+}
+
+function pfLoad() {
+  const p = (typeof userData !== 'undefined' && userData.profile) ? userData.profile : {};
+  if (p.name) document.getElementById('pf-name').value = p.name;
+  if (p.age) document.getElementById('pf-age').value = p.age;
+  if (p.journeyStage) document.getElementById('pf-journey').value = p.journeyStage;
+  if (p.cycleLength) document.getElementById('pf-cycle').value = p.cycleLength;
+  if (p.periodLength) document.getElementById('pf-period').value = p.periodLength;
+  if (p.notes) document.getElementById('pf-notes').value = p.notes;
+  // Pre-select chips
+  if (p.symptoms) document.querySelectorAll('#pf-sym-grid [data-val]').forEach(c => {
+    if (p.symptoms.includes(c.dataset.val)) c.click();
+  });
+  if (p.medications) document.querySelectorAll('#pf-med-grid [data-val]').forEach(c => {
+    if (p.medications.includes(c.dataset.val)) c.click();
+  });
+}
+
+function openProfileModal() {
+  pfBuildChips();
+  pfLoad();
+  document.getElementById('profileModal').style.display = 'flex';
+}
+
+async function pfSave() {
+  const symptoms = [...document.querySelectorAll('#pf-sym-grid [data-selected="1"]')].map(e => e.dataset.val);
+  const medications = [...document.querySelectorAll('#pf-med-grid [data-selected="1"]')].map(e => e.dataset.val);
+  const payload = {
+    name: document.getElementById('pf-name').value.trim(),
+    age: parseInt(document.getElementById('pf-age').value) || null,
+    journeyStage: document.getElementById('pf-journey').value,
+    cycleLength: parseInt(document.getElementById('pf-cycle').value) || 28,
+    periodLength: parseInt(document.getElementById('pf-period').value) || 5,
+    notes: document.getElementById('pf-notes').value.trim(),
+    symptoms, medications
+  };
+  try {
+    const tk = localStorage.getItem('bloom_token');
+    const res = await fetch('/profile', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Authorization: tk },
+      body: JSON.stringify(payload)
+    });
+    if (typeof userData !== 'undefined') userData = await res.json();
+    if (typeof renderProfile === 'function') renderProfile();
+    if (typeof renderTip === 'function') renderTip();
+    document.getElementById('pf-saved-msg').style.display = 'block';
+    setTimeout(() => {
+      document.getElementById('pf-saved-msg').style.display = 'none';
+      document.getElementById('profileModal').style.display = 'none';
+    }, 1800);
+  } catch(e) { alert('Could not save. Please try again.'); }
+}
+</script></body>
 </html>
