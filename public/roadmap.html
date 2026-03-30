@@ -10,15 +10,21 @@
 :root {
   --terra:#C4704F; --terra-l:#F2E4DA; --terra-d:#9E5238; --terra-ll:#FBF3EE;
   --sage:#7B9E87; --sage-l:#E1EDE5; --sage-d:#4F7A5E; --sage-ll:#F0F7F2;
-  --cream:#FAF6F1; --blush:#F5E6DC; --blush-d:#EDD0BE;
+  --cream:#F8F3EC; --blush:#F5E6DC; --blush-d:#EDD0BE;
   --gold:#C9A96E; --gold-l:#F7EDD8;
   --text:#2C2420; --muted:#8C7468; --muted-l:#B8A89F;
   --border:#E8DDD5; --border-l:#F0E8E2;
-  --card:#FFFFFF; --radius:16px; --radius-sm:10px;
+  --card:#FFFCF9; --radius:16px; --radius-sm:10px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
-body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);min-height:100vh;}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);min-height:100vh;
+  background-image:
+    radial-gradient(ellipse at 0% 0%, rgba(196,112,79,0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 100% 0%, rgba(123,158,135,0.10) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 100%, rgba(201,169,110,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse at 100% 100%, rgba(196,112,79,0.06) 0%, transparent 40%);
+}
 
 .topbar{position:sticky;top:0;z-index:200;background:rgba(250,246,241,0.94);backdrop-filter:blur(16px);
 border-bottom:1px solid var(–border);padding:0 1.75rem;height:60px;
@@ -42,9 +48,9 @@ display:flex;align-items:center;justify-content:space-between;}
 /* HERO */
 .journey-tabs{display:flex;gap:8px;margin-bottom:1.5rem;flex-wrap:wrap;}
 .jtab{padding:9px 22px;border-radius:24px;border:1.5px solid var(–border);background:var(–card);font-size:13px;font-weight:500;cursor:pointer;transition:all 0.2s;color:var(–muted);}
-.jtab.active{background:var(–terra);color:#fff;border-color:var(–terra);box-shadow:0 2px 12px rgba(196,112,79,0.25);}
+.jtab.active{background:var(–terra-d);color:#fff;border-color:var(–terra-d);box-shadow:0 2px 12px rgba(158,82,56,0.3);}
 .jtab:hover:not(.active){border-color:var(–terra-l);color:var(–terra);}
-.jtab.active:hover{background:var(–terra);color:#fff;border-color:var(–terra);}
+.jtab.active:hover{background:var(–terra-d) !important;color:#fff !important;border-color:var(–terra-d) !important;}
 .page-title{font-family:‘Cormorant Garamond’,serif;font-size:38px;font-weight:600;color:var(–text);margin-bottom:6px;line-height:1.15;}
 .page-title em{color:var(–terra);font-style:italic;}
 .page-sub{font-size:13.5px;color:var(–muted);line-height:1.6;margin-bottom:1.5rem;}
