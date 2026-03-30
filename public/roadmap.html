@@ -186,7 +186,7 @@ display:flex;align-items:center;justify-content:space-between;}
   <div class="locked-wrap">
     <span class="locked-icon">🗺️</span>
     <div class="locked-title">Your Journey Roadmap</div>
-    <div class="locked-sub">A personalised, AI-powered week-by-week guide built from Williams Obstetrics, Williams Gynecology, and Speroff's — tailored to your exact profile.<br/><br/>Available exclusively on Bloom Complete.</div>
+    <div class="locked-sub">A personalised, AI-powered week-by-week guide — built on clinical evidence and tailored to your exact profile.<br/><br/>Available exclusively on Bloom Complete.</div>
     <button class="unlock-btn" onclick="window.location.href='/app'">Upgrade to Bloom Complete →</button>
   </div>
 </div>
@@ -206,8 +206,8 @@ display:flex;align-items:center;justify-content:space-between;}
     <div class="jtab" id="tab-pregnancy" onclick="switchJourney('pregnancy')">🤰 Pregnancy</div>
   </div>
   <div class="page-title" id="page-title">Your TTC <em>Roadmap</em></div>
-  <div class="page-sub" id="page-sub">Personalised, AI-powered guidance from Williams Obstetrics, Williams Gynecology & Speroff's — tailored to your journey.</div>
-  <div class="ai-badge">✨ AI-Powered · Williams Obs + Gynec + Speroff's · Personalised to your profile</div>
+  <div class="page-sub" id="page-sub">Personalised, AI-powered clinical guidance — tailored to your journey.</div>
+  <div class="ai-badge">✨ AI-Powered · Evidence-Based · Personalised to your profile</div>
 </div>
 
 <div class="persona-banner fade-up" id="persona-banner" style="display:none;">
@@ -501,7 +501,7 @@ function switchJourney(j) {
 
   if (j === 'ttc') {
     document.getElementById('page-title').innerHTML = 'Your TTC <em>Roadmap</em>';
-    document.getElementById('page-sub').textContent = 'Personalised, AI-powered clinical guidance — Williams Obstetrics, Williams Gynecology & Speroff\'s.';
+    document.getElementById('page-sub').textContent = 'Week-by-week AI-powered guidance — personalised to your pregnancy journey.';
     document.getElementById('section-tabs').innerHTML = `
       <div class="stab active" onclick="loadSection('overview')">Overview</div>
       <div class="stab" onclick="loadSection('lifestyle')">Lifestyle</div>
@@ -514,7 +514,7 @@ function switchJourney(j) {
     else { document.getElementById('progress-card').style.display='none'; document.getElementById('content-grid').style.display='none'; }
   } else {
     document.getElementById('page-title').innerHTML = 'Your Pregnancy <em>Roadmap</em>';
-    document.getElementById('page-sub').textContent = 'Week-by-week AI-powered clinical guidance from Williams Obstetrics — personalised to you.';
+    document.getElementById('page-sub').textContent = 'Week-by-week AI-powered clinical guidance — personalised to your pregnancy journey.';
     document.getElementById('section-tabs').innerHTML = `
       <div class="stab active" onclick="loadSection('overview')">Overview</div>
       <div class="stab" onclick="loadSection('lifestyle')">Lifestyle</div>
