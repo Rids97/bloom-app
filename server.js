@@ -190,14 +190,51 @@ const UserSchema = new mongoose.Schema({
   messageCount:        { type: Number, default: 0 },
   reportAnalysisCount: { type: Number, default: 0 },
   profile: {
-    name:         String,
-    age:          Number,
-    cycleLength:  Number,
-    periodLength: Number,
-    journeyStage: String,
-    symptoms:     [String],
-    medications:  [String],
-    notes:        String,
+    // ── BASIC ──
+    name:           String,
+    age:            Number,
+    cycleLength:    Number,
+    periodLength:   Number,
+    journeyStage:   String,
+    symptoms:       [String],
+    medications:    [String],
+    notes:          String,
+
+    // ── MENSTRUAL HISTORY ──
+    lmp:              String,   // Last menstrual period date (ISO string)
+    cycleRegularity:  String,   // regular / slightly_irregular / very_irregular / absent
+    flowHeaviness:    [String], // light / normal / heavy / very_heavy
+    painLevel:        [String], // none / mild / moderate / severe
+    intermenstrual:   [String], // mid_cycle_pain / spotting / discharge / none
+    menarche:         Number,   // Age at first period
+
+    // ── FERTILITY HISTORY ──
+    ttcDuration:        String,   // not_trying / less_3 / 3_to_6 / 6_to_12 / over_12 / over_24
+    gravida:            String,   // 0 / 1 / 2 / 3plus
+    pregnancyOutcomes:  [String], // live_birth / miscarriage / recurrent_loss / ectopic / termination / na
+    semenAnalysis:      [String], // not_done / normal / abnormal / no_partner
+    prevTreatments:     [String], // none / oi / iui / ivf / icsi
+    txCycles:           Number,   // Number of treatment cycles done
+
+    // ── INVESTIGATIONS ──
+    investigationsDone:    [String], // amh / fsh_lh / thyroid / prolactin / testosterone / insulin / hsg / ultrasound / semen / karyotype / none_done
+    amh:                   Number,   // ng/mL
+    fsh:                   Number,   // IU/L
+    lh:                    Number,   // IU/L
+    tsh:                   Number,   // mIU/L
+    prolactin:             Number,   // ng/mL
+    testosterone:          Number,   // ng/dL
+    afc:                   Number,   // Antral follicle count
+    endometrialThickness:  Number,   // mm
+    usgFindings:           [String], // normal / pcos_morphology / low_afc / fibroid / endometrioma / thin_endo / not_done_usg
+
+    // ── TREATMENT STATUS ──
+    workupStatus:    String,   // no_workup / workup_partial / workup_complete / on_treatment / between_cycles / ivf_prep
+    txPhase:         String,   // none / oi_letrozole / oi_clomiphene / iui_cycle / ivf_stimulation / ivf_tww / ivf_fet / luteal_support / monitoring
+    cycleDay:        Number,   // Current cycle day if on treatment
+    doctorInvolved:  [String], // gp_only / gynaecologist / fertility_specialist / none_yet
+    nextStep:        String,   // get_investigations / see_doctor / start_oi / continue_oi / plan_iui / plan_ivf / tww / test_result
+    concerns:        String,   // Free text for appointment concerns
   },
   fertilityPlan: {
     content:     String,
