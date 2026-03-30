@@ -1233,6 +1233,13 @@ async function pfSave(){
     const res=await fetch('/profile',{method:'PUT',headers:{'Content-Type':'application/json',Authorization:TOKEN},body:JSON.stringify(profile)});
     if(res.ok){
       userData=await res.json();
+      // Sync LMP to cycle tracker
+      const lmpVal = profile.lmp;
+      if(lmpVal){
+        localStorage.setItem('bloom_last_period', lmpVal);
+        const lmpInput = document.getElementById('lastPeriodDate');
+        if(lmpInput) lmpInput.value = lmpVal;
+      }
       const msg=document.getElementById('pf-saved-msg');
       msg.style.display='block';setTimeout(()=>msg.style.display='none',2000);
       renderProfile();renderCycle();renderTip();renderInsight();
