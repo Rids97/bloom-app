@@ -20,7 +20,6 @@
 body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--warm);min-height:100vh;
   background-image:radial-gradient(ellipse at 80% 0%,rgba(193,122,90,0.07) 0%,transparent 60%),
   radial-gradient(ellipse at 20% 100%,rgba(122,158,135,0.07) 0%,transparent 50%);}
-
 .topbar{position:sticky;top:0;z-index:100;background:rgba(250,246,240,0.92);
   backdrop-filter:blur(12px);border-bottom:0.5px solid var(--border);
   padding:0 1.5rem;height:56px;display:flex;align-items:center;justify-content:space-between;}
@@ -33,79 +32,48 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--warm);
 .back-btn{font-size:13px;color:var(--muted);background:none;border:0.5px solid var(--border-m);
   padding:6px 14px;border-radius:20px;cursor:pointer;text-decoration:none;}
 .back-btn:hover{color:var(--warm);}
-
 .main{max-width:800px;margin:0 auto;padding:2rem 1.25rem 4rem;}
-.page-title{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:500;
-  color:var(--warm);margin-bottom:4px;}
+.page-title{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:500;color:var(--warm);margin-bottom:4px;}
 .page-title em{color:var(--terra);font-style:italic;}
 .page-sub{font-size:13px;color:var(--muted);margin-bottom:2rem;}
-.badge-complete{display:inline-block;font-size:11px;padding:3px 10px;border-radius:20px;
-  background:#F0DFF5;color:#6B3585;margin-bottom:1rem;}
-
-/* Upload card */
-.upload-card{background:var(--card);border:0.5px solid var(--border);
-  border-radius:16px;padding:1.75rem;margin-bottom:1rem;}
+.badge-complete{display:inline-block;font-size:11px;padding:3px 10px;border-radius:20px;background:#F0DFF5;color:#6B3585;margin-bottom:1rem;}
+.upload-card{background:var(--card);border:0.5px solid var(--border);border-radius:16px;padding:1.75rem;margin-bottom:1rem;}
 .upload-title{font-size:15px;font-weight:500;margin-bottom:1rem;color:var(--warm);}
-
-.report-types{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1.25rem;}
-@media(max-width:540px){.report-types{grid-template-columns:repeat(2,1fr);}}
-.rtype{padding:10px 12px;border:0.5px solid var(--border-m);border-radius:10px;
-  cursor:pointer;text-align:center;transition:all 0.15s;background:var(--cream);}
+.report-types{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1.25rem;}
+@media(max-width:600px){.report-types{grid-template-columns:repeat(2,1fr);}}
+.rtype{padding:10px 12px;border:0.5px solid var(--border-m);border-radius:10px;cursor:pointer;text-align:center;transition:all 0.15s;background:var(--cream);}
 .rtype:hover{border-color:var(--terra-l);background:#FEF9F5;}
 .rtype.selected{border:2px solid var(--terra);background:var(--terra-l);}
 .rtype-icon{font-size:22px;margin-bottom:4px;}
 .rtype-name{font-size:12px;font-weight:500;color:var(--warm);}
-
-.dropzone{border:1.5px dashed var(--border-m);border-radius:12px;
-  padding:2.5rem 1rem;text-align:center;cursor:pointer;
-  transition:all 0.2s;background:var(--cream);}
+.dropzone{border:1.5px dashed var(--border-m);border-radius:12px;padding:2.5rem 1rem;text-align:center;cursor:pointer;transition:all 0.2s;background:var(--cream);}
 .dropzone:hover,.dropzone.drag{border-color:var(--terra);background:#FEF9F5;}
 .dropzone-icon{font-size:36px;margin-bottom:0.5rem;}
 .dropzone-text{font-size:14px;color:var(--muted);}
 .dropzone-text span{color:var(--terra);font-weight:500;}
 .dropzone-sub{font-size:12px;color:var(--muted);margin-top:4px;}
 #file-input{display:none;}
-
 .preview-wrap{margin-top:1rem;display:none;}
-.preview-img{max-width:100%;max-height:300px;border-radius:10px;
-  border:0.5px solid var(--border);object-fit:contain;}
-.preview-info{display:flex;align-items:center;justify-content:space-between;
-  margin-top:8px;font-size:12px;color:var(--muted);}
+.preview-img{max-width:100%;max-height:300px;border-radius:10px;border:0.5px solid var(--border);object-fit:contain;}
+.preview-info{display:flex;align-items:center;justify-content:space-between;margin-top:8px;font-size:12px;color:var(--muted);}
 .remove-btn{background:none;border:none;color:var(--terra);cursor:pointer;font-size:12px;}
-
-.analyze-btn{width:100%;padding:13px;background:var(--terra);color:#fff;
-  border:none;border-radius:10px;font-size:15px;font-weight:500;
-  cursor:pointer;margin-top:1.25rem;font-family:'DM Sans',sans-serif;
-  transition:background 0.15s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.analyze-btn{width:100%;padding:13px;background:var(--terra);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:500;cursor:pointer;margin-top:1.25rem;font-family:'DM Sans',sans-serif;transition:background 0.15s;display:flex;align-items:center;justify-content:center;gap:8px;}
 .analyze-btn:hover{background:var(--terra-d);}
 .analyze-btn:disabled{background:var(--terra-l);cursor:not-allowed;}
-
-/* Loading */
-.loading-card{background:var(--card);border:0.5px solid var(--border);
-  border-radius:16px;padding:2.5rem;text-align:center;display:none;}
+.loading-card{background:var(--card);border:0.5px solid var(--border);border-radius:16px;padding:2.5rem;text-align:center;display:none;}
 .loading-flower{font-size:40px;animation:spin 2s linear infinite;display:inline-block;}
 @keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
-.loading-text{font-family:'Cormorant Garamond',serif;font-size:20px;
-  font-weight:500;color:var(--warm);margin-top:1rem;}
+.loading-text{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:500;color:var(--warm);margin-top:1rem;}
 .loading-sub{font-size:13px;color:var(--muted);margin-top:4px;}
-
-/* Results */
-.results-card{background:var(--card);border:0.5px solid var(--border);
-  border-radius:16px;padding:1.75rem;display:none;}
+.results-card{background:var(--card);border:0.5px solid var(--border);border-radius:16px;padding:1.75rem;display:none;}
 .results-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;}
 .results-title{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:500;color:var(--warm);}
 .results-type{font-size:12px;color:var(--muted);}
-.new-report-btn{font-size:13px;padding:7px 16px;border-radius:20px;
-  background:none;border:0.5px solid var(--border-m);cursor:pointer;color:var(--muted);}
+.new-report-btn{font-size:13px;padding:7px 16px;border-radius:20px;background:none;border:0.5px solid var(--border-m);cursor:pointer;color:var(--muted);}
 .new-report-btn:hover{color:var(--warm);}
-
-/* Value rows */
 .values-section{margin-bottom:1.5rem;}
-.section-label{font-size:11px;letter-spacing:0.06em;color:var(--muted);
-  font-weight:500;margin-bottom:0.75rem;}
-.value-row{display:grid;grid-template-columns:1fr 100px 120px 60px;
-  gap:10px;align-items:center;padding:10px 0;
-  border-bottom:0.5px solid var(--border);}
+.section-label{font-size:11px;letter-spacing:0.06em;color:var(--muted);font-weight:500;margin-bottom:0.75rem;}
+.value-row{display:grid;grid-template-columns:1fr 100px 120px 60px;gap:10px;align-items:center;padding:10px 0;border-bottom:0.5px solid var(--border);}
 .value-row:last-child{border-bottom:none;}
 .value-name{font-size:14px;font-weight:500;color:var(--warm);}
 .value-desc{font-size:11px;color:var(--muted);margin-top:1px;}
@@ -118,47 +86,28 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--warm);
 .status-high{background:#FAECE7;color:#993C1D;}
 .status-borderline{background:#FAEEDA;color:#854F0B;}
 .status-na{background:var(--cream-d);color:var(--muted);}
-
-/* Interpretation */
 .interp-section{margin-bottom:1.5rem;}
 .interp-block{background:var(--cream);border-radius:12px;padding:1.25rem;margin-bottom:0.75rem;}
-.interp-block-title{font-size:14px;font-weight:500;color:var(--warm);margin-bottom:6px;
-  display:flex;align-items:center;gap:6px;}
+.interp-block-title{font-size:14px;font-weight:500;color:var(--warm);margin-bottom:6px;display:flex;align-items:center;gap:6px;}
 .interp-text{font-size:13.5px;color:var(--warm);line-height:1.65;}
-.alert-block{background:#FEF3EC;border-left:3px solid var(--terra);border-radius:0 10px 10px 0;
-  padding:1rem 1.25rem;margin-bottom:0.75rem;}
+.alert-block{background:#FEF3EC;border-left:3px solid var(--terra);border-radius:0 10px 10px 0;padding:1rem 1.25rem;margin-bottom:0.75rem;}
 .alert-title{font-size:13px;font-weight:500;color:var(--terra-d);margin-bottom:4px;}
 .alert-text{font-size:13px;color:var(--warm);line-height:1.6;}
-.good-block{background:#F0FAF5;border-left:3px solid var(--sage);border-radius:0 10px 10px 0;
-  padding:1rem 1.25rem;margin-bottom:0.75rem;}
+.good-block{background:#F0FAF5;border-left:3px solid var(--sage);border-radius:0 10px 10px 0;padding:1rem 1.25rem;margin-bottom:0.75rem;}
 .good-title{font-size:13px;font-weight:500;color:var(--sage-d);margin-bottom:4px;}
-
-.next-steps{background:linear-gradient(135deg,var(--terra-l),var(--blush));
-  border-radius:12px;padding:1.25rem;}
-.next-steps-title{font-family:'Cormorant Garamond',serif;font-size:18px;
-  font-weight:500;color:var(--warm);margin-bottom:0.75rem;}
+.next-steps{background:linear-gradient(135deg,var(--terra-l),var(--blush));border-radius:12px;padding:1.25rem;}
+.next-steps-title{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:500;color:var(--warm);margin-bottom:0.75rem;}
 .step-item{display:flex;gap:10px;margin-bottom:8px;font-size:13px;line-height:1.5;color:var(--warm);}
-.step-num{width:20px;height:20px;border-radius:50%;background:var(--terra);
-  color:#fff;font-size:10px;font-weight:500;display:flex;align-items:center;
-  justify-content:center;flex-shrink:0;margin-top:1px;}
-
-.disclaimer{font-size:11px;color:var(--muted);text-align:center;
-  margin-top:1.5rem;line-height:1.6;padding:0 1rem;}
-
-/* Locked overlay */
-.locked-card{background:var(--card);border:0.5px solid var(--border);
-  border-radius:16px;padding:3rem 2rem;text-align:center;}
+.step-num{width:20px;height:20px;border-radius:50%;background:var(--terra);color:#fff;font-size:10px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.disclaimer{font-size:11px;color:var(--muted);text-align:center;margin-top:1.5rem;line-height:1.6;padding:0 1rem;}
+.locked-card{background:var(--card);border:0.5px solid var(--border);border-radius:16px;padding:3rem 2rem;text-align:center;}
 .locked-icon{font-size:40px;margin-bottom:1rem;}
-.locked-title{font-family:'Cormorant Garamond',serif;font-size:24px;
-  font-weight:500;color:var(--warm);margin-bottom:8px;}
+.locked-title{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:500;color:var(--warm);margin-bottom:8px;}
 .locked-sub{font-size:14px;color:var(--muted);margin-bottom:1.5rem;line-height:1.6;}
-.unlock-btn{padding:12px 28px;background:var(--terra);color:#fff;
-  border:none;border-radius:10px;font-size:15px;font-weight:500;
-  cursor:pointer;font-family:'DM Sans',sans-serif;}
+.unlock-btn{padding:12px 28px;background:var(--terra);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;}
 </style>
 </head>
 <body>
-
 <nav class="topbar">
   <a class="brand" href="/app">
     <div class="brand-mark">b</div>
@@ -166,21 +115,16 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--warm);
   </a>
   <a class="back-btn" href="/app">← Back to dashboard</a>
 </nav>
-
 <div class="main">
   <div class="badge-complete">Bloom Complete</div>
   <div class="page-title">Report <em>Analyzer</em></div>
-  <div class="page-sub">Upload your medical report and Bloom will explain what your results mean for your fertility — in plain language.</div>
-
-  <!-- Locked state for non-complete users -->
+  <div class="page-sub">Upload your medical report and Bloom will explain what your results mean for your health — in plain language.</div>
   <div class="locked-card" id="locked-section" style="display:none;">
     <div class="locked-icon">🔒</div>
     <div class="locked-title">Report Analyzer</div>
-    <div class="locked-sub">AI-powered report analysis is available on Bloom Complete.<br/>Get personalized interpretation of your hormone panels, ultrasounds, and more.</div>
+    <div class="locked-sub">AI-powered report analysis is available on Bloom Complete.<br/>Get personalised interpretation of your hormone panels, ultrasounds, and more.</div>
     <button class="unlock-btn" onclick="window.location.href='/app'">Upgrade to Bloom Complete</button>
   </div>
-
-  <!-- Upload section -->
   <div id="main-content">
     <div class="upload-card">
       <div class="upload-title">What type of report are you uploading?</div>
@@ -189,9 +133,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--warm);
           <div class="rtype-icon">🧪</div>
           <div class="rtype-name">Hormone Panel</div>
         </div>
-        <div class="rtype" data-type="thyroid" onclick="selectType(this)">
-          <div class="rtype-icon">🦋</div>
-          <div class="rtype-name">Thyroid</div>
+        <div class="rtype" data-type="pregnancy" onclick="selectType(this)">
+          <div class="rtype-icon">🤰</div>
+          <div class="rtype-name">Pregnancy Report</div>
         </div>
         <div class="rtype" data-type="ultrasound" onclick="selectType(this)">
           <div class="rtype-icon">📋</div>
@@ -205,12 +149,19 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--warm);
           <div class="rtype-icon">💉</div>
           <div class="rtype-name">Blood Test</div>
         </div>
+        <div class="rtype" data-type="pcos" onclick="selectType(this)">
+          <div class="rtype-icon">🩺</div>
+          <div class="rtype-name">PCOS Panel</div>
+        </div>
+        <div class="rtype" data-type="cervical" onclick="selectType(this)">
+          <div class="rtype-icon">🎗️</div>
+          <div class="rtype-name">Cervical Screening</div>
+        </div>
         <div class="rtype" data-type="general" onclick="selectType(this)">
           <div class="rtype-icon">📄</div>
           <div class="rtype-name">Other Report</div>
         </div>
       </div>
-
       <div class="dropzone" id="dropzone" onclick="document.getElementById('file-input').click()"
         ondragover="handleDrag(event,true)" ondragleave="handleDrag(event,false)" ondrop="handleDrop(event)">
         <div class="dropzone-icon">📎</div>
@@ -218,7 +169,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--warm);
         <div class="dropzone-sub">Supports JPG, PNG, PDF · Max 10MB</div>
       </div>
       <input type="file" id="file-input" accept="image/*,.pdf" onchange="handleFile(event)"/>
-
       <div class="preview-wrap" id="preview-wrap">
         <img id="preview-img" class="preview-img" src="" alt="Report preview"/>
         <div class="preview-info">
@@ -226,20 +176,15 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--warm);
           <button class="remove-btn" onclick="removeFile()">Remove</button>
         </div>
       </div>
-
       <button class="analyze-btn" id="analyze-btn" onclick="analyzeReport()" disabled>
         <span>🌸</span> Analyze Report
       </button>
     </div>
-
-    <!-- Loading -->
     <div class="loading-card" id="loading-card">
       <div class="loading-flower">🌸</div>
       <div class="loading-text">Reading your report…</div>
       <div class="loading-sub" id="loading-sub">Extracting values and cross-referencing clinical ranges</div>
     </div>
-
-    <!-- Results -->
     <div class="results-card" id="results-card">
       <div class="results-header">
         <div>
@@ -248,26 +193,21 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--warm);
         </div>
         <button class="new-report-btn" onclick="resetAnalyzer()">Analyze another</button>
       </div>
-
       <div id="results-body"></div>
-
       <p class="disclaimer">This analysis is for educational purposes only and does not constitute medical advice. Always discuss your results with a qualified healthcare provider before making any decisions about your health or treatment.</p>
     </div>
   </div>
 </div>
-
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
 const token = localStorage.getItem('bloom_token');
 let selectedType = '';
 let uploadedImageBase64 = '';
 let userData = null;
-
 async function init() {
   if (!token) { window.location.href = '/login'; return; }
   try {
-    const res = await fetch('/me', { headers: { Authorization: token } });
+    const res = await fetch('/me', { headers: { Authorization: 'Bearer ' + token } });
     userData = await res.json();
     if (userData.plan !== 'complete') {
       document.getElementById('main-content').style.display = 'none';
@@ -275,41 +215,33 @@ async function init() {
     }
   } catch(e) {}
 }
-
 function selectType(el) {
   document.querySelectorAll('.rtype').forEach(r => r.classList.remove('selected'));
   el.classList.add('selected');
   selectedType = el.dataset.type;
   checkReady();
 }
-
 function checkReady() {
   document.getElementById('analyze-btn').disabled = !(selectedType && uploadedImageBase64);
 }
-
 function handleDrag(e, over) {
   e.preventDefault();
   document.getElementById('dropzone').classList.toggle('drag', over);
 }
-
 function handleDrop(e) {
   e.preventDefault();
   document.getElementById('dropzone').classList.remove('drag');
   const file = e.dataTransfer.files[0];
   if (file) processFile(file);
 }
-
 function handleFile(e) {
   const file = e.target.files[0];
   if (file) processFile(file);
 }
-
 async function processFile(file) {
   if (file.size > 10 * 1024 * 1024) { alert('File too large. Max 10MB.'); return; }
   document.getElementById('file-name').textContent = file.name;
-
   if (file.type === 'application/pdf') {
-    // Convert first PDF page to image
     const arrayBuffer = await file.arrayBuffer();
     const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
     const page = await pdf.getPage(1);
@@ -319,29 +251,26 @@ async function processFile(file) {
     canvas.height = viewport.height;
     const ctx = canvas.getContext('2d');
     await page.render({ canvasContext: ctx, viewport }).promise;
-    // REPLACE WITH:
-uploadedImageBase64 = canvas.toDataURL('image/jpeg', 0.5).split(',')[1];
-document.getElementById('preview-img').src = canvas.toDataURL('image/jpeg', 0.5);
+    uploadedImageBase64 = canvas.toDataURL('image/jpeg', 0.5).split(',')[1];
+    document.getElementById('preview-img').src = canvas.toDataURL('image/jpeg', 0.5);
   } else {
-  const img = new Image();
-img.onload = () => {
-  const canvas = document.createElement('canvas');
-  const MAX = 1200;
-  let w = img.width, h = img.height;
-  if (w > MAX) { h = h * MAX / w; w = MAX; }
-  canvas.width = w; canvas.height = h;
-  canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-  const compressed = canvas.toDataURL('image/jpeg', 0.6);
-  uploadedImageBase64 = compressed.split(',')[1];
-  document.getElementById('preview-img').src = compressed;
-};
-img.src = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const MAX = 1200;
+      let w = img.width, h = img.height;
+      if (w > MAX) { h = h * MAX / w; w = MAX; }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      const compressed = canvas.toDataURL('image/jpeg', 0.6);
+      uploadedImageBase64 = compressed.split(',')[1];
+      document.getElementById('preview-img').src = compressed;
+    };
+    img.src = URL.createObjectURL(file);
   }
-
   document.getElementById('preview-wrap').style.display = 'block';
   setTimeout(checkReady, 200);
 }
-
 function removeFile() {
   uploadedImageBase64 = '';
   document.getElementById('preview-wrap').style.display = 'none';
@@ -349,18 +278,15 @@ function removeFile() {
   document.getElementById('file-input').value = '';
   checkReady();
 }
-
 async function analyzeReport() {
   if (!selectedType || !uploadedImageBase64) return;
-  document.getElementById('upload-card') && (document.getElementById('upload-card').style.display = 'none');
   document.querySelector('.upload-card').style.display = 'none';
   document.getElementById('loading-card').style.display = 'block';
-
   const loadingMsgs = [
     'Extracting values from your report…',
     'Cross-referencing clinical reference ranges…',
-    'Applying fertility knowledge from Speroff\'s…',
     'Personalising interpretation for your profile…',
+    'Applying evidence-based clinical guidelines…',
     'Almost ready…'
   ];
   let i = 0;
@@ -368,11 +294,10 @@ async function analyzeReport() {
     i = (i + 1) % loadingMsgs.length;
     document.getElementById('loading-sub').textContent = loadingMsgs[i];
   }, 2200);
-
   try {
     const res = await fetch('/analyze-report', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: token },
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
       body: JSON.stringify({ imageBase64: uploadedImageBase64, reportType: selectedType })
     });
     const data = await res.json();
@@ -387,19 +312,20 @@ async function analyzeReport() {
     resetAnalyzer();
   }
 }
-
 function displayResults(data, type) {
   const typeLabels = {
-    hormone: 'Hormone Panel', thyroid: 'Thyroid Function',
-    ultrasound: 'Ultrasound Report', semen: 'Semen Analysis',
-    blood: 'Blood Test', general: 'Medical Report'
+    hormone: 'Hormone Panel',
+    pregnancy: 'Pregnancy Report',
+    ultrasound: 'Ultrasound Report',
+    semen: 'Semen Analysis',
+    blood: 'Blood Test (CBC, Thyroid, Iron, HbA1c)',
+    pcos: 'PCOS Panel',
+    cervical: 'Cervical Screening',
+    general: 'Medical Report'
   };
   document.getElementById('results-type-label').textContent = typeLabels[type] || 'Report';
-
   const body = document.getElementById('results-body');
   body.innerHTML = '';
-
-  // Values table
   if (data.values && data.values.length > 0) {
     const sec = document.createElement('div');
     sec.className = 'values-section';
@@ -409,28 +335,20 @@ function displayResults(data, type) {
       row.className = 'value-row';
       const statusClass = { normal:'status-normal', low:'status-low', high:'status-high', borderline:'status-borderline' }[v.status] || 'status-na';
       const statusLabel = { normal:'Normal', low:'Low', high:'High', borderline:'Borderline' }[v.status] || v.status || '—';
-      row.innerHTML = `
-        <div><div class="value-name">${v.name}</div><div class="value-desc">${v.description || ''}</div></div>
-        <div class="value-result">${v.value || '—'}</div>
-        <div class="value-range">${v.normalRange || ''}</div>
-        <div class="value-status"><span class="status-pill ${statusClass}">${statusLabel}</span></div>`;
+      row.innerHTML = `<div><div class="value-name">${v.name}</div><div class="value-desc">${v.description || ''}</div></div><div class="value-result">${v.value || '—'}</div><div class="value-range">${v.normalRange || ''}</div><div class="value-status"><span class="status-pill ${statusClass}">${statusLabel}</span></div>`;
       sec.appendChild(row);
     });
     body.appendChild(sec);
   }
-
-  // Interpretation
   const interp = document.createElement('div');
   interp.className = 'interp-section';
-  interp.innerHTML = '<div class="section-label">WHAT THIS MEANS FOR YOU</div>';
-
+  interp.innerHTML = '<div class="section-label">WHAT THIS MEANS FOR YOUR HEALTH</div>';
   if (data.summary) {
     const block = document.createElement('div');
     block.className = 'interp-block';
     block.innerHTML = `<div class="interp-block-title">📋 Overall Summary</div><div class="interp-text">${data.summary}</div>`;
     interp.appendChild(block);
   }
-
   if (data.concerns && data.concerns.length > 0) {
     data.concerns.forEach(c => {
       const block = document.createElement('div');
@@ -439,7 +357,6 @@ function displayResults(data, type) {
       interp.appendChild(block);
     });
   }
-
   if (data.positives && data.positives.length > 0) {
     data.positives.forEach(p => {
       const block = document.createElement('div');
@@ -448,17 +365,13 @@ function displayResults(data, type) {
       interp.appendChild(block);
     });
   }
-
   if (data.personalised) {
     const block = document.createElement('div');
     block.className = 'interp-block';
     block.innerHTML = `<div class="interp-block-title">🌸 Personalised for you</div><div class="interp-text">${data.personalised}</div>`;
     interp.appendChild(block);
   }
-
   body.appendChild(interp);
-
-  // Next steps
   if (data.nextSteps && data.nextSteps.length > 0) {
     const ns = document.createElement('div');
     ns.className = 'next-steps';
@@ -471,10 +384,8 @@ function displayResults(data, type) {
     });
     body.appendChild(ns);
   }
-
   document.getElementById('results-card').style.display = 'block';
 }
-
 function resetAnalyzer() {
   uploadedImageBase64 = '';
   selectedType = '';
@@ -487,7 +398,6 @@ function resetAnalyzer() {
   document.getElementById('loading-card').style.display = 'none';
   document.querySelector('.upload-card').style.display = 'block';
 }
-
 window.addEventListener('load', init);
 </script>
 </body>
