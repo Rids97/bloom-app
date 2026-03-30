@@ -9,19 +9,19 @@
 <style>
 :root{--terra:#C4704F;--terra-l:#F2E4DA;--terra-d:#9E5238;--sage:#7B9E87;--sage-l:#E1EDE5;--sage-d:#4F7A5E;--cream:#FAF6F1;--blush:#F5E6DC;--gold:#C9A96E;--gold-l:#F7EDD8;--text:#2C2420;--muted:#8C7468;--border:#E8DDD5;--border-l:#F0E8E2;--card:#FFFFFF;--radius:14px;}
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);}
-.topbar{position:sticky;top:0;z-index:100;background:rgba(250,246,241,0.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 2rem;height:54px;display:flex;align-items:center;justify-content:space-between;}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);overflow-x:hidden;width:100%;}
+.topbar{position:sticky;top:0;z-index:100;background:rgba(250,246,241,0.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 1.5rem;height:54px;display:flex;align-items:center;justify-content:space-between;width:100%;box-sizing:border-box;}
 .topbar-logo{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--terra);}
 .topbar-right{display:flex;gap:10px;align-items:center;}
 .plan-badge{font-size:11px;padding:3px 10px;border-radius:20px;background:var(--terra-l);color:var(--terra-d);border:1px solid #E2C4B4;}
 .back-btn{font-size:12px;color:var(--muted);text-decoration:none;padding:4px 10px;border:1px solid var(--border);border-radius:8px;background:var(--card);}
 .back-btn:hover{border-color:var(--terra);color:var(--terra);}
-.journey-tabs{padding:0 2rem;background:var(--card);border-bottom:1px solid var(--border);display:flex;gap:0;overflow-x:auto;}
+.journey-tabs{padding:0 1.5rem;background:var(--card);border-bottom:1px solid var(--border);display:flex;gap:0;overflow-x:auto;width:100%;box-sizing:border-box;}
 .jtab{padding:12px 18px;font-size:13px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all 0.15s;display:flex;align-items:center;gap:6px;}
 .jtab:hover{color:var(--terra);}
 .jtab.active{color:var(--terra);border-bottom-color:var(--terra);font-weight:500;}
-.container{max-width:100%;padding:1.25rem 2rem;}
-.grid{display:grid;grid-template-columns:1fr 300px;gap:1.25rem;}
+.container{max-width:100%;padding:1.25rem 1.5rem;overflow-x:hidden;}
+.grid{display:grid;grid-template-columns:1fr 280px;gap:1rem;min-width:0;}
 @media(max-width:900px){.grid{grid-template-columns:1fr;}}
 .section{display:none;}
 .section.active{display:block;}
@@ -1299,7 +1299,12 @@ async function pfSave(){
         const modal=document.getElementById('profileModal');
         if(modal) modal.style.display='none';
         if(typeof renderPersonaTags==='function') renderPersonaTags();
-        if(typeof initTTC==='function') initTTC();
+        // Re-init current active journey
+        const activeJtab = document.querySelector('.jtab.active');
+        const activeName = activeJtab ? activeJtab.textContent.trim() : '';
+        if(activeName.includes('Pregnancy') && typeof initPregnancy==='function') initPregnancy();
+        else if(activeName.includes('Postpartum') && typeof initPostpartum==='function') initPostpartum();
+        else if(typeof initTTC==='function') initTTC();
       }, 1200);
     }
   }catch(e){alert('Could not save profile. Please try again.');}
@@ -1321,9 +1326,6 @@ function buildRoadmapProfileModal(){
   pfBuildChips();pfLoad();
   document.getElementById('profileModal').style.display='flex';
 }
-
-
-</body></html>
 
 </script>
 <div id="profileModal" style="position:fixed;inset:0;z-index:300;background:rgba(44,36,32,0.52);display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);">
