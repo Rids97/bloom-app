@@ -97,10 +97,8 @@ const BLOOM_SYSTEM_PROMPT = `You are Bloom, a warm, knowledgeable, and compassio
 
 You provide accurate, evidence-based information grounded in:
 
-- Williams Obstetrics (26th Edition)
-- Williams Gynecology (4th Edition)
-- Speroff’s Clinical Gynecologic Endocrinology and Infertility (9th Edition)
-- Current clinical guidelines (NICE, ESHRE, ASRM, RCOG, FIGO)
+- Evidence-based clinical guidelines (NICE, ESHRE, ASRM, RCOG, FIGO)
+- Current obstetrics and gynaecology clinical standards
 
 Core principles:
 
@@ -434,10 +432,6 @@ await User.findOneAndUpdate({ email: payment.notes.email }, { plan: ‘pro’, p
 res.json({ status: ‘ok’ });
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, ‘0.0.0.0’, function () { console.log(“Bloom running on port “ + PORT); });
-module.exports = app;
-
 // – ROADMAP CONTENT API –
 app.post(”/roadmap-content”, auth, async (req, res) => {
 try {
@@ -633,16 +627,40 @@ const sectionPrompts = {
     ? `Generate fertile window and ovulation timing guidance.\nCycle: ${profile.cycleRegularity || 'unknown'}, ${profile.cycleLength || 28} days.\nCover OPK timing, intercourse timing, PCOS irregular cycle advice, OI monitoring if on treatment.`
     : `Generate pregnancy monitoring guidance for Week ${week}.\n${checkinContext}\nWhat scans/tests are due, what to track, warning signs, upcoming appointments.`,
 
-  hormones: `Generate hormone explanation for this patient's results.\nSTAGE: ${stageDescriptions[clinicalStage]}\n${profile.amh || profile.fsh || profile.lh || profile.tsh ? `Interpret her values:\n${profile.amh ? `AMH ${profile.amh} ng/mL` : ''}\n${profile.fsh ? `FSH ${profile.fsh} IU/L` : ''}\n${profile.lh && profile.fsh ? `LH:FSH ${(profile.lh/profile.fsh).toFixed(1)}` : ''}\n${profile.tsh ? `TSH ${profile.tsh} mIU/L` : ''}` : 'No hormone tests done yet. Explain which tests she needs and when.'}`,
+  hormones: (function(){
+    const vals = [];
+    if(profile.amh) vals.push('AMH ' + profile.amh + ' ng/mL');
+    if(profile.fsh) vals.push('FSH ' + profile.fsh + ' IU/L');
+    if(profile.lh && profile.fsh) vals.push('LH:FSH ' + (profile.lh/profile.fsh).toFixed(1));
+    if(profile.tsh) vals.push('TSH ' + profile.tsh + ' mIU/L');
+    if(profile.prolactin) vals.push('Prolactin ' + profile.prolactin + ' ng/mL');
+    if(profile.vitaminD) vals.push('Vitamin D ' + profile.vitaminD + ' ng/mL');
+    if(profile.hb) vals.push('Hb ' + profile.hb + ' g/dL');
+    if(profile.ferritin) vals.push('Ferritin ' + profile.ferritin + ' ng/mL');
+    if(profile.afc) vals.push('AFC ' + profile.afc);
+    const valsText = vals.length ? 'Interpret her values:\n' + vals.join('\n') : 'No hormone tests done yet. Explain which tests she needs and when.';
+    return 'Generate a My Results summary for this patient.\nSTAGE: ' + (stageDescriptions[clinicalStage]||clinicalStage) + '\n' + valsText + '\nFor each value: what is normal, is hers normal, what does it mean for her fertility/health. Be direct.';
+  })(),
 
-  supplements: `Generate specific supplement protocol.\nSTAGE: ${stageDescriptions[clinicalStage]}\n${checkinContext ? `CHECK-IN SYMPTOMS: ${checkin && checkin.chips ? checkin.chips.join(', ') : ''}\nAddress each symptom with supplement/dietary advice. Flag bleeding/reduced movements/headache/swelling as URGENT first.` : ''}
-```
+  supplements: (function(){
+    let p = 'Generate specific supplement protocol.\nSTAGE: ' + (stageDescriptions[clinicalStage]||clinicalStage) + '\n';
+    if(checkinContext) p += 'CHECK-IN SYMPTOMS: ' + (checkin && checkin.chips ? checkin.chips.join(', ') : '') + '\nAddress each symptom with supplement/dietary advice. Flag bleeding/reduced movements/headache/swelling as URGENT first.\n';
+    if(journey === 'pregnancy' && (profile.bpReading1 || profile.bpReading2)) {
+      p += 'BP READINGS: ' + (profile.bpReading1||'') + (profile.bpReading2 ? ' / '+profile.bpReading2 : '') + '\nIf systolic >= 140 or diastolic >= 90 — flag pre-eclampsia risk at top. Advise: rest, reduce salt, avoid NSAIDs, contact doctor urgently.\n';
+    }
+    if(journey === 'pregnancy') {
+      p += 'STRICT PREGNANCY RULES:\n- Folic acid 5mg: weeks 1-12 ONLY\n- Iron 60mg: Week 14+ ONLY\n- Calcium: Week 16+ only\n- Vitamin D: safe throughout\nCurrent week: ' + week;
+    } else {
+      p += 'TTC SUPPLEMENTS:\n';
+      if(syms.includes('pcos_diagnosed')) p += '- PCOS: Myo-inositol 2g + D-chiro 50mg BD, Vitamin D, NAC 600mg, Omega-3\n';
+      if(profile.amh && profile.amh < 1.5) p += '- Low AMH: CoQ10 ubiquinol 400-600mg, DHEA 25mg (doctor supervised), Vitamin D\n';
+      if(profile.vitaminD && profile.vitaminD < 30) p += '- Vitamin D ' + profile.vitaminD + ' ng/mL (deficient): 60,000 IU weekly x 8 weeks\n';
+      p += '- Universal TTC: Folic acid 5mg, Vitamin D 1000 IU, Omega-3 1g';
+    }
+    p += '\nInclude Indian brand names. Format: * Supplement -- Dose -- Timing -- Why';
+    return p;
+  })(),
 
-${journey === ‘pregnancy’ && (profile.bpReading1 || profile.bpReading2) ? ` BP READINGS: ${profile.bpReading1 || ''}${profile.bpReading2 ? ' / ' + profile.bpReading2 : ''} If systolic ≥140 or diastolic ≥90 in ANY reading — flag pre-eclampsia risk prominently at top. Advise: rest, reduce salt, avoid NSAIDs, contact doctor urgently.` : ‘’}
-${journey === ‘pregnancy’ ? `STRICT PREGNANCY RULES:\n- Folic acid 5mg: weeks 1-12 ONLY\n- Iron 60mg: Week 14+ ONLY\n- Calcium: Week 16+ only\n- Vitamin D: safe throughout\nCurrent week: ${week}` : `TTC SUPPLEMENTS:\n${syms.includes('pcos_diagnosed') ? '- PCOS: Myo-inositol 2g + D-chiro 50mg BD, Vitamin D, NAC 600mg, Omega-3' : ''}\n${profile.amh && profile.amh < 1.5 ? '- Low AMH: CoQ10 ubiquinol 400-600mg, DHEA 25mg (doctor supervised), Vitamin D' : ''}\n${profile.vitaminD && profile.vitaminD < 30 ? `- Vitamin D ${profile.vitaminD} ng/mL (deficient): 60,000 IU weekly x 8 weeks` : ''}\n- Universal TTC: Folic acid 5mg, Vitamin D 1000 IU, Omega-3 1g`}
-Include Indian brand names. Format: • Supplement — Dose — Timing — Why`,
-
-```
   pretreatment: `Generate investigation and pre-treatment guidance.\nWORKUP: ${profile.workupStatus || 'not specified'}\nDONE: ${profile.investigationsDone && profile.investigationsDone.length ? profile.investigationsDone.join(', ') : 'none'}\n${!profile.workupStatus || profile.workupStatus === 'no_workup' ? 'No investigations done. Prioritised list of what to get done, cycle day timing, why.' : 'What is still missing? What happens in next 4-8 weeks?'}`,
 
   immunization: journey === 'pregnancy'
@@ -652,7 +670,7 @@ Include Indian brand names. Format: • Supplement — Dose — Timing — Why`,
 
 const prompt = sectionPrompts[section] || sectionPrompts.overview;
 
-const systemMsg = `You are Bloom's clinical content engine — specialist in reproductive medicine and obstetrics, created by a licensed Indian gynaecologist, grounded in Williams Obstetrics, Williams Gynecology, and Speroff's.
+const systemMsg = `You are Bloom's clinical content engine — specialist in reproductive medicine and obstetrics, created by a licensed Indian gynaecologist, grounded in evidence-based clinical guidelines.
 ```
 
 Patient clinical profile:\n${clinicalContext}
@@ -696,3 +714,7 @@ console.error(“Roadmap content error:”, err.message);
 res.status(500).json({ error: “Could not generate content: “ + err.message });
 }
 });
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, ‘0.0.0.0’, function () { console.log(“Bloom running on port “ + PORT); });
+module.exports = app;
