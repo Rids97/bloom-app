@@ -116,7 +116,6 @@
       overflow: hidden;
     }
 
-    /* Large decorative circle */
     .hero::before {
       content: '';
       position: absolute;
@@ -223,15 +222,9 @@
     }
 
     .btn-ghost:hover { color: var(--deep); }
-
-    .btn-ghost::after {
-      content: '→';
-      transition: transform 0.2s;
-    }
-
+    .btn-ghost::after { content: '→'; transition: transform 0.2s; }
     .btn-ghost:hover::after { transform: translateX(4px); }
 
-    /* Hero visual */
     .hero-visual {
       position: relative;
       z-index: 2;
@@ -266,7 +259,6 @@
       animation-duration: 36s;
     }
 
-    /* Orbital dots */
     .orb-ring::before {
       content: '';
       position: absolute;
@@ -311,7 +303,6 @@
       text-shadow: 0 2px 12px rgba(61,35,24,0.2);
     }
 
-    /* Floating stat cards */
     .stat-card {
       position: absolute;
       background: var(--white);
@@ -377,6 +368,42 @@
     .trust-icon {
       width: 20px; height: 20px;
       opacity: 0.6;
+    }
+
+    /* ── CLINICAL CREDIBILITY BANNER ── */
+    .credibility-bar {
+      background: var(--deep);
+      padding: 28px 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 48px;
+      flex-wrap: wrap;
+    }
+
+    .cred-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: rgba(253,248,242,0.75);
+      font-size: 13px;
+      letter-spacing: 0.06em;
+    }
+
+    .cred-icon {
+      font-size: 18px;
+      opacity: 0.9;
+    }
+
+    .cred-item strong {
+      color: var(--rose);
+      font-weight: 500;
+    }
+
+    .cred-divider {
+      width: 1px;
+      height: 28px;
+      background: rgba(253,248,242,0.15);
     }
 
     /* ── FEATURES ── */
@@ -466,9 +493,7 @@
       font-size: 22px;
     }
 
-    .feature-card.highlight .feature-icon {
-      background: rgba(255,255,255,0.1);
-    }
+    .feature-card.highlight .feature-icon { background: rgba(255,255,255,0.1); }
 
     h3 {
       font-family: 'Playfair Display', serif;
@@ -516,10 +541,7 @@
       background: linear-gradient(90deg, transparent, var(--rose), var(--rose), transparent);
     }
 
-    .step {
-      text-align: center;
-      position: relative;
-    }
+    .step { text-align: center; position: relative; }
 
     .step-num {
       width: 56px; height: 56px;
@@ -544,11 +566,7 @@
       margin-bottom: 10px;
     }
 
-    .step p {
-      font-size: 13px;
-      color: var(--muted);
-      line-height: 1.7;
-    }
+    .step p { font-size: 13px; color: var(--muted); line-height: 1.7; }
 
     /* ── TESTIMONIALS ── */
     .testimonials {
@@ -593,11 +611,7 @@
       font-weight: 400;
     }
 
-    .tcard-author {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
+    .tcard-author { display: flex; align-items: center; gap: 12px; }
 
     .tcard-avatar {
       width: 38px; height: 38px;
@@ -609,25 +623,9 @@
       color: var(--deep);
     }
 
-    .tcard-name {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--deep);
-      letter-spacing: 0.04em;
-    }
-
-    .tcard-meta {
-      font-size: 11px;
-      color: var(--muted);
-      margin-top: 2px;
-    }
-
-    .stars {
-      color: var(--dusty);
-      font-size: 13px;
-      margin-bottom: 16px;
-      letter-spacing: 2px;
-    }
+    .tcard-name { font-size: 13px; font-weight: 500; color: var(--deep); letter-spacing: 0.04em; }
+    .tcard-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .stars { color: var(--dusty); font-size: 13px; margin-bottom: 16px; letter-spacing: 2px; }
 
     /* ── PRICING ── */
     .pricing {
@@ -676,10 +674,7 @@
       margin-bottom: 24px;
     }
 
-    .plan.featured .plan-badge {
-      background: var(--rose);
-      color: var(--deep);
-    }
+    .plan.featured .plan-badge { background: var(--rose); color: var(--deep); }
 
     .plan-name {
       font-family: 'Playfair Display', serif;
@@ -691,29 +686,12 @@
 
     .plan.featured .plan-name { color: var(--cream); }
 
-    .plan-tagline {
-      font-size: 13px;
-      color: var(--muted);
-      margin-bottom: 28px;
-      line-height: 1.5;
-    }
-
+    .plan-tagline { font-size: 13px; color: var(--muted); margin-bottom: 28px; line-height: 1.5; }
     .plan.featured .plan-tagline { color: rgba(253,248,242,0.55); }
 
-    .plan-price {
-      display: flex;
-      align-items: flex-end;
-      gap: 4px;
-      margin-bottom: 6px;
-    }
+    .plan-price { display: flex; align-items: flex-end; gap: 4px; margin-bottom: 6px; }
 
-    .price-currency {
-      font-family: 'Jost', sans-serif;
-      font-size: 20px;
-      color: var(--deep);
-      margin-bottom: 6px;
-    }
-
+    .price-currency { font-family: 'Jost', sans-serif; font-size: 20px; color: var(--deep); margin-bottom: 6px; }
     .plan.featured .price-currency { color: var(--rose); }
 
     .price-amount {
@@ -727,20 +705,10 @@
 
     .plan.featured .price-amount { color: var(--cream); }
 
-    .price-period {
-      font-size: 13px;
-      color: var(--muted);
-      margin-bottom: 8px;
-    }
-
+    .price-period { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
     .plan.featured .price-period { color: rgba(253,248,242,0.45); }
 
-    .plan-divider {
-      height: 1px;
-      background: rgba(200,149,122,0.15);
-      margin: 28px 0;
-    }
-
+    .plan-divider { height: 1px; background: rgba(200,149,122,0.15); margin: 28px 0; }
     .plan.featured .plan-divider { background: rgba(253,248,242,0.1); }
 
     .plan-features {
@@ -791,6 +759,24 @@
 
     .plan-features li.dim { opacity: 0.4; }
 
+    /* Limit badge inline */
+    .limit-badge {
+      display: inline-block;
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 20px;
+      background: rgba(200,149,122,0.15);
+      color: var(--dusty);
+      margin-left: 4px;
+      letter-spacing: 0.04em;
+      vertical-align: middle;
+    }
+
+    .plan.featured .limit-badge {
+      background: rgba(232,196,176,0.2);
+      color: var(--rose);
+    }
+
     .btn-plan {
       width: 100%;
       font-family: 'Jost', sans-serif;
@@ -832,14 +818,7 @@
 
     .btn-plan-filled:hover { background: #f0d4c0; transform: translateY(-1px); }
 
-    .plan-note {
-      font-size: 11px;
-      text-align: center;
-      color: var(--muted);
-      margin-top: 14px;
-      letter-spacing: 0.04em;
-    }
-
+    .plan-note { font-size: 11px; text-align: center; color: var(--muted); margin-top: 14px; letter-spacing: 0.04em; }
     .plan.featured .plan-note { color: rgba(253,248,242,0.3); }
 
     /* ── CTA BANNER ── */
@@ -863,12 +842,7 @@
       border-radius: 50%;
     }
 
-    .cta-section h2 {
-      color: var(--cream);
-      font-size: clamp(32px, 3.5vw, 48px);
-      margin-bottom: 16px;
-    }
-
+    .cta-section h2 { color: var(--cream); font-size: clamp(32px, 3.5vw, 48px); margin-bottom: 16px; }
     .cta-section h2 em { color: var(--rose); }
 
     .cta-section p {
@@ -908,14 +882,6 @@
       z-index: 1;
     }
 
-    @media (max-width: 960px) {
-      .pricing { padding: 80px 28px; }
-      .pricing-grid { grid-template-columns: 1fr; }
-      .plan.featured { transform: none; }
-      .plan.featured:hover { transform: translateY(-6px); }
-      .cta-section { margin: 0 20px 80px; padding: 60px 28px; }
-    }
-
     /* ── FOOTER ── */
     footer {
       border-top: 1px solid rgba(200,149,122,0.15);
@@ -927,35 +893,14 @@
       gap: 20px;
     }
 
-    .footer-logo {
-      font-family: 'Playfair Display', serif;
-      font-size: 22px;
-      font-style: italic;
-      color: var(--deep);
-    }
+    .footer-logo { font-family: 'Playfair Display', serif; font-size: 22px; font-style: italic; color: var(--deep); }
 
-    .footer-links {
-      display: flex;
-      gap: 32px;
-      list-style: none;
-    }
+    .footer-links { display: flex; gap: 32px; list-style: none; }
 
-    .footer-links a {
-      font-size: 12px;
-      letter-spacing: 0.08em;
-      color: var(--muted);
-      text-decoration: none;
-      transition: color 0.2s;
-    }
-
+    .footer-links a { font-size: 12px; letter-spacing: 0.08em; color: var(--muted); text-decoration: none; transition: color 0.2s; }
     .footer-links a:hover { color: var(--deep); }
 
-    .footer-copy {
-      font-size: 11px;
-      color: var(--muted);
-      opacity: 0.6;
-      letter-spacing: 0.06em;
-    }
+    .footer-copy { font-size: 11px; color: var(--muted); opacity: 0.6; letter-spacing: 0.06em; }
 
     /* ── SCROLL ANIMATIONS ── */
     .reveal {
@@ -988,8 +933,14 @@
       .testimonials { padding: 80px 28px; }
       .testimonials-grid { grid-template-columns: 1fr; }
       .how { padding: 80px 28px; }
+      .pricing { padding: 80px 28px; }
+      .pricing-grid { grid-template-columns: 1fr; }
+      .plan.featured { transform: none; }
+      .plan.featured:hover { transform: translateY(-6px); }
       .cta-section { margin: 0 20px 80px; padding: 60px 28px; }
       .trust-bar { gap: 28px; padding: 20px 28px; }
+      .credibility-bar { gap: 24px; padding: 24px 28px; flex-direction: column; align-items: flex-start; }
+      .cred-divider { display: none; }
       footer { padding: 32px 28px; flex-direction: column; align-items: flex-start; }
     }
   </style>
@@ -1013,7 +964,7 @@
     <div class="hero-text">
       <div class="hero-eyebrow">AI Fertility Companion</div>
       <h1>Your journey<br/>to <em>motherhood,</em><br/>supported.</h1>
-      <p class="hero-desc">Bloom uses AI to guide you through every phase of your fertility journey — from cycle tracking to IVF support — with the warmth of a trusted companion.</p>
+      <p class="hero-desc">Bloom uses AI trained on clinical textbooks to guide you through every phase of your fertility journey — with the warmth of a trusted companion.</p>
       <div class="hero-actions">
         <a href="/login.html" class="btn-primary">Begin your journey</a>
         <a href="#how" class="btn-ghost">See how it works</a>
@@ -1028,7 +979,6 @@
         <div class="orb-center">
           <span class="orb-symbol">b</span>
         </div>
-        <!-- Stat cards -->
         <div class="stat-card">
           <div class="stat-dot"></div>
           <div class="stat-num">94%</div>
@@ -1063,6 +1013,29 @@
     </div>
   </div>
 
+  <!-- CLINICAL CREDIBILITY BAR -->
+  <div class="credibility-bar">
+    <div class="cred-item">
+      <span class="cred-icon">👩‍⚕️</span>
+      <span><strong>Built by a Gynecologist</strong> — not just a tech team</span>
+    </div>
+    <div class="cred-divider"></div>
+    <div class="cred-item">
+      <span class="cred-icon">📖</span>
+      <span>AI trained on <strong>Speroff's Clinical Gynecologic Endocrinology</strong> (9th Ed.)</span>
+    </div>
+    <div class="cred-divider"></div>
+    <div class="cred-item">
+      <span class="cred-icon">📚</span>
+      <span>Powered by <strong>Williams Obstetrics & Gynecology</strong> (26th Ed.)</span>
+    </div>
+    <div class="cred-divider"></div>
+    <div class="cred-item">
+      <span class="cred-icon">🏥</span>
+      <span>The same textbooks <strong>your gynecologist studied</strong></span>
+    </div>
+  </div>
+
   <!-- FEATURES -->
   <section class="features" id="features">
     <div class="section-header">
@@ -1077,35 +1050,30 @@
         <h3>Cycle Intelligence</h3>
         <p class="feature-text">Track your cycle with AI that learns your unique patterns, predicts ovulation windows, and adapts over time.</p>
       </div>
-
       <div class="feature-card highlight reveal reveal-delay-1">
         <div class="feature-icon">💬</div>
         <h3>Your Fertility Companion</h3>
         <p class="feature-text">Ask anything — from medication timings to emotional support between appointments. Bloom is here every step of the way.</p>
       </div>
-
       <div class="feature-card reveal reveal-delay-2">
         <div class="feature-icon">🧬</div>
-        <h3>IVF Protocol Guide</h3>
-        <p class="feature-text">Navigate complex IVF cycles with personalised reminders, medication logs, and clarity on each phase of your protocol.</p>
+        <h3>Report Analyzer</h3>
+        <p class="feature-text">Upload your hormone panels, ultrasounds, and blood reports. Bloom explains every value in plain language with fertility context.</p>
       </div>
-
       <div class="feature-card reveal reveal-delay-1">
         <div class="feature-icon">📊</div>
-        <h3>Symptom Journaling</h3>
-        <p class="feature-text">Log symptoms, moods, and observations. Bloom surfaces insights and helps you communicate better with your doctor.</p>
+        <h3>Fertile Window Tracker</h3>
+        <p class="feature-text">Know exactly when your fertile window opens — backed by clinical ovulation science, not generic averages.</p>
       </div>
-
       <div class="feature-card reveal reveal-delay-2">
         <div class="feature-icon">🌿</div>
-        <h3>Lifestyle Guidance</h3>
-        <p class="feature-text">Evidence-based nutrition, supplement, and wellness guidance tailored to where you are in your fertility journey.</p>
+        <h3>Personalised Roadmap</h3>
+        <p class="feature-text">Get a complete fertility plan — nutrition, supplements, lifestyle, and a 4-week action roadmap — built around your unique profile.</p>
       </div>
-
       <div class="feature-card reveal reveal-delay-3">
-        <div class="feature-icon">🤝</div>
-        <h3>Community & Support</h3>
-        <p class="feature-text">You are not alone. Bloom connects you with others on similar paths and curated resources for every milestone.</p>
+        <div class="feature-icon">📋</div>
+        <h3>Clinical-Grade Knowledge</h3>
+        <p class="feature-text">Every answer is grounded in Speroff's and Williams — the gold standard references used by gynecologists worldwide.</p>
       </div>
     </div>
   </section>
@@ -1117,7 +1085,6 @@
         <div class="section-tag reveal">Simple to begin</div>
         <h2 class="reveal reveal-delay-1">How <em>Bloom</em> works</h2>
       </div>
-
       <div class="steps">
         <div class="step reveal">
           <div class="step-num">1</div>
@@ -1132,7 +1099,7 @@
         <div class="step reveal reveal-delay-2">
           <div class="step-num">3</div>
           <h4>Ask anything</h4>
-          <p>Chat with Bloom any time. Get clear, compassionate answers informed by fertility science.</p>
+          <p>Chat with Bloom any time. Get clear, compassionate answers informed by clinical fertility science.</p>
         </div>
         <div class="step reveal reveal-delay-3">
           <div class="step-num">4</div>
@@ -1149,7 +1116,6 @@
       <div class="section-tag reveal">Real stories</div>
       <h2 class="reveal reveal-delay-1">Women who found<br/><em>their bloom.</em></h2>
     </div>
-
     <div class="testimonials-grid">
       <div class="tcard reveal">
         <div class="stars">★★★★★</div>
@@ -1162,7 +1128,6 @@
           </div>
         </div>
       </div>
-
       <div class="tcard reveal reveal-delay-1">
         <div class="stars">★★★★★</div>
         <p class="tcard-text">Going through IVF is overwhelming. Bloom was with me at 2am when my anxiety was at its peak. It felt like having a knowledgeable friend in my pocket.</p>
@@ -1174,10 +1139,9 @@
           </div>
         </div>
       </div>
-
       <div class="tcard reveal reveal-delay-2">
         <div class="stars">★★★★★</div>
-        <p class="tcard-text">The symptom journaling helped me spot patterns my gynaecologist hadn't noticed. She was genuinely impressed with how prepared I was at our next appointment.</p>
+        <p class="tcard-text">The report analyzer explained my AMH results better than my clinic did. I walked into my next appointment fully prepared — my doctor was impressed.</p>
         <div class="tcard-author">
           <div class="tcard-avatar">S</div>
           <div>
@@ -1202,7 +1166,7 @@
       <!-- FREE -->
       <div class="plan reveal">
         <div class="plan-name">Free</div>
-        <div class="plan-tagline">Dip your toes in. No commitment needed.</div>
+        <div class="plan-tagline">Try Bloom with no commitment needed.</div>
         <div class="plan-price">
           <span class="price-currency">₹</span>
           <span class="price-amount">0</span>
@@ -1210,12 +1174,12 @@
         <div class="price-period">forever free</div>
         <div class="plan-divider"></div>
         <ul class="plan-features">
-          <li><span class="check">✓</span> 5 AI conversations / month</li>
-          <li><span class="check">✓</span> Cycle tracking basics</li>
-          <li><span class="check">✓</span> Symptom journaling</li>
-          <li class="dim"><span class="cross">✕</span> Unlimited chat</li>
-          <li class="dim"><span class="cross">✕</span> IVF protocol guide</li>
-          <li class="dim"><span class="cross">✕</span> Personalised fertility plan</li>
+          <li><span class="check">✓</span> Bloom Chat AI <span class="limit-badge">3/day</span></li>
+          <li><span class="check">✓</span> Menstrual cycle tracker</li>
+          <li class="dim"><span class="cross">✕</span> Fertile window calculator</li>
+          <li class="dim"><span class="cross">✕</span> Report analyzer</li>
+          <li class="dim"><span class="cross">✕</span> Personalised roadmap</li>
+          <li class="dim"><span class="cross">✕</span> Priority support</li>
         </ul>
         <a href="/login.html" class="btn-plan">Get started free</a>
         <p class="plan-note">No card required</p>
@@ -1228,20 +1192,20 @@
         <div class="plan-tagline">Everything you need for your daily fertility journey.</div>
         <div class="plan-price">
           <span class="price-currency">₹</span>
-          <span class="price-amount">200</span>
+          <span class="price-amount">149</span>
         </div>
         <div class="price-period">per month · cancel any time</div>
         <div class="plan-divider"></div>
         <ul class="plan-features">
-          <li><span class="check">✓</span> Unlimited AI conversations</li>
-          <li><span class="check">✓</span> Full cycle intelligence</li>
-          <li><span class="check">✓</span> IVF protocol guide & reminders</li>
-          <li><span class="check">✓</span> Symptom journaling & insights</li>
-          <li><span class="check">✓</span> Lifestyle & nutrition guidance</li>
-          <li class="dim"><span class="cross">✕</span> Personalised fertility plan</li>
+          <li><span class="check">✓</span> Bloom Chat AI <span class="limit-badge">unlimited</span></li>
+          <li><span class="check">✓</span> Menstrual cycle tracker</li>
+          <li><span class="check">✓</span> Fertile window calculator</li>
+          <li><span class="check">✓</span> Report analyzer <span class="limit-badge">3/month</span></li>
+          <li class="dim"><span class="cross">✕</span> Personalised roadmap</li>
+          <li class="dim"><span class="cross">✕</span> Priority support</li>
         </ul>
         <a href="/login.html" class="btn-plan-filled">Start Bloom Pro</a>
-        <p class="plan-note">First 5 chats free, no card needed to try</p>
+        <p class="plan-note">Cancel any time · no hidden fees</p>
       </div>
 
       <!-- BLOOM COMPLETE -->
@@ -1251,20 +1215,20 @@
         <div class="plan-tagline">A fully personalised plan, built just for you.</div>
         <div class="plan-price">
           <span class="price-currency">₹</span>
-          <span class="price-amount">800</span>
+          <span class="price-amount">449</span>
         </div>
         <div class="price-period">per month · everything included</div>
         <div class="plan-divider"></div>
         <ul class="plan-features">
           <li><span class="check">✓</span> Everything in Bloom Pro</li>
-          <li><span class="check">✓</span> AI-generated fertility plan</li>
-          <li><span class="check">✓</span> Monthly plan refresh & review</li>
-          <li><span class="check">✓</span> Diet, supplement & lifestyle roadmap</li>
-          <li><span class="check">✓</span> Downloadable plan PDF</li>
+          <li><span class="check">✓</span> Report analyzer <span class="limit-badge">unlimited</span></li>
+          <li><span class="check">✓</span> Personalised fertility roadmap</li>
+          <li><span class="check">✓</span> Nutrition, supplement & lifestyle plan</li>
+          <li><span class="check">✓</span> 4-week action roadmap</li>
           <li><span class="check">✓</span> Priority support</li>
         </ul>
         <a href="/login.html" class="btn-plan">Get Bloom Complete</a>
-        <p class="plan-note">₹200 Pro + ₹600 plan = ₹800/month total</p>
+        <p class="plan-note">Most comprehensive plan available</p>
       </div>
 
     </div>
@@ -1273,9 +1237,9 @@
   <!-- CTA BANNER -->
   <section class="cta-section">
     <h2>Ready to <em>bloom?</em></h2>
-    <p>Start free today. Your first 5 conversations are on us — no card required.</p>
+    <p>Start free today. Clinical-grade fertility guidance — built by a gynecologist, for you.</p>
     <a href="/login.html" class="btn-light">Begin your journey →</a>
-    <p class="cta-note">₹200 / month for unlimited support · Cancel any time</p>
+    <p class="cta-note">Free forever · Pro from ₹149/month · Cancel any time</p>
   </section>
 
   <!-- FOOTER -->
@@ -1291,7 +1255,6 @@
   </footer>
 
   <script>
-    // Scroll reveal
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(e => {
         if (e.isIntersecting) {
