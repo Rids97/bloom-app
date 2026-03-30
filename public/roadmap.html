@@ -1075,10 +1075,14 @@ function scrollWeekNav(amount){
 }
 
 function openRoadmapProfile(){
-  if(typeof pfBuildChips === 'function') pfBuildChips();
-  if(typeof pfLoad === 'function') pfLoad();
   const modal = document.getElementById('profileModal');
-  if(modal) modal.style.display='flex';
+  if(!modal) return;
+  if(typeof pfBuildChips === 'function') pfBuildChips();
+  // Small delay to ensure chips are in DOM before loading values
+  setTimeout(() => {
+    if(typeof pfLoad === 'function') pfLoad();
+    modal.style.display='flex';
+  }, 50);
 }
 
 function saveBabyInvestigation(){
