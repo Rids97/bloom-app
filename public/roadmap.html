@@ -10,18 +10,18 @@
 :root{--terra:#C4704F;--terra-l:#F2E4DA;--terra-d:#9E5238;--sage:#7B9E87;--sage-l:#E1EDE5;--sage-d:#4F7A5E;--cream:#FAF6F1;--blush:#F5E6DC;--gold:#C9A96E;--gold-l:#F7EDD8;--text:#2C2420;--muted:#8C7468;--border:#E8DDD5;--border-l:#F0E8E2;--card:#FFFFFF;--radius:14px;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);}
-.topbar{position:sticky;top:0;z-index:100;background:rgba(250,246,241,0.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 1.5rem;height:54px;display:flex;align-items:center;justify-content:space-between;}
+.topbar{position:sticky;top:0;z-index:100;background:rgba(250,246,241,0.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 2rem;height:54px;display:flex;align-items:center;justify-content:space-between;}
 .topbar-logo{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--terra);}
 .topbar-right{display:flex;gap:10px;align-items:center;}
 .plan-badge{font-size:11px;padding:3px 10px;border-radius:20px;background:var(--terra-l);color:var(--terra-d);border:1px solid #E2C4B4;}
 .back-btn{font-size:12px;color:var(--muted);text-decoration:none;padding:4px 10px;border:1px solid var(--border);border-radius:8px;background:var(--card);}
 .back-btn:hover{border-color:var(--terra);color:var(--terra);}
-.journey-tabs{padding:0 1.5rem;background:var(--card);border-bottom:1px solid var(--border);display:flex;gap:0;overflow-x:auto;}
+.journey-tabs{padding:0 2rem;background:var(--card);border-bottom:1px solid var(--border);display:flex;gap:0;overflow-x:auto;}
 .jtab{padding:12px 18px;font-size:13px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all 0.15s;display:flex;align-items:center;gap:6px;}
 .jtab:hover{color:var(--terra);}
 .jtab.active{color:var(--terra);border-bottom-color:var(--terra);font-weight:500;}
-.container{max-width:1100px;margin:0 auto;padding:1.5rem;}
-.grid{display:grid;grid-template-columns:1fr 320px;gap:1.25rem;}
+.container{max-width:100%;padding:1.25rem 2rem;}
+.grid{display:grid;grid-template-columns:1fr 300px;gap:1.25rem;}
 @media(max-width:900px){.grid{grid-template-columns:1fr;}}
 .section{display:none;}
 .section.active{display:block;}
@@ -280,21 +280,25 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
           </div>
 
           <!-- Week-by-week navigator -->
-          <div class="week-nav" id="week-nav"></div>
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:1rem;">
+            <button onclick="scrollWeekNav(-200)" style="flex-shrink:0;width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);background:var(--card);cursor:pointer;font-size:13px;color:var(--muted);">‹</button>
+            <div class="week-nav" id="week-nav" style="flex:1;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;"></div>
+            <button onclick="scrollWeekNav(200)" style="flex-shrink:0;width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);background:var(--card);cursor:pointer;font-size:13px;color:var(--muted);">›</button>
+          </div>
 
           <!-- Check-in panel -->
           <div class="checkin-panel" id="preg-checkin-panel">
             <div class="checkin-panel-title">📋 This Week's Check-in</div>
             <div class="checkin-panel-sub">What's happened since last week? Bloom uses this to personalise your guidance.</div>
-            <div class="checkin-chips">
-              <div class="cc-chip" data-val="scan_done">Scan done ✓</div>
-              <div class="cc-chip" data-val="new_medication">New medication started</div>
-              <div class="cc-chip alert-chip" data-val="bleeding">Bleeding / spotting</div>
-              <div class="cc-chip alert-chip" data-val="reduced_movements">Reduced movements</div>
-              <div class="cc-chip" data-val="nausea">Nausea / vomiting</div>
-              <div class="cc-chip alert-chip" data-val="headache">Headache / visual changes</div>
-              <div class="cc-chip alert-chip" data-val="swelling">Swelling in feet/hands</div>
-              <div class="cc-chip" data-val="all_well">All going well 🌸</div>
+            <div class="checkin-chips" id="checkin-chips-container">
+              <div class="cc-chip" data-val="scan_done" onclick="this.classList.toggle('selected')">Scan done ✓</div>
+              <div class="cc-chip" data-val="new_medication" onclick="this.classList.toggle('selected')">New medication started</div>
+              <div class="cc-chip alert-chip" data-val="bleeding" onclick="this.classList.toggle('selected')">Bleeding / spotting</div>
+              <div class="cc-chip alert-chip" data-val="reduced_movements" onclick="this.classList.toggle('selected')">Reduced movements</div>
+              <div class="cc-chip" data-val="nausea" onclick="this.classList.toggle('selected')">Nausea / vomiting</div>
+              <div class="cc-chip alert-chip" data-val="headache" onclick="this.classList.toggle('selected')">Headache / visual changes</div>
+              <div class="cc-chip alert-chip" data-val="swelling" onclick="this.classList.toggle('selected')">Swelling in feet/hands</div>
+              <div class="cc-chip" data-val="all_well" onclick="this.classList.toggle('selected')">All going well 🌸</div>
             </div>
             <textarea class="checkin-notes" id="preg-checkin-notes" placeholder="Any notes for Bloom… e.g. told placenta is low, iron started" rows="2"></textarea>
             <button class="checkin-save-btn" onclick="saveCheckin()">Save Check-in ✓</button>
@@ -727,8 +731,8 @@ function computeAndRenderPreg(lmpStr){
   const lmp=new Date(lmpStr);lmp.setHours(0,0,0,0);
   const today=new Date();today.setHours(0,0,0,0);
   const daysPreg=Math.floor((today-lmp)/86400000);
-  const weeksPreg=Math.floor(daysPreg/7);
-  const daysRem=daysPreg%7;
+  const weeksPreg=Math.max(0, Math.floor(daysPreg/7));
+  const daysRem=Math.max(0, daysPreg%7);
   const dueDate=new Date(lmp);dueDate.setDate(dueDate.getDate()+280);
 
   // Find closest week
@@ -747,7 +751,8 @@ function computeAndRenderPreg(lmpStr){
   if(lmpEdit) lmpEdit.value=lmpStr;
   if(eddEdit) eddEdit.value=dueDate.toISOString().split('T')[0];
 
-  document.getElementById('week-badge').textContent='Week '+weeksPreg+'+'+daysRem;
+  const weekDisplay = weeksPreg < 4 ? '4' : weeksPreg;
+  document.getElementById('week-badge').textContent='Week '+weekDisplay+'+'+daysRem;
   document.getElementById('week-title').textContent=wk.title;
   document.getElementById('week-sub').textContent=wk.sub;
   document.getElementById('preg-week-label').textContent='Week '+weeksPreg;
@@ -1017,6 +1022,10 @@ function handleContentError(containerId,err,section,journey){
   document.getElementById(containerId).innerHTML=`<div class="content-error">⚠ Could not load content. <button class="retry-btn" onclick="${journey==='ttc'?`loadTTCSection('${section}',null)`:journey==='pregnancy'?`loadPregSection('${section}',null)`:`loadPPSection('${section}',null)`}">Retry</button></div>`;
 }
 
+function scrollWeekNav(amount){
+  const nav = document.getElementById('week-nav');
+  if(nav) nav.scrollBy({left: amount, behavior: 'smooth'});
+}
 init();
 </script>
 </body></html>
