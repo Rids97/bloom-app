@@ -795,3 +795,160 @@ app.listen(PORT, '0.0.0.0', function() {
 });
 
 module.exports = app;
+
+// ── ROADMAP CONTENT API ──
+app.post("/roadmap-content", auth, async (req, res) => {
+  try {
+    await connectDB();
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    if (user.plan !== "complete") {
+      return res.status(403).json({ error: "upgrade_required" });
+    }
+
+    const { journey, month, week, section } = req.body;
+    const profile = user.profile || {};
+
+    // Build specific query based on journey + month/week + section
+    let query = '';
+    if (journey === 'ttc') {
+      const monthTopics = {
+        1: 'preconception counseling folic acid cycle tracking ovulation fertile window',
+        2: 'cervical mucus ovulation detection LH surge fertile signs tracking',
+        3: 'ovulation timing intercourse fertile window peak fertility',
+        4: 'luteal phase two week wait implantation hCG progesterone',
+        5: 'fertility investigations FSH AMH progesterone semen analysis thyroid',
+        6: 'fertility nutrition Mediterranean diet supplements CoQ10 vitamin D omega-3',
+        7: 'stress cortisol HPA axis lifestyle yoga mindfulness fertility',
+        8: 'fertility specialist referral IUI IVF ovulation induction',
+        9: 'diminished ovarian reserve low AMH CoQ10 DHEA egg quality',
+        10: 'PCOS polycystic ovary syndrome letrozole metformin ovulation induction insulin',
+        11: 'IVF pre-treatment protocol egg quality optimization supplements',
+        12: 'unexplained infertility recurrent loss specialist review assisted reproduction',
+      };
+      query = monthTopics[month] || 'fertility trying to conceive';
+    } else {
+      const weekTopics = {
+        4: 'implantation early pregnancy hCG progesterone first trimester',
+        6: 'fetal heartbeat embryo development first trimester viability scan',
+        8: 'organogenesis teratogens embryo development first trimester',
+        10: 'luteal placental shift first trimester screening nuchal',
+        12: 'first trimester complete nuchal translucency combined screening',
+        16: 'second trimester fetal movement anatomy scan preparation',
+        20: 'anomaly scan fetal anatomy ultrasound second trimester',
+        24: 'viability gestational diabetes OGTT fetal movements',
+        28: 'third trimester preeclampsia monitoring iron anaemia',
+        36: 'term delivery preparation labour signs birth plan',
+        38: 'full term labour onset oxytocin delivery',
+      };
+      // Find closest week
+      const weeks = Object.keys(weekTopics).map(Number);
+      const closest = weeks.reduce((prev, curr) => 
+        Math.abs(curr - week) < Math.abs(prev - week) ? curr : prev
+      );
+      query = weekTopics[closest] || 'pregnancy prenatal care';
+    }
+
+    // Add profile-specific terms
+    const profileTerms = [];
+    const syms = profile.symptoms || [];
+    const meds = profile.medications || [];
+    if (syms.includes('pcos_diagnosed')) profileTerms.push('PCOS polycystic ovary syndrome');
+    if (syms.includes('low_amh')) profileTerms.push('diminished ovarian reserve low AMH');
+    if (meds.includes('metformin')) profileTerms.push('metformin insulin resistance');
+    if (meds.includes('letrozole')) profileTerms.push('letrozole ovulation induction');
+    if (meds.includes('clomiphene')) profileTerms.push('clomiphene ovulation induction');
+    if (meds.includes('progesterone')) profileTerms.push('progesterone luteal support');
+    if (syms.includes('irregular_periods')) profileTerms.push('anovulation irregular cycles');
+
+    const fullQuery = query + ' ' + profileTerms.join(' ');
+
+    // RAG fetch
+    const relevantKnowledge = searchKnowledge(fullQuery, profile, 12);
+
+    // Build profile context
+    const profileContext = [
+      profile.name ? `Name: ${profile.name}` : null,
+      profile.age ? `Age: ${profile.age}` : null,
+      profile.journeyStage ? `Journey: ${profile.journeyStage}` : null,
+      profile.cycleLength ? `Cycle: ${profile.cycleLength} days` : null,
+      syms.length ? `Symptoms: ${syms.join(', ')}` : null,
+      meds.length ? `Medications: ${meds.join(', ')}` : null,
+      profile.notes ? `Notes: ${profile.notes}` : null,
+    ].filter(Boolean).join('\n');
+
+    const sectionPrompts = {
+      overview: `Generate a comprehensive clinical overview for ${journey === 'ttc' ? `Month ${month} of TTC` : `Week ${week} of pregnancy`}. Include: what is happening physiologically, key clinical points, and what to watch for. Be specific and evidence-based.`,
+      lifestyle: `Generate specific lifestyle guidance for ${journey === 'ttc' ? `Month ${month} of TTC` : `Week ${week} of pregnancy`}. Cover: diet recommendations (specific Indian-friendly foods), exercise, sleep, stress management. Be practical and specific.`,
+      timing: journey === 'ttc' 
+        ? `Generate detailed fertile window and intercourse timing guidance for Month ${month} of TTC. Include: ovulation detection methods, optimal timing, frequency, practical tips. Be clinical and specific.`
+        : `Generate pregnancy monitoring guidance for Week ${week}. Include: what tests/scans are due, what to track, warning signs to watch for, upcoming appointments.`,
+      hormones: `Generate a detailed hormone explanation for ${journey === 'ttc' ? `Month ${month} of TTC` : `Week ${week} of pregnancy`}. Explain: which hormones are active, what they are doing, what abnormal values might indicate. Be educational and clear.`,
+      supplements: `Generate a specific supplement protocol for ${journey === 'ttc' ? `Month ${month} of TTC` : `Week ${week} of pregnancy`}. Include: what to take, doses, timing, why each supplement helps. Base on clinical evidence.`,
+      pretreatment: `Generate pre-treatment investigation and optimization guidance for Month ${month} of TTC. Include: which tests to request, what results mean, how to optimize before treatment. Be specific and clinical.`,
+    };
+
+    const prompt = sectionPrompts[section] || sectionPrompts.overview;
+
+    const systemMsg = `You are Bloom's clinical content engine — a specialist in reproductive medicine and obstetrics, powered by Williams Obstetrics (26th Ed), Williams Gynecology (4th Ed), and Speroff's Clinical Gynecologic Endocrinology.
+
+Patient profile:
+${profileContext || 'No profile provided'}
+
+Generate content that is:
+1. Evidence-based — cite clinical facts from the knowledge base
+2. Personalised — tailor to this specific patient's profile, symptoms, medications
+3. Practical — specific actionable guidance, not generic advice
+4. Indian-context aware — reference Indian dietary options, acknowledge local healthcare context
+5. Warm but clinical in tone
+
+Format your response as a JSON object with these fields:
+{
+  "main_content": "2-3 paragraphs of main clinical content",
+  "key_points": ["point 1", "point 2", "point 3", "point 4", "point 5"],
+  "personalised_tip": "1-2 sentences specifically for this patient based on their profile",
+  "clinical_note": "1 important clinical note or warning relevant to this stage",
+  "action_items": ["specific action 1", "specific action 2", "specific action 3"]
+}
+
+Return ONLY valid JSON. No markdown, no preamble.
+
+Use this clinical knowledge to ensure accuracy:
+--- CLINICAL KNOWLEDGE ---
+${relevantKnowledge}
+--- END ---`;
+
+    const response = await groq.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
+      messages: [
+        { role: "system", content: systemMsg },
+        { role: "user", content: prompt },
+      ],
+      max_tokens: 1200,
+      temperature: 0.3,
+    });
+
+    const rawText = response.choices[0].message.content.trim();
+    let parsed;
+    try {
+      const cleaned = rawText.replace(/```json|```/g, "").trim();
+      parsed = JSON.parse(cleaned);
+    } catch(e) {
+      // Return as plain text if JSON parse fails
+      parsed = {
+        main_content: rawText,
+        key_points: [],
+        personalised_tip: "",
+        clinical_note: "",
+        action_items: []
+      };
+    }
+
+    res.json({ content: parsed, journey, month, week, section });
+
+  } catch (err) {
+    console.error("Roadmap content error:", err.message);
+    res.status(500).json({ error: "Could not generate content: " + err.message });
+  }
+});
