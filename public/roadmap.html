@@ -156,22 +156,17 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
     <div id="persona-tags" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
   </div>
 
-  <!-- UPDATE PROFILE BANNER -->
-  <div onclick="openRoadmapProfile()" style="background:var(--terra);border-radius:var(--radius);padding:1rem 1.5rem;margin-bottom:1.25rem;text-align:center;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:12px;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
-    <span style="font-size:20px;">✏️</span>
-    <div>
-      <div style="font-size:16px;font-weight:600;color:#fff;margin-bottom:2px;">Update Your Profile</div>
-      <div style="font-size:13px;color:rgba(255,255,255,0.85);">New reports? Doctor appointment? Tap here to update — your roadmap refreshes automatically.</div>
-    </div>
-    <span style="font-size:20px;color:rgba(255,255,255,0.7);">→</span>
-  </div>
+
 
   <!-- TTC SECTION -->
   <div id="section-ttc" class="section active">
     <div class="grid">
       <div>
         <div class="stage-detector fade-up">
-          <div class="stage-detector-title">Your Clinical Pathway</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <div class="stage-detector-title" style="margin-bottom:0;">Your Clinical Pathway</div>
+            <button onclick="openRoadmapProfile()" style="font-size:13px;font-weight:500;padding:6px 16px;border-radius:20px;border:none;background:#8a6a5a;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;letter-spacing:0.02em;transition:background 0.15s;" onmouseover="this.style.background='#6b4f42'" onmouseout="this.style.background='#8a6a5a'">✏️ Update Profile</button>
+          </div>
           <div class="stage-path" id="stage-path"></div>
           <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border-l);display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
             <div style="display:flex;flex-direction:column;gap:4px;">
@@ -180,16 +175,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
             </div>
             <div id="ttc-trying-duration" style="font-size:14px;color:var(--terra-d);font-weight:500;"></div>
           </div>
-        </div>
-
-        <!-- Update Profile Banner - prominent, centered -->
-        <div onclick="openRoadmapProfile()" style="background:var(--terra);border-radius:var(--radius);padding:1rem 1.5rem;margin-bottom:1rem;display:flex;align-items:center;justify-content:center;gap:12px;cursor:pointer;transition:all 0.2s;text-align:center;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
-          <span style="font-size:20px;">✏️</span>
-          <div>
-            <div style="font-size:16px;font-weight:600;color:#fff;margin-bottom:2px;">Update Your Profile</div>
-            <div style="font-size:13px;color:rgba(255,255,255,0.85);">New reports? Appointment done? Update here — your roadmap refreshes automatically.</div>
-          </div>
-          <span style="font-size:20px;color:rgba(255,255,255,0.7);">→</span>
         </div>
 
         <div class="stage-card fade-up">
@@ -243,11 +228,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
         </div>
 
         <div class="profile-summary-card" id="profile-summary-card"></div>
-        <div style="background:var(--terra);border-radius:var(--radius);padding:1.1rem 1.25rem;text-align:center;">
-          <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:4px;">✏️ Update Your Profile</div>
-          <div style="font-size:11.5px;color:rgba(255,255,255,0.8);margin-bottom:12px;line-height:1.5;">New reports done? Doctor appointment? Tap here to update — your roadmap will refresh automatically.</div>
-          <button onclick="openRoadmapProfile()" style="width:100%;padding:9px;background:#fff;color:var(--terra-d);border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Update My Profile →</button>
-        </div>
+
         <div class="checklist-card">
           <div class="checklist-title">Right Now Checklist</div>
           <div id="ttc-checklist"></div>
