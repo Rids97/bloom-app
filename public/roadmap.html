@@ -231,9 +231,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
             <div><div style="font-size:11px;color:var(--muted);margin-bottom:3px;">AMH (ng/mL)</div><input type="number" id="ttc-log-amh" placeholder="e.g. 1.2" step="0.01" class="inv-input-sm"/></div>
             <div><div style="font-size:11px;color:var(--muted);margin-bottom:3px;">FSH (IU/L)</div><input type="number" id="ttc-log-fsh" placeholder="e.g. 7.5" step="0.1" class="inv-input-sm"/></div>
             <div><div style="font-size:11px;color:var(--muted);margin-bottom:3px;">LH (IU/L)</div><input type="number" id="ttc-log-lh" placeholder="e.g. 6.2" step="0.1" class="inv-input-sm"/></div>
-            <div><div style="font-size:11px;color:var(--muted);margin-bottom:3px;">TSH (mIU/L)</div><input type="number" id="ttc-log-tsh" placeholder="e.g. 2.1" step="0.01" class="inv-input-sm"/></div>
+            <div><div style="font-size:11px;color:var(--muted);margin-bottom:3px;">TSH (mIU/L)</div><input type="number" id="ttc-log-tsh" placeholder="e.g. 2.1" step="0.01" min="0" max="20" class="inv-input-sm"/></div>
             <div><div style="font-size:11px;color:var(--muted);margin-bottom:3px;">AFC</div><input type="number" id="ttc-log-afc" placeholder="e.g. 8" class="inv-input-sm"/></div>
-            <div><div style="font-size:11px;color:var(--muted);margin-bottom:3px;">ET in mm</div><input type="number" id="ttc-log-et" placeholder="e.g. 9" step="0.1" class="inv-input-sm"/></div>
+            <div><div style="font-size:11px;color:var(--muted);margin-bottom:3px;">ET in mm</div><input type="number" id="ttc-log-et" placeholder="e.g. 9" step="0.1" min="0" max="30" class="inv-input-sm"/></div>
           </div>
           <div style="margin-bottom:8px;"><div style="font-size:11px;color:var(--muted);margin-bottom:3px;">USG finding</div>
             <select id="ttc-log-usg" class="inv-input-sm">
