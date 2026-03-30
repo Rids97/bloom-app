@@ -1268,8 +1268,11 @@ function calcPregLmpFromEdd(){
 }
 
 function openProfileModal(){
-  pfBuildChips();pfLoad();
-  document.getElementById('profileModal').style.display='flex';
+  pfBuildChips();
+  setTimeout(() => {
+    pfLoad();
+    document.getElementById('profileModal').style.display='flex';
+  }, 50);
 }
 </script>
 </body></html>
