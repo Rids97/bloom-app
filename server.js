@@ -15,16 +15,155 @@ app.use((req, res, next) => {
   if (req.path === '/webhook/razorpay') return next();
   express.json({ limit: '20mb' })(req, res, next);
 });
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'landing.html'));
-});
 app.use(express.static(path.join(__dirname, "public")));
 
-// Load knowledge base once at startup
-const knowledgeBase = fs.readFileSync(
-  path.join(__dirname, 'data', 'bloom_ai_system_prompt_kb.md'),
-  'utf8'
-);
+// ── KNOWLEDGE BASE — RAG ──
+// Load full knowledge base (Williams Obs + Williams Gynec + Clinical Guidelines)
+let knowledgeBase = [];
+try {
+  const kbPath = path.join(__dirname, 'data', 'bloom_kb_complete.json');
+  knowledgeBase = JSON.parse(fs.readFileSync(kbPath, 'utf8'));
+  console.log(`Knowledge base loaded: ${knowledgeBase.length} chunks`);
+} catch (e) {
+  // Fallback to old markdown file if JSON not yet uploaded
+  console.log('JSON KB not found, falling back to markdown KB');
+  try {
+    const mdPath = path.join(__dirname, 'data', 'bloom_ai_system_prompt_kb.md');
+    const mdText = fs.readFileSync(mdPath, 'utf8');
+    knowledgeBase = [{ id: 'legacy', source: 'Legacy KB', chapter: 'general', text: mdText }];
+    console.log('Markdown KB loaded as fallback');
+  } catch (e2) {
+    console.log('No knowledge base found');
+  }
+}
+
+// ── RAG SEARCH FUNCTION ──
+function searchKnowledge(query, profile, topK = 10) {
+  if (!knowledgeBase.length) return '';
+
+  // Extract search terms from query
+  const queryWords = query.toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .split(/\s+/)
+    .filter(w => w.length > 3);
+
+  // Add profile-based context terms
+  const contextTerms = [];
+  if (profile) {
+    const syms = profile.symptoms || [];
+    const meds = profile.medications || [];
+    if (syms.includes('pcos_diagnosed')) contextTerms.push('pcos', 'polycystic');
+    if (syms.includes('irregular_periods')) contextTerms.push('anovulation', 'irregular');
+    if (meds.includes('metformin')) contextTerms.push('metformin', 'insulin');
+    if (meds.includes('letrozole')) contextTerms.push('letrozole', 'ovulation induction');
+    if (meds.includes('clomiphene')) contextTerms.push('clomiphene', 'ovulation induction');
+    if (profile.journeyStage === 'pregnant') contextTerms.push('pregnancy', 'prenatal', 'obstetric');
+    if (profile.journeyStage === 'ttc_ivf') contextTerms.push('ivf', 'assisted reproduction', 'embryo');
+    if (profile.journeyStage === 'perimenopause') contextTerms.push('menopause', 'perimenopause', 'hrt');
+  }
+
+  const allTerms = [...new Set([...queryWords, ...contextTerms])];
+
+  // Chapter priority keywords
+  const chapterPriority = {
+    pcos_hyperandrogenism: ['pcos', 'polycystic', 'hirsutism', 'androgen', 'hyperandrogenism'],
+    endometriosis: ['endometriosis', 'endometrioma', 'adenomyosis'],
+    fibroids: ['fibroid', 'leiomyoma', 'myomectomy'],
+    menopause: ['menopause', 'menopausal', 'hrt', 'hot flush', 'perimenopause'],
+    infertility: ['infertility', 'infertile', 'fertility', 'conception', 'ttc'],
+    infertility_treatment: ['ivf', 'iui', 'letrozole', 'clomiphene', 'ovulation induction'],
+    prenatal_care: ['prenatal', 'antenatal', 'pregnancy care', 'booking'],
+    normal_labor: ['labour', 'labor', 'delivery', 'birth', 'contraction'],
+    preeclampsia: ['preeclampsia', 'pre-eclampsia', 'hypertension pregnancy', 'eclampsia'],
+    diabetes_mellitus: ['gestational diabetes', 'gdm', 'glucose', 'insulin pregnancy'],
+    contraception: ['contraception', 'birth control', 'pill', 'iud', 'condom'],
+    cervical_disease: ['cervical', 'hpv', 'pap smear', 'colposcopy', 'cin'],
+    abnormal_uterine_bleeding: ['bleeding', 'heavy periods', 'menorrhagia', 'aub'],
+    miscarriage: ['miscarriage', 'pregnancy loss', 'recurrent', 'spontaneous abortion'],
+    ectopic_pregnancy: ['ectopic', 'tubal pregnancy', 'methotrexate'],
+    low_amh: ['amh', 'ovarian reserve', 'diminished', 'egg quality'],
+    thyroid_fertility: ['thyroid', 'tsh', 'hypothyroid', 'hyperthyroid'],
+    preterm_birth: ['preterm', 'premature', 'preterm labour'],
+    puerperium_postpartum: ['postpartum', 'postnatal', 'puerperium', 'breastfeeding'],
+  };
+
+  // Score each chunk
+  const scored = knowledgeBase.map(chunk => {
+    const chunkText = chunk.text.toLowerCase();
+    const chunkChapter = (chunk.chapter || '').toLowerCase();
+    let score = 0;
+
+    // Score based on query word matches
+    for (const term of allTerms) {
+      const textMatches = (chunkText.match(new RegExp(term, 'g')) || []).length;
+      score += textMatches * 2;
+      if (chunkChapter.includes(term)) score += 5;
+    }
+
+    // Boost score based on chapter priority match
+    for (const [chapter, keywords] of Object.entries(chapterPriority)) {
+      if (chunkChapter === chapter) {
+        for (const kw of keywords) {
+          if (allTerms.some(t => t.includes(kw) || kw.includes(t))) {
+            score += 8;
+          }
+        }
+      }
+    }
+
+    // Boost Williams textbook sources
+    if (chunk.source && chunk.source.includes('Williams')) score += 1;
+
+    return { ...chunk, score };
+  });
+
+  // Return top K relevant chunks
+  const relevant = scored
+    .filter(c => c.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, topK);
+
+  if (!relevant.length) {
+    // Fallback: return general fertility chunks
+    return knowledgeBase
+      .filter(c => ['ttc_basics', 'preconception', 'menstrual_cycle', 'hormone_ranges'].includes(c.chapter))
+      .slice(0, 5)
+      .map(c => `[${c.chapter}]\n${c.text}`)
+      .join('\n\n---\n\n');
+  }
+
+  return relevant
+    .map(c => `[${c.source || 'Clinical KB'} — ${c.chapter}]\n${c.text}`)
+    .join('\n\n---\n\n');
+}
+
+// ── BLOOM SYSTEM PROMPT ──
+const BLOOM_SYSTEM_PROMPT = `You are Bloom, a warm, knowledgeable, and compassionate AI fertility and women's health companion, created by a licensed gynecologist.
+
+You provide accurate, evidence-based information grounded in:
+- Williams Obstetrics (26th Edition)
+- Williams Gynecology (4th Edition)  
+- Speroff's Clinical Gynecologic Endocrinology and Infertility (9th Edition)
+- Current clinical guidelines (NICE, ESHRE, ASRM, RCOG, FIGO)
+
+Core principles:
+1. Evidence-based — cite clinical evidence when relevant
+2. Personalised — tailor responses to the user's profile, journey stage, symptoms and medications
+3. Compassionate — fertility journeys are emotionally demanding; respond with warmth
+4. Safe — always recommend consulting a doctor for diagnosis and treatment decisions
+5. Accurate — if uncertain, say so clearly
+
+Communication style:
+- Warm and professional — like a knowledgeable gynaecologist friend
+- Clear language — explain medical terms when used
+- Always end with a practical, actionable next step
+- In Indian context — reference Indian dietary options, acknowledge cost considerations
+
+Important boundaries:
+- Do NOT diagnose conditions definitively
+- Do NOT prescribe specific drug doses without recommending medical consultation
+- Emergency symptoms (severe pain, heavy bleeding, reduced fetal movements) → always direct to immediate medical care
+- Always include: "Please discuss with your doctor before making any changes"`;
 
 let isConnected = false;
 
@@ -104,12 +243,13 @@ function auth(req, res, next) {
 
 app.get("/test", (req, res) => {
   res.json({
-    status:   "ok",
-    mongo:    process.env.MONGO_URI    ? "set" : "missing",
-    groq:     process.env.GROQ_API_KEY ? "set" : "missing",
-    jwt:      process.env.JWT_SECRET   ? "set" : "missing",
-    razorpay: process.env.RAZORPAY_KEY_ID ? "set" : "missing",
-    dbState:  mongoose.connection.readyState === 1 ? "connected" : "disconnected",
+    status:    "ok",
+    mongo:     process.env.MONGO_URI       ? "set" : "missing",
+    groq:      process.env.GROQ_API_KEY    ? "set" : "missing",
+    jwt:       process.env.JWT_SECRET      ? "set" : "missing",
+    razorpay:  process.env.RAZORPAY_KEY_ID ? "set" : "missing",
+    dbState:   mongoose.connection.readyState === 1 ? "connected" : "disconnected",
+    kbChunks:  knowledgeBase.length,
   });
 });
 
@@ -187,6 +327,7 @@ app.put("/profile", auth, async (req, res) => {
   }
 });
 
+// ── CHAT ──
 app.post("/chat", auth, async (req, res) => {
   try {
     await connectDB();
@@ -206,29 +347,34 @@ app.post("/chat", auth, async (req, res) => {
     await user.save();
 
     const profile = user.profile || {};
+    const userMessage = req.body.message || '';
 
-    // ── BLOOM AI SYSTEM PROMPT WITH KNOWLEDGE BASE ──
-    let systemPrompt = `You are Bloom, a warm, knowledgeable, and compassionate AI fertility companion. You provide accurate, evidence-based information about fertility, menstrual cycles, IVF, PCOS, and reproductive health. You are supportive, non-judgmental, and always remind users to consult their doctor for medical decisions. Keep responses warm, clear, and concise.
+    // RAG — fetch relevant knowledge chunks for this query
+    const relevantKnowledge = searchKnowledge(userMessage, profile, 10);
 
-Use the following clinical knowledge base to give accurate, helpful answers. Explain things in simple friendly language — not medical jargon.
-
---- CLINICAL KNOWLEDGE BASE ---
-${knowledgeBase}
---- END OF KNOWLEDGE BASE ---`;
-
-    // Personalise with user profile if available
+    // Build personalised context
+    let profileContext = '';
     if (profile.journeyStage) {
-      systemPrompt += "\n\nUser context: " + (profile.name || "This user") + " is on a " + profile.journeyStage + " journey.";
-      if (profile.age) systemPrompt += " Age: " + profile.age + ".";
-      if (profile.cycleLength) systemPrompt += " Average cycle: " + profile.cycleLength + " days.";
-      if (profile.symptoms && profile.symptoms.length) systemPrompt += " Noted symptoms: " + profile.symptoms.join(", ") + ".";
+      profileContext = `\n\nUser profile: ${profile.name || 'User'} is on a ${profile.journeyStage} journey.`;
+      if (profile.age) profileContext += ` Age: ${profile.age}.`;
+      if (profile.cycleLength) profileContext += ` Cycle: ${profile.cycleLength} days.`;
+      if (profile.symptoms && profile.symptoms.length) profileContext += ` Symptoms: ${profile.symptoms.join(', ')}.`;
+      if (profile.medications && profile.medications.length) profileContext += ` Medications: ${profile.medications.join(', ')}.`;
     }
+
+    const systemPrompt = `${BLOOM_SYSTEM_PROMPT}${profileContext}
+
+Use the following clinically relevant knowledge to answer the user's question accurately. Synthesise this into a warm, clear, helpful response — do not copy it verbatim.
+
+--- RELEVANT CLINICAL KNOWLEDGE ---
+${relevantKnowledge}
+--- END ---`;
 
     const response = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
       messages: [
         { role: "system", content: systemPrompt },
-        { role: "user",   content: req.body.message },
+        { role: "user",   content: userMessage },
       ],
       max_tokens: 800,
     });
@@ -245,6 +391,7 @@ ${knowledgeBase}
   }
 });
 
+// ── FERTILITY PLAN ──
 app.get("/fertility-plan", auth, async (req, res) => {
   try {
     await connectDB();
@@ -264,21 +411,33 @@ app.get("/fertility-plan", auth, async (req, res) => {
     }
 
     const profile = user.profile || {};
+
+    // RAG — fetch knowledge relevant to this user's profile
+    const planQuery = [
+      profile.journeyStage || 'fertility',
+      profile.symptoms ? profile.symptoms.join(' ') : '',
+      profile.medications ? profile.medications.join(' ') : '',
+      'fertility plan nutrition supplements lifestyle',
+    ].join(' ');
+
+    const relevantKnowledge = searchKnowledge(planQuery, profile, 15);
+
+    const systemPrompt = `You are Bloom's senior fertility advisor AI, created by a licensed gynecologist. Generate detailed, personalised, evidence-based fertility plans in structured markdown format. 
+
+Always include: introduction, cycle insights, nutrition plan, supplement recommendations, lifestyle adjustments, stress management, and monthly roadmap. Be warm, specific, and actionable. Reference clinical evidence where appropriate.
+
+Use this clinically relevant knowledge to ensure accuracy:
+--- CLINICAL KNOWLEDGE ---
+${relevantKnowledge}
+--- END ---`;
+
     const response = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
       messages: [
-        {
-          role: "system",
-          content: `You are Bloom's senior fertility advisor AI. Generate detailed, personalised, evidence-based fertility plans in structured markdown format. Always include: introduction, cycle insights, nutrition plan, supplement recommendations, lifestyle adjustments, stress management, and monthly roadmap. Be warm, specific, and actionable.
-
-Use this clinical knowledge base to ensure accuracy:
---- CLINICAL KNOWLEDGE BASE ---
-${knowledgeBase}
---- END OF KNOWLEDGE BASE ---`,
-        },
-        { role: "user", content: buildPlanPrompt(profile) },
+        { role: "system", content: systemPrompt },
+        { role: "user",   content: buildPlanPrompt(profile) },
       ],
-      max_tokens: 1000,
+      max_tokens: 2000,
     });
 
     const planContent = response.choices[0].message.content;
@@ -302,19 +461,26 @@ app.post("/fertility-plan/regenerate", auth, async (req, res) => {
     if (user.plan !== "complete") return res.status(403).json({ error: "upgrade_required" });
 
     const profile = user.profile || {};
+    const planQuery = [
+      profile.journeyStage || 'fertility',
+      profile.symptoms ? profile.symptoms.join(' ') : '',
+      profile.medications ? profile.medications.join(' ') : '',
+      'fertility plan nutrition supplements lifestyle',
+    ].join(' ');
+
+    const relevantKnowledge = searchKnowledge(planQuery, profile, 15);
+
+    const systemPrompt = `You are Bloom's senior fertility advisor AI. Generate detailed personalised fertility plans in markdown format. Be warm, evidence-based, and actionable.
+
+--- CLINICAL KNOWLEDGE ---
+${relevantKnowledge}
+--- END ---`;
+
     const response = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
       messages: [
-        {
-          role: "system",
-          content: `You are Bloom's senior fertility advisor AI. Generate detailed personalised fertility plans in markdown format. Be warm and actionable.
-
-Use this clinical knowledge base to ensure accuracy:
---- CLINICAL KNOWLEDGE BASE ---
-${knowledgeBase}
---- END OF KNOWLEDGE BASE ---`,
-        },
-        { role: "user", content: buildPlanPrompt(profile) },
+        { role: "system", content: systemPrompt },
+        { role: "user",   content: buildPlanPrompt(profile) },
       ],
       max_tokens: 2000,
     });
@@ -351,6 +517,160 @@ function buildPlanPrompt(profile) {
     "8. When to Speak to Your Doctor";
 }
 
+// ── REPORT ANALYZER ──
+app.post("/analyze-report", auth, async (req, res) => {
+  try {
+    await connectDB();
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    if (user.plan === "free") {
+      return res.status(403).json({
+        error: "upgrade_required",
+        message: "Report analysis requires Bloom Pro or Complete. Upgrade to get started.",
+      });
+    }
+
+    if (user.plan === "pro" && user.reportAnalysisCount >= 3) {
+      return res.status(403).json({
+        error: "limit_reached",
+        message: "You've used your 3 monthly report analyses. Upgrade to Bloom Complete for unlimited reports.",
+      });
+    }
+
+    if (user.plan === "pro") {
+      await User.findByIdAndUpdate(req.user.id, { $inc: { reportAnalysisCount: 1 } });
+    }
+
+    const { imageBase64, reportType } = req.body;
+    if (!imageBase64) return res.status(400).json({ error: "No image provided" });
+
+    const profile = user.profile || {};
+
+    // RAG — fetch knowledge relevant to this report type
+    const reportQueries = {
+      hormone:    'FSH LH AMH estradiol progesterone prolactin testosterone hormone ranges fertility',
+      thyroid:    'thyroid TSH T3 T4 anti-TPO hypothyroid fertility',
+      ultrasound: 'ultrasound antral follicle count AFC endometrium ovarian cyst fibroid PCOS morphology',
+      semen:      'semen analysis sperm count motility morphology azoospermia WHO criteria',
+      blood:      'haemoglobin ferritin iron fasting glucose HbA1c insulin HOMA-IR blood count',
+      general:    'medical report investigation fertility gynecology',
+    };
+
+    const reportKnowledge = searchKnowledge(
+      reportQueries[reportType] || reportQueries.general,
+      profile,
+      8
+    );
+
+    const profileContext = [
+      profile.name      ? `Name: ${profile.name}`                                         : null,
+      profile.age       ? `Age: ${profile.age}`                                           : null,
+      profile.journeyStage ? `Journey: ${profile.journeyStage}`                           : null,
+      profile.cycleLength  ? `Cycle length: ${profile.cycleLength} days`                  : null,
+      profile.symptoms && profile.symptoms.length
+                        ? `Symptoms: ${profile.symptoms.join(", ")}`                       : null,
+      profile.medications && profile.medications.length
+                        ? `Medications: ${profile.medications.join(", ")}`                 : null,
+      profile.notes     ? `Notes: ${profile.notes}`                                       : null,
+    ].filter(Boolean).join("\n");
+
+    const reportTypeLabels = {
+      hormone:    "Hormone Panel (FSH, LH, AMH, estradiol, progesterone, prolactin, testosterone)",
+      thyroid:    "Thyroid Function Test (TSH, T3, T4, Anti-TPO)",
+      ultrasound: "Pelvic / Transvaginal Ultrasound Report",
+      semen:      "Semen Analysis Report",
+      blood:      "Blood Test / Complete Blood Count / metabolic panel",
+      general:    "General Medical Report",
+    };
+
+    const systemPrompt = `You are Bloom's expert medical report analyzer — a specialist in reproductive endocrinology and fertility medicine, created by a licensed gynecologist and grounded in Williams Obstetrics, Williams Gynecology, and Speroff's.
+
+A patient has uploaded their ${reportTypeLabels[reportType] || "medical report"}. Analyze it thoroughly and return a JSON object ONLY — no markdown, no preamble, no explanation outside the JSON.
+
+Patient profile:
+${profileContext || "No profile provided"}
+
+Use this clinical reference knowledge for accurate interpretation:
+--- CLINICAL REFERENCE ---
+${reportKnowledge}
+--- END ---
+
+Your JSON must follow this exact structure:
+{
+  "values": [
+    {
+      "name": "FSH",
+      "description": "Follicle Stimulating Hormone",
+      "value": "7.2 IU/L",
+      "normalRange": "3–10 IU/L",
+      "status": "normal"
+    }
+  ],
+  "summary": "Overall plain-English summary of findings in 2-3 sentences, personalised to this patient's journey",
+  "concerns": [
+    { "title": "Elevated LH:FSH ratio", "detail": "Detailed explanation of what this means and why it matters for fertility, referencing clinical significance" }
+  ],
+  "positives": [
+    { "title": "AMH within normal range", "detail": "What this means positively for the patient" }
+  ],
+  "personalised": "2-3 sentences specifically connecting these results to their journey stage, symptoms, and profile",
+  "nextSteps": [
+    "Book appointment with gynaecologist to discuss LH:FSH ratio",
+    "Request day 21 progesterone test to confirm ovulation",
+    "Consider transvaginal ultrasound to assess antral follicle count"
+  ]
+}
+
+Rules:
+- status must be one of: "normal", "low", "high", "borderline", "na"
+- Extract EVERY value visible in the report — do not skip any
+- Use Indian clinical reference ranges where applicable
+- Be specific and clinical in concerns/positives — reference actual fertility implications
+- nextSteps should be 3-5 actionable, specific recommendations
+- If the report is not readable or not a medical report, return: {"error": "Could not read report. Please upload a clearer image."}
+- Return ONLY valid JSON. No text before or after.`;
+
+    const response = await groq.chat.completions.create({
+      model: "meta-llama/llama-4-scout-17b-16e-instruct",
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "image_url",
+              image_url: { url: `data:image/jpeg;base64,${imageBase64}` },
+            },
+            { type: "text", text: systemPrompt },
+          ],
+        },
+      ],
+      max_tokens: 2000,
+      temperature: 0.1,
+    });
+
+    const rawText = response.choices[0].message.content.trim();
+
+    let parsed;
+    try {
+      const cleaned = rawText.replace(/```json|```/g, "").trim();
+      parsed = JSON.parse(cleaned);
+    } catch(e) {
+      console.error("JSON parse error:", rawText.substring(0, 200));
+      return res.status(500).json({ error: "Could not parse report analysis. Please try with a clearer image." });
+    }
+
+    if (parsed.error) return res.status(400).json({ error: parsed.error });
+
+    res.json(parsed);
+
+  } catch (err) {
+    console.error("Report analysis error:", err.message);
+    res.status(500).json({ error: "Analysis failed: " + err.message });
+  }
+});
+
+// ── ORDERS & PAYMENTS ──
 app.post("/create-order", auth, async (req, res) => {
   try {
     await connectDB();
@@ -385,13 +705,8 @@ app.post("/create-order", auth, async (req, res) => {
 
 app.post("/verify-payment", auth, async (req, res) => {
   try {
-    console.log("Payment body:", JSON.stringify(req.body));
-    console.log("Secret loaded:", !!process.env.RAZORPAY_KEY_SECRET);
     await connectDB();
-    const razorpay_order_id   = req.body.razorpay_order_id;
-    const razorpay_payment_id = req.body.razorpay_payment_id;
-    const razorpay_signature  = req.body.razorpay_signature;
-    const plan                = req.body.plan;
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, plan } = req.body;
 
     const expectedSig = crypto
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
@@ -399,9 +714,6 @@ app.post("/verify-payment", auth, async (req, res) => {
       .digest("hex");
 
     if (expectedSig !== razorpay_signature) {
-      console.error("Signature mismatch");
-      console.error("Expected:", expectedSig);
-      console.error("Got:", razorpay_signature);
       return res.status(400).json({ error: "Payment verification failed." });
     }
 
@@ -443,24 +755,21 @@ app.get("/plan-status", auth, async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 5000;
-
+// ── WEBHOOK ──
 app.post('/webhook/razorpay', express.raw({type: 'application/json'}), async(req, res) => {
   const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
-  
   const signature = req.headers['x-razorpay-signature'];
   const digest = crypto.createHmac('sha256', secret).update(req.body).digest('hex');
-  
+
   if (signature !== digest) {
     return res.status(400).json({ message: 'Invalid signature' });
   }
 
   const event = JSON.parse(req.body);
-  
+
   if (event.event === 'payment.captured') {
     const payment = event.payload.payment.entity;
     const userEmail = payment.notes.email;
-    
     await User.findOneAndUpdate(
       { email: userEmail },
       { plan: 'pro', planActivatedAt: new Date() }
@@ -470,154 +779,17 @@ app.post('/webhook/razorpay', express.raw({type: 'application/json'}), async(req
   res.json({ status: 'ok' });
 });
 
+// ── STATIC ROUTES ──
 app.get("/report", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "report.html"));
 });
 
-app.post("/analyze-report", auth, async (req, res) => {
-  try {
-    await connectDB();
-    const user = await User.findById(req.user.id);
-    if (!user) return res.status(404).json({ error: "User not found" });
-
-    // Free plan: no access
-    if (user.plan === "free") {
-      return res.status(403).json({
-        error: "upgrade_required",
-        message: "Report analysis requires Bloom Pro or Complete. Upgrade to get started.",
-      });
-    }
-
-    // Pro plan: 3 reports/month limit
-    if (user.plan === "pro" && user.reportAnalysisCount >= 3) {
-      return res.status(403).json({
-        error: "limit_reached",
-        message: "You've used your 3 monthly report analyses. Upgrade to Bloom Complete for unlimited reports.",
-      });
-    }
-
-    // Increment count for pro users
-    if (user.plan === "pro") {
-      await User.findByIdAndUpdate(req.user.id, { $inc: { reportAnalysisCount: 1 } });
-    }
-
-    const { imageBase64, reportType } = req.body;
-    if (!imageBase64) return res.status(400).json({ error: "No image provided" });
-
-    const profile = user.profile || {};
-
-    // Build profile context string
-    const profileContext = [
-      profile.name      ? `Name: ${profile.name}`                             : null,
-      profile.age       ? `Age: ${profile.age}`                               : null,
-      profile.journeyStage ? `Journey: ${profile.journeyStage}`               : null,
-      profile.cycleLength  ? `Cycle length: ${profile.cycleLength} days`      : null,
-      profile.symptoms && profile.symptoms.length
-                        ? `Symptoms: ${profile.symptoms.join(", ")}`           : null,
-      profile.medications && profile.medications.length
-                        ? `Medications: ${profile.medications.join(", ")}`     : null,
-      profile.notes     ? `Notes: ${profile.notes}`                           : null,
-    ].filter(Boolean).join("\n");
-
-    const reportTypeLabels = {
-      hormone:   "Hormone Panel (FSH, LH, AMH, estradiol, progesterone, prolactin, testosterone)",
-      thyroid:   "Thyroid Function Test (TSH, T3, T4, Anti-TPO)",
-      ultrasound:"Pelvic / Transvaginal Ultrasound Report",
-      semen:     "Semen Analysis Report",
-      blood:     "Blood Test / Complete Blood Count / metabolic panel",
-      general:   "General Medical Report",
-    };
-
-    const systemPrompt = `You are Bloom's expert medical report analyzer — a specialist in reproductive endocrinology and fertility medicine, created by a licensed gynecologist and grounded in clinical expertise.
-
-A patient has uploaded their ${reportTypeLabels[reportType] || "medical report"}. Analyze it thoroughly and return a JSON object ONLY — no markdown, no preamble, no explanation outside the JSON.
-
-Patient profile:
-${profileContext || "No profile provided"}
-
-Your JSON must follow this exact structure:
-{
-  "values": [
-    {
-      "name": "FSH",
-      "description": "Follicle Stimulating Hormone",
-      "value": "7.2 IU/L",
-      "normalRange": "3–10 IU/L",
-      "status": "normal"
-    }
-  ],
-  "summary": "Overall plain-English summary of findings in 2-3 sentences, personalised to this patient's journey",
-  "concerns": [
-    { "title": "Elevated LH:FSH ratio", "detail": "Detailed explanation of what this means and why it matters for fertility, referencing clinical significance" }
-  ],
-  "positives": [
-    { "title": "AMH within normal range", "detail": "What this means positively for the patient" }
-  ],
-  "personalised": "2-3 sentences specifically connecting these results to their journey stage, symptoms, and profile",
-  "nextSteps": [
-    "Book appointment with gynaecologist to discuss LH:FSH ratio",
-    "Request day 21 progesterone test to confirm ovulation",
-    "Consider transabdominal ultrasound to assess antral follicle count"
-  ]
-}
-
-Rules:
-- status must be one of: "normal", "low", "high", "borderline", "na"
-- Extract EVERY value visible in the report — do not skip any
-- Use Indian clinical reference ranges where applicable
-- Be specific and clinical in concerns/positives — reference actual fertility implications
-- nextSteps should be 3-5 actionable, specific recommendations
-- If the report is not readable or not a medical report, return: {"error": "Could not read report. Please upload a clearer image."}
-- Return ONLY valid JSON. No text before or after.`;
-
-    // Use Groq vision model
-    const response = await groq.chat.completions.create({
-      model: "meta-llama/llama-4-scout-17b-16e-instruct",
-      messages: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "image_url",
-              image_url: {
-                url: `data:image/jpeg;base64,${imageBase64}`,
-              },
-            },
-            {
-              type: "text",
-              text: systemPrompt,
-            },
-          ],
-        },
-      ],
-      max_tokens: 2000,
-      temperature: 0.1,
-    });
-
-    const rawText = response.choices[0].message.content.trim();
-
-    // Parse JSON safely
-    let parsed;
-    try {
-      const cleaned = rawText.replace(/```json|```/g, "").trim();
-      parsed = JSON.parse(cleaned);
-    } catch(e) {
-      console.error("JSON parse error:", rawText.substring(0, 200));
-      return res.status(500).json({ error: "Could not parse report analysis. Please try with a clearer image." });
-    }
-
-    if (parsed.error) return res.status(400).json({ error: parsed.error });
-
-    res.json(parsed);
-
-  } catch (err) {
-    console.error("Report analysis error:", err.message);
-    res.status(500).json({ error: "Analysis failed: " + err.message });
-  }
+app.get("/roadmap", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "roadmap.html"));
 });
 
-app.get("/roadmap", (req, res) => { res.sendFile(path.join(__dirname, "public", "roadmap.html")); });
-
+// ── START ──
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, '0.0.0.0', function() {
   console.log("Bloom running on port " + PORT);
 });
