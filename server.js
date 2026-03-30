@@ -18,14 +18,12 @@ app.use((req, res, next) => {
 app.use(express.static(path.join(__dirname, "public")));
 
 // -- KNOWLEDGE BASE - RAG --
-// Load full knowledge base (Williams Obs + Williams Gynec + Clinical Guidelines)
 let knowledgeBase = [];
 try {
   const kbPath = path.join(__dirname, 'data', 'bloom_kb_complete.json');
   knowledgeBase = JSON.parse(fs.readFileSync(kbPath, 'utf8'));
   console.log(`Knowledge base loaded: ${knowledgeBase.length} chunks`);
 } catch (e) {
-  // Fallback to old markdown file if JSON not yet uploaded
   console.log('JSON KB not found, falling back to markdown KB');
   try {
     const mdPath = path.join(__dirname, 'data', 'bloom_ai_system_prompt_kb.md');
@@ -41,13 +39,11 @@ try {
 function searchKnowledge(query, profile, topK = 10) {
   if (!knowledgeBase.length) return '';
 
-  // Extract search terms from query
   const queryWords = query.toLowerCase()
     .replace(/[^a-z0-9\s]/g, ' ')
     .split(/\s+/)
     .filter(w => w.length > 3);
 
-  // Add profile-based context terms
   const contextTerms = [];
   if (profile) {
     const syms = profile.symptoms || [];
@@ -60,17 +56,20 @@ function searchKnowledge(query, profile, topK = 10) {
     if (profile.journeyStage === 'pregnant') contextTerms.push('pregnancy', 'prenatal', 'obstetric');
     if (profile.journeyStage === 'ttc_ivf') contextTerms.push('ivf', 'assisted reproduction', 'embryo');
     if (profile.journeyStage === 'perimenopause') contextTerms.push('menopause', 'perimenopause', 'hrt');
+    if (profile.amh && profile.amh < 1.5) contextTerms.push('low amh', 'diminished ovarian reserve');
+    if (profile.workupStatus === 'no_workup') contextTerms.push('infertility workup', 'investigations');
   }
 
   const allTerms = [...new Set([...queryWords, ...contextTerms])];
 
-  // Chapter priority keywords
   const chapterPriority = {
     pcos_hyperandrogenism: ['pcos', 'polycystic', 'hirsutism', 'androgen', 'hyperandrogenism'],
     endometriosis: ['endometriosis', 'endometrioma', 'adenomyosis'],
     fibroids: ['fibroid', 'leiomyoma', 'myomectomy'],
     menopause: ['menopause', 'menopausal', 'hrt', 'hot flush', 'perimenopause'],
     infertility: ['infertility', 'infertile', 'fertility', 'conception', 'ttc'],
+    infertility_workup: ['workup', 'investigation', 'fsh', 'amh', 'tvs', 'hsg', 'semen'],
+    male_factor_infertility: ['semen', 'sperm', 'azoospermia', 'oligospermia', 'male factor'],
     infertility_treatment: ['ivf', 'iui', 'letrozole', 'clomiphene', 'ovulation induction'],
     prenatal_care: ['prenatal', 'antenatal', 'pregnancy care', 'booking'],
     normal_labor: ['labour', 'labor', 'delivery', 'birth', 'contraction'],
@@ -87,20 +86,17 @@ function searchKnowledge(query, profile, topK = 10) {
     puerperium_postpartum: ['postpartum', 'postnatal', 'puerperium', 'breastfeeding'],
   };
 
-  // Score each chunk
   const scored = knowledgeBase.map(chunk => {
     const chunkText = chunk.text.toLowerCase();
     const chunkChapter = (chunk.chapter || '').toLowerCase();
     let score = 0;
 
-    // Score based on query word matches
     for (const term of allTerms) {
       const textMatches = (chunkText.match(new RegExp(term, 'g')) || []).length;
       score += textMatches * 2;
       if (chunkChapter.includes(term)) score += 5;
     }
 
-    // Boost score based on chapter priority match
     for (const [chapter, keywords] of Object.entries(chapterPriority)) {
       if (chunkChapter === chapter) {
         for (const kw of keywords) {
@@ -111,20 +107,17 @@ function searchKnowledge(query, profile, topK = 10) {
       }
     }
 
-    // Boost Williams textbook sources
     if (chunk.source && chunk.source.includes('Williams')) score += 1;
 
     return { ...chunk, score };
   });
 
-  // Return top K relevant chunks
   const relevant = scored
     .filter(c => c.score > 0)
     .sort((a, b) => b.score - a.score)
     .slice(0, topK);
 
   if (!relevant.length) {
-    // Fallback: return general fertility chunks
     return knowledgeBase
       .filter(c => ['ttc_basics', 'preconception', 'menstrual_cycle', 'hormone_ranges'].includes(c.chapter))
       .slice(0, 5)
@@ -142,7 +135,7 @@ const BLOOM_SYSTEM_PROMPT = `You are Bloom, a warm, knowledgeable, and compassio
 
 You provide accurate, evidence-based information grounded in:
 - Williams Obstetrics (26th Edition)
-- Williams Gynecology (4th Edition)  
+- Williams Gynecology (4th Edition)
 - Speroff's Clinical Gynecologic Endocrinology and Infertility (9th Edition)
 - Current clinical guidelines (NICE, ESHRE, ASRM, RCOG, FIGO)
 
@@ -190,7 +183,6 @@ const UserSchema = new mongoose.Schema({
   messageCount:        { type: Number, default: 0 },
   reportAnalysisCount: { type: Number, default: 0 },
   profile: {
-    // ── BASIC ──
     name:           String,
     age:            Number,
     cycleLength:    Number,
@@ -199,42 +191,34 @@ const UserSchema = new mongoose.Schema({
     symptoms:       [String],
     medications:    [String],
     notes:          String,
-
-    // ── MENSTRUAL HISTORY ──
-    lmp:              String,   // Last menstrual period date (ISO string)
-    cycleRegularity:  String,   // regular / slightly_irregular / very_irregular / absent
-    flowHeaviness:    [String], // light / normal / heavy / very_heavy
-    painLevel:        [String], // none / mild / moderate / severe
-    intermenstrual:   [String], // mid_cycle_pain / spotting / discharge / none
-    menarche:         Number,   // Age at first period
-
-    // ── FERTILITY HISTORY ──
-    ttcDuration:        String,   // not_trying / less_3 / 3_to_6 / 6_to_12 / over_12 / over_24
-    gravida:            String,   // 0 / 1 / 2 / 3plus
-    pregnancyOutcomes:  [String], // live_birth / miscarriage / recurrent_loss / ectopic / termination / na
-    semenAnalysis:      [String], // not_done / normal / abnormal / no_partner
-    prevTreatments:     [String], // none / oi / iui / ivf / icsi
-    txCycles:           Number,   // Number of treatment cycles done
-
-    // ── INVESTIGATIONS ──
-    investigationsDone:    [String], // amh / fsh_lh / thyroid / prolactin / testosterone / insulin / hsg / ultrasound / semen / karyotype / none_done
-    amh:                   Number,   // ng/mL
-    fsh:                   Number,   // IU/L
-    lh:                    Number,   // IU/L
-    tsh:                   Number,   // mIU/L
-    prolactin:             Number,   // ng/mL
-    testosterone:          Number,   // ng/dL
-    afc:                   Number,   // Antral follicle count
-    endometrialThickness:  Number,   // mm
-    usgFindings:           [String], // normal / pcos_morphology / low_afc / fibroid / endometrioma / thin_endo / not_done_usg
-
-    // ── TREATMENT STATUS ──
-    workupStatus:    String,   // no_workup / workup_partial / workup_complete / on_treatment / between_cycles / ivf_prep
-    txPhase:         String,   // none / oi_letrozole / oi_clomiphene / iui_cycle / ivf_stimulation / ivf_tww / ivf_fet / luteal_support / monitoring
-    cycleDay:        Number,   // Current cycle day if on treatment
-    doctorInvolved:  [String], // gp_only / gynaecologist / fertility_specialist / none_yet
-    nextStep:        String,   // get_investigations / see_doctor / start_oi / continue_oi / plan_iui / plan_ivf / tww / test_result
-    concerns:        String,   // Free text for appointment concerns
+    lmp:              String,
+    cycleRegularity:  String,
+    flowHeaviness:    [String],
+    painLevel:        [String],
+    intermenstrual:   [String],
+    menarche:         Number,
+    ttcDuration:        String,
+    gravida:            String,
+    pregnancyOutcomes:  [String],
+    semenAnalysis:      [String],
+    prevTreatments:     [String],
+    txCycles:           Number,
+    investigationsDone:    [String],
+    amh:                   Number,
+    fsh:                   Number,
+    lh:                    Number,
+    tsh:                   Number,
+    prolactin:             Number,
+    testosterone:          Number,
+    afc:                   Number,
+    endometrialThickness:  Number,
+    usgFindings:           [String],
+    workupStatus:    String,
+    txPhase:         String,
+    cycleDay:        Number,
+    doctorInvolved:  [String],
+    nextStep:        String,
+    concerns:        String,
   },
   fertilityPlan: {
     content:     String,
@@ -290,17 +274,11 @@ app.get("/test", (req, res) => {
   });
 });
 
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "landing.html"));
-});
-
-app.get("/app", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
-});
-
-app.get("/login", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "login.html"));
-});
+app.get("/", (req, res) => res.sendFile(path.join(__dirname, "public", "landing.html")));
+app.get("/app", (req, res) => res.sendFile(path.join(__dirname, "public", "index.html")));
+app.get("/login", (req, res) => res.sendFile(path.join(__dirname, "public", "login.html")));
+app.get("/report", (req, res) => res.sendFile(path.join(__dirname, "public", "report.html")));
+app.get("/roadmap", (req, res) => res.sendFile(path.join(__dirname, "public", "roadmap.html")));
 
 app.post("/signup", async (req, res) => {
   try {
@@ -352,10 +330,9 @@ app.get("/me", auth, async (req, res) => {
 app.put("/profile", auth, async (req, res) => {
   try {
     await connectDB();
-    const { name, age, cycleLength, periodLength, journeyStage, symptoms, medications, notes } = req.body;
     const user = await User.findByIdAndUpdate(
       req.user.id,
-      { profile: { name, age, cycleLength, periodLength, journeyStage, symptoms, medications, notes } },
+      { profile: req.body },
       { new: true }
     ).select("-password");
     res.json(user);
@@ -371,7 +348,6 @@ app.post("/chat", auth, async (req, res) => {
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    // Free plan: 3 messages/day limit
     if (user.plan === "free" && user.messageCount >= 3) {
       return res.json({
         reply: null,
@@ -385,11 +361,8 @@ app.post("/chat", auth, async (req, res) => {
 
     const profile = user.profile || {};
     const userMessage = req.body.message || '';
-
-    // RAG - fetch relevant knowledge chunks for this query
     const relevantKnowledge = searchKnowledge(userMessage, profile, 10);
 
-    // Build personalised context
     let profileContext = '';
     if (profile.journeyStage) {
       profileContext = `\n\nUser profile: ${profile.name || 'User'} is on a ${profile.journeyStage} journey.`;
@@ -397,6 +370,10 @@ app.post("/chat", auth, async (req, res) => {
       if (profile.cycleLength) profileContext += ` Cycle: ${profile.cycleLength} days.`;
       if (profile.symptoms && profile.symptoms.length) profileContext += ` Symptoms: ${profile.symptoms.join(', ')}.`;
       if (profile.medications && profile.medications.length) profileContext += ` Medications: ${profile.medications.join(', ')}.`;
+      if (profile.amh) profileContext += ` AMH: ${profile.amh} ng/mL.`;
+      if (profile.tsh) profileContext += ` TSH: ${profile.tsh} mIU/L.`;
+      if (profile.workupStatus) profileContext += ` Workup status: ${profile.workupStatus}.`;
+      if (profile.txPhase && profile.txPhase !== 'none') profileContext += ` Currently on: ${profile.txPhase}.`;
     }
 
     const systemPrompt = `${BLOOM_SYSTEM_PROMPT}${profileContext}
@@ -436,10 +413,7 @@ app.get("/fertility-plan", auth, async (req, res) => {
     if (!user) return res.status(404).json({ error: "User not found" });
 
     if (user.plan !== "complete") {
-      return res.status(403).json({
-        error: "upgrade_required",
-        message: "Personalised fertility plans are part of Bloom Complete.",
-      });
+      return res.status(403).json({ error: "upgrade_required", message: "Personalised fertility plans are part of Bloom Complete." });
     }
 
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
@@ -448,8 +422,6 @@ app.get("/fertility-plan", auth, async (req, res) => {
     }
 
     const profile = user.profile || {};
-
-    // RAG - fetch knowledge relevant to this user's profile
     const planQuery = [
       profile.journeyStage || 'fertility',
       profile.symptoms ? profile.symptoms.join(' ') : '',
@@ -459,11 +431,10 @@ app.get("/fertility-plan", auth, async (req, res) => {
 
     const relevantKnowledge = searchKnowledge(planQuery, profile, 15);
 
-    const systemPrompt = `You are Bloom's senior fertility advisor AI, created by a licensed gynecologist. Generate detailed, personalised, evidence-based fertility plans in structured markdown format. 
+    const systemPrompt = `You are Bloom's senior fertility advisor AI, created by a licensed gynecologist. Generate detailed, personalised, evidence-based fertility plans in structured markdown format.
 
-Always include: introduction, cycle insights, nutrition plan, supplement recommendations, lifestyle adjustments, stress management, and monthly roadmap. Be warm, specific, and actionable. Reference clinical evidence where appropriate.
+Always include: introduction, cycle insights, nutrition plan, supplement recommendations, lifestyle adjustments, stress management, and monthly roadmap. Be warm, specific, and actionable.
 
-Use this clinically relevant knowledge to ensure accuracy:
 --- CLINICAL KNOWLEDGE ---
 ${relevantKnowledge}
 --- END ---`;
@@ -478,10 +449,7 @@ ${relevantKnowledge}
     });
 
     const planContent = response.choices[0].message.content;
-    await User.findByIdAndUpdate(req.user.id, {
-      fertilityPlan: { content: planContent, generatedAt: new Date() },
-    });
-
+    await User.findByIdAndUpdate(req.user.id, { fertilityPlan: { content: planContent, generatedAt: new Date() } });
     res.json({ plan: planContent, generatedAt: new Date(), cached: false });
 
   } catch (err) {
@@ -498,35 +466,19 @@ app.post("/fertility-plan/regenerate", auth, async (req, res) => {
     if (user.plan !== "complete") return res.status(403).json({ error: "upgrade_required" });
 
     const profile = user.profile || {};
-    const planQuery = [
-      profile.journeyStage || 'fertility',
-      profile.symptoms ? profile.symptoms.join(' ') : '',
-      profile.medications ? profile.medications.join(' ') : '',
-      'fertility plan nutrition supplements lifestyle',
-    ].join(' ');
-
+    const planQuery = [profile.journeyStage || 'fertility', profile.symptoms ? profile.symptoms.join(' ') : '', profile.medications ? profile.medications.join(' ') : '', 'fertility plan nutrition supplements lifestyle'].join(' ');
     const relevantKnowledge = searchKnowledge(planQuery, profile, 15);
 
-    const systemPrompt = `You are Bloom's senior fertility advisor AI. Generate detailed personalised fertility plans in markdown format. Be warm, evidence-based, and actionable.
-
---- CLINICAL KNOWLEDGE ---
-${relevantKnowledge}
---- END ---`;
+    const systemPrompt = `You are Bloom's senior fertility advisor AI. Generate detailed personalised fertility plans in markdown format. Be warm, evidence-based, and actionable.\n\n--- CLINICAL KNOWLEDGE ---\n${relevantKnowledge}\n--- END ---`;
 
     const response = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user",   content: buildPlanPrompt(profile) },
-      ],
+      messages: [{ role: "system", content: systemPrompt }, { role: "user", content: buildPlanPrompt(profile) }],
       max_tokens: 2000,
     });
 
     const planContent = response.choices[0].message.content;
-    await User.findByIdAndUpdate(req.user.id, {
-      fertilityPlan: { content: planContent, generatedAt: new Date() },
-    });
-
+    await User.findByIdAndUpdate(req.user.id, { fertilityPlan: { content: planContent, generatedAt: new Date() } });
     res.json({ plan: planContent, generatedAt: new Date(), cached: false });
   } catch (err) {
     res.status(500).json({ error: "Could not regenerate plan: " + err.message });
@@ -538,20 +490,17 @@ function buildPlanPrompt(profile) {
     "Name: " + (profile.name || "Not provided") + "\n" +
     "Age: " + (profile.age || "Not provided") + "\n" +
     "Journey stage: " + (profile.journeyStage || "general fertility support") + "\n" +
-    "Average cycle length: " + (profile.cycleLength ? profile.cycleLength + " days" : "Not provided") + "\n" +
-    "Average period length: " + (profile.periodLength ? profile.periodLength + " days" : "Not provided") + "\n" +
-    "Current symptoms: " + (profile.symptoms && profile.symptoms.length ? profile.symptoms.join(", ") : "None noted") + "\n" +
-    "Current medications: " + (profile.medications && profile.medications.length ? profile.medications.join(", ") : "None") + "\n" +
-    "Additional notes: " + (profile.notes || "None") + "\n\n" +
+    "Cycle length: " + (profile.cycleLength ? profile.cycleLength + " days" : "Not provided") + "\n" +
+    "Period length: " + (profile.periodLength ? profile.periodLength + " days" : "Not provided") + "\n" +
+    "Symptoms: " + (profile.symptoms && profile.symptoms.length ? profile.symptoms.join(", ") : "None noted") + "\n" +
+    "Medications: " + (profile.medications && profile.medications.length ? profile.medications.join(", ") : "None") + "\n" +
+    "TTC duration: " + (profile.ttcDuration || "Not provided") + "\n" +
+    "AMH: " + (profile.amh ? profile.amh + " ng/mL" : "Not done") + "\n" +
+    "TSH: " + (profile.tsh ? profile.tsh + " mIU/L" : "Not done") + "\n" +
+    "Workup status: " + (profile.workupStatus || "Not provided") + "\n" +
+    "Notes: " + (profile.notes || "None") + "\n\n" +
     "Create a comprehensive personalised fertility plan with these sections:\n" +
-    "1. Personal Overview and Key Insights\n" +
-    "2. Understanding Your Cycle\n" +
-    "3. Nutrition Plan\n" +
-    "4. Supplement Protocol\n" +
-    "5. Lifestyle Adjustments\n" +
-    "6. Stress and Emotional Wellbeing\n" +
-    "7. 4-Week Action Roadmap\n" +
-    "8. When to Speak to Your Doctor";
+    "1. Personal Overview and Key Insights\n2. Understanding Your Cycle\n3. Nutrition Plan\n4. Supplement Protocol\n5. Lifestyle Adjustments\n6. Stress and Emotional Wellbeing\n7. 4-Week Action Roadmap\n8. When to Speak to Your Doctor";
 }
 
 // -- REPORT ANALYZER --
@@ -561,30 +510,14 @@ app.post("/analyze-report", auth, async (req, res) => {
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    if (user.plan === "free") {
-      return res.status(403).json({
-        error: "upgrade_required",
-        message: "Report analysis requires Bloom Pro or Complete. Upgrade to get started.",
-      });
-    }
-
-    if (user.plan === "pro" && user.reportAnalysisCount >= 3) {
-      return res.status(403).json({
-        error: "limit_reached",
-        message: "You've used your 3 monthly report analyses. Upgrade to Bloom Complete for unlimited reports.",
-      });
-    }
-
-    if (user.plan === "pro") {
-      await User.findByIdAndUpdate(req.user.id, { $inc: { reportAnalysisCount: 1 } });
-    }
+    if (user.plan === "free") return res.status(403).json({ error: "upgrade_required", message: "Report analysis requires Bloom Pro or Complete." });
+    if (user.plan === "pro" && user.reportAnalysisCount >= 3) return res.status(403).json({ error: "limit_reached", message: "You've used your 3 monthly report analyses. Upgrade to Bloom Complete for unlimited reports." });
+    if (user.plan === "pro") await User.findByIdAndUpdate(req.user.id, { $inc: { reportAnalysisCount: 1 } });
 
     const { imageBase64, reportType } = req.body;
     if (!imageBase64) return res.status(400).json({ error: "No image provided" });
 
     const profile = user.profile || {};
-
-    // RAG - fetch knowledge relevant to this report type
     const reportQueries = {
       hormone:    'FSH LH AMH estradiol progesterone prolactin testosterone hormone ranges fertility',
       thyroid:    'thyroid TSH T3 T4 anti-TPO hypothyroid fertility',
@@ -594,111 +527,66 @@ app.post("/analyze-report", auth, async (req, res) => {
       general:    'medical report investigation fertility gynecology',
     };
 
-    const reportKnowledge = searchKnowledge(
-      reportQueries[reportType] || reportQueries.general,
-      profile,
-      8
-    );
-
+    const reportKnowledge = searchKnowledge(reportQueries[reportType] || reportQueries.general, profile, 8);
     const profileContext = [
-      profile.name      ? `Name: ${profile.name}`                                         : null,
-      profile.age       ? `Age: ${profile.age}`                                           : null,
-      profile.journeyStage ? `Journey: ${profile.journeyStage}`                           : null,
-      profile.cycleLength  ? `Cycle length: ${profile.cycleLength} days`                  : null,
-      profile.symptoms && profile.symptoms.length
-                        ? `Symptoms: ${profile.symptoms.join(", ")}`                       : null,
-      profile.medications && profile.medications.length
-                        ? `Medications: ${profile.medications.join(", ")}`                 : null,
-      profile.notes     ? `Notes: ${profile.notes}`                                       : null,
+      profile.name ? `Name: ${profile.name}` : null,
+      profile.age ? `Age: ${profile.age}` : null,
+      profile.journeyStage ? `Journey: ${profile.journeyStage}` : null,
+      profile.cycleLength ? `Cycle length: ${profile.cycleLength} days` : null,
+      profile.symptoms && profile.symptoms.length ? `Symptoms: ${profile.symptoms.join(", ")}` : null,
+      profile.medications && profile.medications.length ? `Medications: ${profile.medications.join(", ")}` : null,
+      profile.notes ? `Notes: ${profile.notes}` : null,
     ].filter(Boolean).join("\n");
 
     const reportTypeLabels = {
-      hormone:    "Hormone Panel (FSH, LH, AMH, estradiol, progesterone, prolactin, testosterone)",
-      thyroid:    "Thyroid Function Test (TSH, T3, T4, Anti-TPO)",
+      hormone: "Hormone Panel (FSH, LH, AMH, estradiol, progesterone, prolactin, testosterone)",
+      thyroid: "Thyroid Function Test (TSH, T3, T4, Anti-TPO)",
       ultrasound: "Pelvic / Transvaginal Ultrasound Report",
-      semen:      "Semen Analysis Report",
-      blood:      "Blood Test / Complete Blood Count / metabolic panel",
-      general:    "General Medical Report",
+      semen: "Semen Analysis Report",
+      blood: "Blood Test / Complete Blood Count / metabolic panel",
+      general: "General Medical Report",
     };
 
-    const systemPrompt = `You are Bloom's expert medical report analyzer - a specialist in reproductive endocrinology and fertility medicine, created by a licensed gynecologist and grounded in Williams Obstetrics, Williams Gynecology, and Speroff's.
+    const systemPrompt = `You are Bloom's expert medical report analyzer - a specialist in reproductive endocrinology and fertility medicine, created by a licensed gynecologist.
 
-A patient has uploaded their ${reportTypeLabels[reportType] || "medical report"}. Analyze it thoroughly and return a JSON object ONLY - no markdown, no preamble, no explanation outside the JSON.
+A patient has uploaded their ${reportTypeLabels[reportType] || "medical report"}. Analyze it and return a JSON object ONLY.
 
 Patient profile:
 ${profileContext || "No profile provided"}
 
-Use this clinical reference knowledge for accurate interpretation:
 --- CLINICAL REFERENCE ---
 ${reportKnowledge}
 --- END ---
 
-Your JSON must follow this exact structure:
+Return this exact JSON structure:
 {
-  "values": [
-    {
-      "name": "FSH",
-      "description": "Follicle Stimulating Hormone",
-      "value": "7.2 IU/L",
-      "normalRange": "3-10 IU/L",
-      "status": "normal"
-    }
-  ],
-  "summary": "Overall plain-English summary of findings in 2-3 sentences, personalised to this patient's journey",
-  "concerns": [
-    { "title": "Elevated LH:FSH ratio", "detail": "Detailed explanation of what this means and why it matters for fertility, referencing clinical significance" }
-  ],
-  "positives": [
-    { "title": "AMH within normal range", "detail": "What this means positively for the patient" }
-  ],
-  "personalised": "2-3 sentences specifically connecting these results to their journey stage, symptoms, and profile",
-  "nextSteps": [
-    "Book appointment with gynaecologist to discuss LH:FSH ratio",
-    "Request day 21 progesterone test to confirm ovulation",
-    "Consider transvaginal ultrasound to assess antral follicle count"
-  ]
+  "values": [{"name": "FSH", "description": "Follicle Stimulating Hormone", "value": "7.2 IU/L", "normalRange": "3-10 IU/L", "status": "normal"}],
+  "summary": "Overall summary in 2-3 sentences",
+  "concerns": [{"title": "Issue title", "detail": "Detailed explanation"}],
+  "positives": [{"title": "Positive finding", "detail": "What this means"}],
+  "personalised": "2-3 sentences connecting results to their profile",
+  "nextSteps": ["Action 1", "Action 2", "Action 3"]
 }
 
-Rules:
-- status must be one of: "normal", "low", "high", "borderline", "na"
-- Extract EVERY value visible in the report - do not skip any
-- Use Indian clinical reference ranges where applicable
-- Be specific and clinical in concerns/positives - reference actual fertility implications
-- nextSteps should be 3-5 actionable, specific recommendations
-- If the report is not readable or not a medical report, return: {"error": "Could not read report. Please upload a clearer image."}
-- Return ONLY valid JSON. No text before or after.`;
+Rules: status must be one of: normal, low, high, borderline, na. Extract ALL values. Use Indian reference ranges. Return ONLY valid JSON.`;
 
     const response = await groq.chat.completions.create({
       model: "meta-llama/llama-4-scout-17b-16e-instruct",
-      messages: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "image_url",
-              image_url: { url: `data:image/jpeg;base64,${imageBase64}` },
-            },
-            { type: "text", text: systemPrompt },
-          ],
-        },
-      ],
+      messages: [{ role: "user", content: [{ type: "image_url", image_url: { url: `data:image/jpeg;base64,${imageBase64}` } }, { type: "text", text: systemPrompt }] }],
       max_tokens: 2000,
       temperature: 0.1,
     });
 
     const rawText = response.choices[0].message.content.trim();
-
     let parsed;
     try {
-      const cleaned = rawText.replace(/```json|```/g, "").trim();
-      parsed = JSON.parse(cleaned);
+      parsed = JSON.parse(rawText.replace(/```json|```/g, "").trim());
     } catch(e) {
       console.error("JSON parse error:", rawText.substring(0, 200));
       return res.status(500).json({ error: "Could not parse report analysis. Please try with a clearer image." });
     }
 
     if (parsed.error) return res.status(400).json({ error: parsed.error });
-
     res.json(parsed);
 
   } catch (err) {
@@ -715,25 +603,11 @@ app.post("/create-order", auth, async (req, res) => {
     if (!PLANS[plan]) return res.status(400).json({ error: "Invalid plan" });
 
     const razorpayOrder = await razorpay.orders.create({
-      amount:   PLANS[plan].amount,
-      currency: "INR",
-      notes:    { userId: req.user.id.toString(), plan: plan },
+      amount: PLANS[plan].amount, currency: "INR", notes: { userId: req.user.id.toString(), plan },
     });
 
-    await Order.create({
-      razorpayOrderId: razorpayOrder.id,
-      userId:          req.user.id,
-      plan:            plan,
-      amount:          PLANS[plan].amount,
-    });
-
-    res.json({
-      orderId:   razorpayOrder.id,
-      amount:    razorpayOrder.amount,
-      currency:  razorpayOrder.currency,
-      plan:      plan,
-      planLabel: PLANS[plan].label,
-    });
+    await Order.create({ razorpayOrderId: razorpayOrder.id, userId: req.user.id, plan, amount: PLANS[plan].amount });
+    res.json({ orderId: razorpayOrder.id, amount: razorpayOrder.amount, currency: razorpayOrder.currency, plan, planLabel: PLANS[plan].label });
   } catch (err) {
     console.error("Order error:", err.message);
     res.status(500).json({ error: "Could not create order" });
@@ -744,30 +618,12 @@ app.post("/verify-payment", auth, async (req, res) => {
   try {
     await connectDB();
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, plan } = req.body;
-
-    const expectedSig = crypto
-      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
-      .update(razorpay_order_id + "|" + razorpay_payment_id)
-      .digest("hex");
-
-    if (expectedSig !== razorpay_signature) {
-      return res.status(400).json({ error: "Payment verification failed." });
-    }
+    const expectedSig = crypto.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET).update(razorpay_order_id + "|" + razorpay_payment_id).digest("hex");
+    if (expectedSig !== razorpay_signature) return res.status(400).json({ error: "Payment verification failed." });
 
     await Order.findOneAndUpdate({ razorpayOrderId: razorpay_order_id }, { status: "paid" });
-
-    const updatedUser = await User.findByIdAndUpdate(
-      req.user.id,
-      { plan: plan, isPremium: true },
-      { new: true }
-    );
-
-    const newToken = jwt.sign(
-      { id: updatedUser._id, plan: updatedUser.plan },
-      process.env.JWT_SECRET || "BLOOM_SECRET",
-      { expiresIn: "30d" }
-    );
-
+    const updatedUser = await User.findByIdAndUpdate(req.user.id, { plan, isPremium: true }, { new: true });
+    const newToken = jwt.sign({ id: updatedUser._id, plan: updatedUser.plan }, process.env.JWT_SECRET || "BLOOM_SECRET", { expiresIn: "30d" });
     res.json({ success: true, plan: updatedUser.plan, token: newToken });
   } catch (err) {
     console.error("Verify error:", err.message);
@@ -780,13 +636,7 @@ app.get("/plan-status", auth, async (req, res) => {
     await connectDB();
     const user = await User.findById(req.user.id).select("plan messageCount reportAnalysisCount fertilityPlan");
     if (!user) return res.status(404).json({ error: "User not found" });
-    res.json({
-      plan:                user.plan,
-      messageCount:        user.messageCount,
-      reportAnalysisCount: user.reportAnalysisCount,
-      hasPlan:             !!(user.fertilityPlan && user.fertilityPlan.content),
-      planGeneratedAt:     user.fertilityPlan ? user.fertilityPlan.generatedAt : null,
-    });
+    res.json({ plan: user.plan, messageCount: user.messageCount, reportAnalysisCount: user.reportAnalysisCount, hasPlan: !!(user.fertilityPlan && user.fertilityPlan.content), planGeneratedAt: user.fertilityPlan ? user.fertilityPlan.generatedAt : null });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -797,32 +647,14 @@ app.post('/webhook/razorpay', express.raw({type: 'application/json'}), async(req
   const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
   const signature = req.headers['x-razorpay-signature'];
   const digest = crypto.createHmac('sha256', secret).update(req.body).digest('hex');
-
-  if (signature !== digest) {
-    return res.status(400).json({ message: 'Invalid signature' });
-  }
+  if (signature !== digest) return res.status(400).json({ message: 'Invalid signature' });
 
   const event = JSON.parse(req.body);
-
   if (event.event === 'payment.captured') {
     const payment = event.payload.payment.entity;
-    const userEmail = payment.notes.email;
-    await User.findOneAndUpdate(
-      { email: userEmail },
-      { plan: 'pro', planActivatedAt: new Date() }
-    );
+    await User.findOneAndUpdate({ email: payment.notes.email }, { plan: 'pro', planActivatedAt: new Date() });
   }
-
   res.json({ status: 'ok' });
-});
-
-// -- STATIC ROUTES --
-app.get("/report", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "report.html"));
-});
-
-app.get("/roadmap", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "roadmap.html"));
 });
 
 // -- START --
@@ -839,32 +671,112 @@ app.post("/roadmap-content", auth, async (req, res) => {
     await connectDB();
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ error: "User not found" });
-
-    if (user.plan !== "complete") {
-      return res.status(403).json({ error: "upgrade_required" });
-    }
+    if (user.plan !== "complete") return res.status(403).json({ error: "upgrade_required" });
 
     const { journey, month, week, section } = req.body;
     const profile = user.profile || {};
 
-    // Build specific query based on journey + month/week + section
+    // -- DETERMINE CLINICAL STAGE --
+    function determineClinicalStage(p) {
+      const txPhase = p.txPhase;
+      const workupStatus = p.workupStatus;
+      const prevTreatments = p.prevTreatments || [];
+      const symptoms = p.symptoms || [];
+      const medications = p.medications || [];
+      const ttcDuration = p.ttcDuration;
+
+      if (txPhase && txPhase !== 'none') {
+        if (['ivf_stimulation','ivf_tww','ivf_fet'].includes(txPhase)) return 'ivf_active';
+        if (txPhase === 'iui_cycle') return 'iui_active';
+        if (['oi_letrozole','oi_clomiphene'].includes(txPhase)) return 'oi_active';
+        if (['luteal_support','monitoring'].includes(txPhase)) return 'monitoring';
+      }
+      if (workupStatus === 'ivf_prep' || prevTreatments.includes('iui')) return 'pre_ivf';
+      if (workupStatus === 'workup_complete') return 'workup_complete';
+      if (workupStatus === 'workup_partial') return 'workup_partial';
+      if (!workupStatus || workupStatus === 'no_workup') {
+        if (ttcDuration === 'over_12' || ttcDuration === 'over_24') return 'needs_urgent_workup';
+        if (ttcDuration === '6_to_12') return 'needs_workup';
+        if (symptoms.includes('pcos_diagnosed') || medications.includes('Metformin')) return 'needs_workup';
+        return 'early_ttc';
+      }
+      return 'early_ttc';
+    }
+
+    // -- BUILD CLINICAL CONTEXT --
+    function buildClinicalContext(p) {
+      const lines = [];
+      if (p.name) lines.push(`Name: ${p.name}`);
+      if (p.age) lines.push(`Age: ${p.age}`);
+      if (p.journeyStage) lines.push(`Journey: ${p.journeyStage}`);
+      if (p.cycleLength) lines.push(`Cycle length: ${p.cycleLength} days`);
+      if (p.periodLength) lines.push(`Period length: ${p.periodLength} days`);
+      if (p.lmp) lines.push(`LMP: ${p.lmp}`);
+      if (p.cycleRegularity) lines.push(`Cycle regularity: ${p.cycleRegularity}`);
+      if (p.flowHeaviness && p.flowHeaviness.length) lines.push(`Flow: ${p.flowHeaviness.join(', ')}`);
+      if (p.painLevel && p.painLevel.length) lines.push(`Pain level: ${p.painLevel.join(', ')}`);
+      if (p.symptoms && p.symptoms.length) lines.push(`Symptoms: ${p.symptoms.join(', ')}`);
+      if (p.medications && p.medications.length) lines.push(`Medications: ${p.medications.join(', ')}`);
+      if (p.ttcDuration) lines.push(`TTC duration: ${p.ttcDuration}`);
+      if (p.gravida) lines.push(`Previous pregnancies: ${p.gravida}`);
+      if (p.pregnancyOutcomes && p.pregnancyOutcomes.length) lines.push(`Pregnancy outcomes: ${p.pregnancyOutcomes.join(', ')}`);
+      if (p.semenAnalysis && p.semenAnalysis.length) lines.push(`Semen analysis: ${p.semenAnalysis.join(', ')}`);
+      if (p.prevTreatments && p.prevTreatments.length) lines.push(`Previous treatments: ${p.prevTreatments.join(', ')}`);
+      if (p.txCycles) lines.push(`Treatment cycles done: ${p.txCycles}`);
+      if (p.investigationsDone && p.investigationsDone.length) lines.push(`Investigations done: ${p.investigationsDone.join(', ')}`);
+      if (p.amh) lines.push(`AMH: ${p.amh} ng/mL ${p.amh < 1.0 ? '(LOW)' : p.amh < 1.5 ? '(borderline low)' : '(normal)'}`);
+      if (p.fsh) lines.push(`FSH: ${p.fsh} IU/L ${p.fsh > 10 ? '(ELEVATED)' : '(normal)'}`);
+      if (p.lh) lines.push(`LH: ${p.lh} IU/L${p.fsh && p.lh/p.fsh > 2 ? ' (LH:FSH >2 — PCOS pattern)' : ''}`);
+      if (p.tsh) lines.push(`TSH: ${p.tsh} mIU/L ${p.tsh > 2.5 ? '(above TTC optimal — discuss with doctor)' : '(optimal)'}`);
+      if (p.prolactin) lines.push(`Prolactin: ${p.prolactin} ng/mL ${p.prolactin > 25 ? '(ELEVATED)' : '(normal)'}`);
+      if (p.testosterone) lines.push(`Testosterone: ${p.testosterone} ng/dL ${p.testosterone > 70 ? '(ELEVATED)' : '(normal)'}`);
+      if (p.afc) lines.push(`AFC: ${p.afc} ${p.afc < 5 ? '(LOW)' : p.afc < 10 ? '(borderline)' : '(normal)'}`);
+      if (p.endometrialThickness) lines.push(`Endometrial thickness: ${p.endometrialThickness} mm`);
+      if (p.usgFindings && p.usgFindings.length) lines.push(`Ultrasound findings: ${p.usgFindings.join(', ')}`);
+      if (p.workupStatus) lines.push(`Workup status: ${p.workupStatus}`);
+      if (p.txPhase) lines.push(`Current treatment phase: ${p.txPhase}`);
+      if (p.cycleDay) lines.push(`Current cycle day: ${p.cycleDay}`);
+      if (p.doctorInvolved && p.doctorInvolved.length) lines.push(`Doctor involved: ${p.doctorInvolved.join(', ')}`);
+      if (p.nextStep) lines.push(`Planned next step: ${p.nextStep}`);
+      if (p.concerns) lines.push(`Patient concerns: ${p.concerns}`);
+      if (p.notes) lines.push(`Notes: ${p.notes}`);
+      return lines.join('\n');
+    }
+
+    const clinicalStage = determineClinicalStage(profile);
+    const clinicalContext = buildClinicalContext(profile);
+
+    const stageDescriptions = {
+      early_ttc: 'Early TTC (less than 6 months, no workup needed yet)',
+      needs_workup: 'TTC 6-12 months or has PCOS/symptoms — investigations should begin',
+      needs_urgent_workup: 'TTC over 12 months — urgent investigations and specialist referral needed',
+      workup_partial: 'Some investigations done — results available, workup incomplete',
+      workup_complete: 'Full workup complete — awaiting or planning treatment',
+      oi_active: 'Currently on ovulation induction (Letrozole/Clomiphene)',
+      monitoring: 'Currently in follicle monitoring / luteal support phase',
+      iui_active: 'Currently in an IUI cycle',
+      pre_ivf: 'Preparing for IVF — pre-treatment optimisation phase',
+      ivf_active: 'Currently in active IVF cycle (stimulation/TWW/FET)',
+    };
+
+    const timeContext = journey === 'ttc' ? `Month ${month} of TTC journey` : `Week ${week} of pregnancy`;
+
+    // Build RAG query
     let query = '';
     if (journey === 'ttc') {
-      const monthTopics = {
-        1: 'preconception counseling folic acid cycle tracking ovulation fertile window',
-        2: 'cervical mucus ovulation detection LH surge fertile signs tracking',
-        3: 'ovulation timing intercourse fertile window peak fertility',
-        4: 'luteal phase two week wait implantation hCG progesterone',
-        5: 'fertility investigations FSH AMH progesterone semen analysis thyroid',
-        6: 'fertility nutrition Mediterranean diet supplements CoQ10 vitamin D omega-3',
-        7: 'stress cortisol HPA axis lifestyle yoga mindfulness fertility',
-        8: 'fertility specialist referral IUI IVF ovulation induction',
-        9: 'diminished ovarian reserve low AMH CoQ10 DHEA egg quality',
-        10: 'PCOS polycystic ovary syndrome letrozole metformin ovulation induction insulin',
-        11: 'IVF pre-treatment protocol egg quality optimization supplements',
-        12: 'unexplained infertility recurrent loss specialist review assisted reproduction',
+      const stageQueries = {
+        early_ttc: 'preconception folic acid cycle tracking ovulation fertile window',
+        needs_workup: 'infertility workup investigations FSH AMH TSH prolactin semen analysis',
+        needs_urgent_workup: 'infertility workup specialist referral IUI IVF investigations urgent',
+        workup_partial: 'infertility investigations results interpretation next steps',
+        workup_complete: 'ovulation induction letrozole clomiphene treatment plan fertility',
+        oi_active: 'ovulation induction letrozole clomiphene follicle monitoring trigger',
+        monitoring: 'follicle scan monitoring luteal phase progesterone support',
+        iui_active: 'IUI cycle preparation sperm wash timing success rate',
+        pre_ivf: 'IVF pre-treatment optimisation egg quality supplements protocol',
+        ivf_active: 'IVF stimulation monitoring egg retrieval embryo transfer TWW',
       };
-      query = monthTopics[month] || 'fertility trying to conceive';
+      query = stageQueries[clinicalStage] || 'fertility trying to conceive';
     } else {
       const weekTopics = {
         4: 'implantation early pregnancy hCG progesterone first trimester',
@@ -879,88 +791,160 @@ app.post("/roadmap-content", auth, async (req, res) => {
         36: 'term delivery preparation labour signs birth plan',
         38: 'full term labour onset oxytocin delivery',
       };
-      // Find closest week
       const weeks = Object.keys(weekTopics).map(Number);
-      const closest = weeks.reduce((prev, curr) => 
-        Math.abs(curr - week) < Math.abs(prev - week) ? curr : prev
-      );
+      const closest = weeks.reduce((prev, curr) => Math.abs(curr - week) < Math.abs(prev - week) ? curr : prev);
       query = weekTopics[closest] || 'pregnancy prenatal care';
     }
 
-    // Add profile-specific terms
-    const profileTerms = [];
     const syms = profile.symptoms || [];
     const meds = profile.medications || [];
+    const profileTerms = [];
     if (syms.includes('pcos_diagnosed')) profileTerms.push('PCOS polycystic ovary syndrome');
-    if (syms.includes('low_amh')) profileTerms.push('diminished ovarian reserve low AMH');
+    if (profile.amh && profile.amh < 1.5) profileTerms.push('low AMH diminished ovarian reserve CoQ10 DHEA');
     if (meds.includes('metformin')) profileTerms.push('metformin insulin resistance');
     if (meds.includes('letrozole')) profileTerms.push('letrozole ovulation induction');
     if (meds.includes('clomiphene')) profileTerms.push('clomiphene ovulation induction');
     if (meds.includes('progesterone')) profileTerms.push('progesterone luteal support');
     if (syms.includes('irregular_periods')) profileTerms.push('anovulation irregular cycles');
+    if (profile.tsh && profile.tsh > 2.5) profileTerms.push('thyroid TSH hypothyroid fertility');
 
-    const fullQuery = query + ' ' + profileTerms.join(' ');
+    const relevantKnowledge = searchKnowledge(query + ' ' + profileTerms.join(' '), profile, 12);
 
-    // RAG fetch
-    const relevantKnowledge = searchKnowledge(fullQuery, profile, 12);
-
-    // Build profile context
-    const profileContext = [
-      profile.name ? `Name: ${profile.name}` : null,
-      profile.age ? `Age: ${profile.age}` : null,
-      profile.journeyStage ? `Journey: ${profile.journeyStage}` : null,
-      profile.cycleLength ? `Cycle: ${profile.cycleLength} days` : null,
-      syms.length ? `Symptoms: ${syms.join(', ')}` : null,
-      meds.length ? `Medications: ${meds.join(', ')}` : null,
-      profile.notes ? `Notes: ${profile.notes}` : null,
-    ].filter(Boolean).join('\n');
-
+    // -- STAGE-BASED SECTION PROMPTS --
     const sectionPrompts = {
-      overview: `Generate a comprehensive clinical overview for ${journey === 'ttc' ? `Month ${month} of TTC` : `Week ${week} of pregnancy`}. Include: what is happening physiologically, key clinical points, and what to watch for. Be specific and evidence-based.`,
-      lifestyle: `Generate specific lifestyle guidance for ${journey === 'ttc' ? `Month ${month} of TTC` : `Week ${week} of pregnancy`}. Cover: diet recommendations (specific Indian-friendly foods), exercise, sleep, stress management. Be practical and specific.`,
-      timing: journey === 'ttc' 
-        ? `Generate detailed fertile window and intercourse timing guidance for Month ${month} of TTC. Include: ovulation detection methods, optimal timing, frequency, practical tips. Be clinical and specific.`
-        : `Generate pregnancy monitoring guidance for Week ${week}. Include: what tests/scans are due, what to track, warning signs to watch for, upcoming appointments.`,
-      hormones: `Generate a detailed hormone explanation for ${journey === 'ttc' ? `Month ${month} of TTC` : `Week ${week} of pregnancy`}. Explain: which hormones are active, what they are doing, what abnormal values might indicate. Be educational and clear.`,
-      supplements: `Generate a specific supplement protocol for ${journey === 'ttc' ? `Month ${month} of TTC` : `Week ${week} of pregnancy`}. Include: what to take, doses, timing, why each supplement helps. Base on clinical evidence.
+      overview: `Generate a personalised clinical overview for this patient.
 
-STRICT CLINICAL RULES FOR PREGNANCY SUPPLEMENTS — follow exactly:
-- Folic acid (5mg daily): weeks 1–12 only. After week 12, only if part of prenatal vitamin — do NOT list standalone.
-- Iron supplementation: DO NOT recommend before Week 14. Start from Week 14+ only — 60mg elemental iron daily. Before Week 14, iron must NOT appear.
-- Calcium: Week 16 onwards only — 500mg twice daily with meals.
-- Vitamin D (600–1000 IU): safe throughout, recommend from booking.
-- DHA/Omega-3 (200mg DHA): safe throughout, emphasise from second trimester.
+PATIENT CLINICAL STAGE: ${stageDescriptions[clinicalStage] || clinicalStage}
+TIME CONTEXT: ${timeContext}
+FULL PATIENT CONTEXT:
+${clinicalContext}
+
+Based on her SPECIFIC stage and profile, provide:
+1. Where she is clinically right now — be direct and specific
+2. What is the most important priority for her RIGHT NOW
+3. What she should expect at this stage
+4. Any specific concerns based on her results or conditions
+
+DO NOT give generic month-by-month content. Respond directly to her actual clinical situation. If she has PCOS, address PCOS. If she has abnormal results, reference them by value. If she has been trying over 12 months with no workup, tell her clearly.`,
+
+      lifestyle: `Generate specific lifestyle guidance for this patient at her current stage.
+
+PATIENT CLINICAL STAGE: ${stageDescriptions[clinicalStage] || clinicalStage}
+FULL PATIENT CONTEXT:
+${clinicalContext}
+
+Cover:
+- Diet: specific Indian-friendly foods relevant to her conditions (PCOS diet if PCOS, antioxidant-rich if low AMH)
+- Exercise: type and intensity appropriate for her stage and treatment phase
+- Sleep and stress: evidence-based specific advice
+- What to AVOID at her specific stage
+- Any lifestyle factors that directly affect her specific conditions
+
+Be specific to her profile — not generic fertility lifestyle advice.`,
+
+      timing: journey === 'ttc'
+        ? `Generate fertile window and ovulation timing guidance for this patient.
+
+PATIENT CLINICAL STAGE: ${stageDescriptions[clinicalStage] || clinicalStage}
+FULL PATIENT CONTEXT:
+${clinicalContext}
+
+Cover:
+- How to detect ovulation given her cycle pattern (${profile.cycleRegularity || 'not specified'}, ${profile.cycleLength || 28} day cycle)
+- OPK timing based on her cycle length
+- Intercourse timing recommendations
+- If PCOS/irregular — specific advice for unpredictable ovulation
+- If on OI — follicle scan timing and what to expect
+- If in TWW — what to do and not do`
+        : `Generate pregnancy monitoring guidance for Week ${week}.
+
+Cover what tests/scans are due, what to track, warning signs, and upcoming appointments. Be specific to this week.`,
+
+      hormones: `Generate a hormone explanation personalised to this patient's actual results.
+
+PATIENT CLINICAL STAGE: ${stageDescriptions[clinicalStage] || clinicalStage}
+FULL PATIENT CONTEXT:
+${clinicalContext}
+
+${profile.amh || profile.fsh || profile.lh || profile.tsh || profile.prolactin || profile.testosterone
+  ? `She HAS report values — interpret them specifically and directly:
+${profile.amh ? `- AMH ${profile.amh} ng/mL: explain what this means for her fertility` : ''}
+${profile.fsh ? `- FSH ${profile.fsh} IU/L: explain significance` : ''}
+${profile.lh && profile.fsh ? `- LH:FSH ratio ${(profile.lh/profile.fsh).toFixed(1)}: explain PCOS implications if >2` : ''}
+${profile.tsh ? `- TSH ${profile.tsh} mIU/L: explain TTC implications, flag if >2.5` : ''}
+${profile.prolactin ? `- Prolactin ${profile.prolactin} ng/mL: explain if elevated` : ''}
+${profile.testosterone ? `- Testosterone ${profile.testosterone} ng/dL: explain if elevated` : ''}
+Be direct about what abnormal values mean and what action is needed.`
+  : `She has NOT had hormone tests yet. Explain which tests she needs, when in her cycle, and what they will show.`}`,
+
+      supplements: `Generate a specific supplement protocol for this patient.
+
+PATIENT CLINICAL STAGE: ${stageDescriptions[clinicalStage] || clinicalStage}
+TIME CONTEXT: ${timeContext}
+FULL PATIENT CONTEXT:
+${clinicalContext}
+
+${journey === 'pregnancy' ? `
+STRICT PREGNANCY SUPPLEMENT RULES — apply exactly:
+- Folic acid 5mg: weeks 1–12 ONLY. After week 12 only as part of prenatal vitamin.
+- Iron 60mg elemental: Week 14+ ONLY. DO NOT recommend before Week 14.
+- Calcium 500mg BD: Week 16+ only.
+- Vitamin D 600–1000 IU: safe throughout.
+- DHA 200mg: safe throughout, emphasise from second trimester.
 - B12: safe throughout if deficient.
-- Do NOT include supplements not clinically indicated for the specific week.`,
-      pretreatment: `Generate pre-treatment investigation and optimization guidance for Month ${month} of TTC. Include: which tests to request, what results mean, how to optimize before treatment. Be specific and clinical.`,
+Current week is ${week} — apply rules strictly.` : `
+TTC SUPPLEMENT PROTOCOL based on her specific profile:
+${syms.includes('pcos_diagnosed') ? '- PCOS: Myo-inositol 2g + D-chiro-inositol 50mg twice daily, Vitamin D, NAC 600mg, Omega-3' : ''}
+${profile.amh && profile.amh < 1.5 ? '- Low AMH: CoQ10 ubiquinol 400-600mg/day, DHEA 25mg (only under doctor supervision), Vitamin D, Omega-3' : ''}
+${profile.tsh && profile.tsh > 2.5 ? '- Elevated TSH: refer to doctor for thyroid medication — supplements alone insufficient' : ''}
+- Universal TTC: Folic acid 5mg/day, Vitamin D 1000-2000 IU, Omega-3 1g/day
+- Include Indian brand names where helpful (e.g. Shelcal, Sunova CoQ10, Inofolic)`}
+
+Include: what to take, dose, timing, why it helps, and where to get it in India.`,
+
+      pretreatment: `Generate investigation and pre-treatment guidance for this patient.
+
+PATIENT CLINICAL STAGE: ${stageDescriptions[clinicalStage] || clinicalStage}
+FULL PATIENT CONTEXT:
+${clinicalContext}
+
+WORKUP STATUS: ${profile.workupStatus || 'not specified'}
+INVESTIGATIONS DONE: ${profile.investigationsDone && profile.investigationsDone.length ? profile.investigationsDone.join(', ') : 'none reported'}
+
+${!profile.workupStatus || profile.workupStatus === 'no_workup'
+  ? 'She has NO investigations done. Give her a complete prioritised list of what to get done, on which cycle days, and why each test matters.'
+  : 'She has partial/complete workup. Tell her exactly what is still missing and why it matters, or what the next treatment step should be based on her results.'}
+
+Cover:
+- Which tests are needed and exact timing (Day 2/3 for FSH/LH, mid-luteal for progesterone etc)
+- What to ask her doctor specifically
+- How to read results when they come
+- Timeline: what should happen in the next 4-8 weeks
+- When to escalate to a specialist`,
     };
 
     const prompt = sectionPrompts[section] || sectionPrompts.overview;
 
-    const systemMsg = `You are Bloom's clinical content engine - a specialist in reproductive medicine and obstetrics, grounded in established obstetric and gynaecological evidence, reviewed by a licensed gynaecologist.
-
-Patient profile:
-${profileContext || 'No profile provided'}
+    const systemMsg = `You are Bloom's clinical content engine — a specialist in reproductive medicine and obstetrics, created by a licensed Indian gynaecologist, grounded in Williams Obstetrics, Williams Gynecology, and Speroff's Clinical Gynecologic Endocrinology.
 
 Generate content that is:
-1. Evidence-based - cite clinical facts from the knowledge base
-2. Personalised - tailor to this specific patient's profile, symptoms, medications
-3. Practical - specific actionable guidance, not generic advice
-4. Indian-context aware - reference Indian dietary options, acknowledge local healthcare context
-5. Warm but clinical in tone
+1. PERSONALISED — directly address her specific conditions, results, and stage. Never give generic advice.
+2. Evidence-based — cite clinical facts
+3. Practical — specific actionable guidance
+4. Indian-context aware — Indian foods, Indian brands, Indian healthcare context
+5. Warm but clinical
 
-Format your response as a JSON object with these fields:
+Format response as JSON:
 {
-  "main_content": "2-3 paragraphs of main clinical content",
+  "main_content": "2-3 paragraphs of personalised clinical content",
   "key_points": ["point 1", "point 2", "point 3", "point 4", "point 5"],
-  "personalised_tip": "1-2 sentences specifically for this patient based on their profile",
-  "clinical_note": "1 important clinical note or warning relevant to this stage",
+  "personalised_tip": "1-2 sentences specifically for THIS patient based on her exact profile and results",
+  "clinical_note": "1 important clinical note or warning relevant to her stage",
   "action_items": ["specific action 1", "specific action 2", "specific action 3"]
 }
 
 Return ONLY valid JSON. No markdown, no preamble.
 
-Use this clinical knowledge to ensure accuracy:
 --- CLINICAL KNOWLEDGE ---
 ${relevantKnowledge}
 --- END ---`;
@@ -978,20 +962,12 @@ ${relevantKnowledge}
     const rawText = response.choices[0].message.content.trim();
     let parsed;
     try {
-      const cleaned = rawText.replace(/```json|```/g, "").trim();
-      parsed = JSON.parse(cleaned);
+      parsed = JSON.parse(rawText.replace(/```json|```/g, "").trim());
     } catch(e) {
-      // Return as plain text if JSON parse fails
-      parsed = {
-        main_content: rawText,
-        key_points: [],
-        personalised_tip: "",
-        clinical_note: "",
-        action_items: []
-      };
+      parsed = { main_content: rawText, key_points: [], personalised_tip: "", clinical_note: "", action_items: [] };
     }
 
-    res.json({ content: parsed, journey, month, week, section });
+    res.json({ content: parsed, journey, month, week, section, clinicalStage });
 
   } catch (err) {
     console.error("Roadmap content error:", err.message);
