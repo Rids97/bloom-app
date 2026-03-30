@@ -885,7 +885,16 @@ app.post("/roadmap-content", auth, async (req, res) => {
         ? `Generate detailed fertile window and intercourse timing guidance for Month ${month} of TTC. Include: ovulation detection methods, optimal timing, frequency, practical tips. Be clinical and specific.`
         : `Generate pregnancy monitoring guidance for Week ${week}. Include: what tests/scans are due, what to track, warning signs to watch for, upcoming appointments.`,
       hormones: `Generate a detailed hormone explanation for ${journey === 'ttc' ? `Month ${month} of TTC` : `Week ${week} of pregnancy`}. Explain: which hormones are active, what they are doing, what abnormal values might indicate. Be educational and clear.`,
-      supplements: `Generate a specific supplement protocol for ${journey === 'ttc' ? `Month ${month} of TTC` : `Week ${week} of pregnancy`}. Include: what to take, doses, timing, why each supplement helps. Base on clinical evidence.`,
+      supplements: `Generate a specific supplement protocol for ${journey === 'ttc' ? `Month ${month} of TTC` : `Week ${week} of pregnancy`}. Include: what to take, doses, timing, why each supplement helps. Base on clinical evidence.
+
+STRICT CLINICAL RULES FOR PREGNANCY SUPPLEMENTS — follow exactly:
+- Folic acid (5mg daily): weeks 1–12 only. After week 12, only if part of prenatal vitamin — do NOT list standalone.
+- Iron supplementation: DO NOT recommend before Week 14. Start from Week 14+ only — 60mg elemental iron daily. Before Week 14, iron must NOT appear.
+- Calcium: Week 16 onwards only — 500mg twice daily with meals.
+- Vitamin D (600–1000 IU): safe throughout, recommend from booking.
+- DHA/Omega-3 (200mg DHA): safe throughout, emphasise from second trimester.
+- B12: safe throughout if deficient.
+- Do NOT include supplements not clinically indicated for the specific week.`,
       pretreatment: `Generate pre-treatment investigation and optimization guidance for Month ${month} of TTC. Include: which tests to request, what results mean, how to optimize before treatment. Be specific and clinical.`,
     };
 
