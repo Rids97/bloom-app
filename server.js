@@ -44,11 +44,12 @@ async function connectDB() {
 connectDB();
 
 const UserSchema = new mongoose.Schema({
-  email:        { type: String, required: true, unique: true },
-  password:     { type: String, required: true },
-  plan:         { type: String, default: "free" },
-  isPremium:    { type: Boolean, default: false },
-  messageCount: { type: Number, default: 0 },
+  email:               { type: String, required: true, unique: true },
+  password:            { type: String, required: true },
+  plan:                { type: String, default: "free" },
+  isPremium:           { type: Boolean, default: false },
+  messageCount:        { type: Number, default: 0 },
+  reportAnalysisCount: { type: Number, default: 0 },
   profile: {
     name:         String,
     age:          Number,
@@ -86,8 +87,8 @@ const razorpay = new Razorpay({
 });
 
 const PLANS = {
-  pro:      { amount: 20000, label: "Bloom Pro",      monthly: 200 },
-  complete: { amount: 80000, label: "Bloom Complete",  monthly: 800 },
+  pro:      { amount: 14900, label: "Bloom Pro",      monthly: 149 },
+  complete: { amount: 44900, label: "Bloom Complete",  monthly: 449 },
 };
 
 function auth(req, res, next) {
@@ -192,11 +193,12 @@ app.post("/chat", auth, async (req, res) => {
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    if (user.plan === "free" && user.messageCount >= 5) {
+    // Free plan: 3 messages/day limit
+    if (user.plan === "free" && user.messageCount >= 3) {
       return res.json({
         reply: null,
         limitReached: true,
-        message: "You've used your 5 free messages. Upgrade to Bloom Pro for unlimited conversations.",
+        message: "You've used your 3 free messages. Upgrade to Bloom Pro for unlimited conversations.",
       });
     }
 
@@ -427,13 +429,14 @@ app.post("/verify-payment", auth, async (req, res) => {
 app.get("/plan-status", auth, async (req, res) => {
   try {
     await connectDB();
-    const user = await User.findById(req.user.id).select("plan messageCount fertilityPlan");
+    const user = await User.findById(req.user.id).select("plan messageCount reportAnalysisCount fertilityPlan");
     if (!user) return res.status(404).json({ error: "User not found" });
     res.json({
-      plan:            user.plan,
-      messageCount:    user.messageCount,
-      hasPlan:         !!(user.fertilityPlan && user.fertilityPlan.content),
-      planGeneratedAt: user.fertilityPlan ? user.fertilityPlan.generatedAt : null,
+      plan:                user.plan,
+      messageCount:        user.messageCount,
+      reportAnalysisCount: user.reportAnalysisCount,
+      hasPlan:             !!(user.fertilityPlan && user.fertilityPlan.content),
+      planGeneratedAt:     user.fertilityPlan ? user.fertilityPlan.generatedAt : null,
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -467,9 +470,6 @@ app.post('/webhook/razorpay', express.raw({type: 'application/json'}), async(req
   res.json({ status: 'ok' });
 });
 
-// ── ADD THIS ENTIRE BLOCK TO server.js ──
-// Place it just before the final app.listen() line
-
 app.get("/report", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "report.html"));
 });
@@ -480,9 +480,25 @@ app.post("/analyze-report", auth, async (req, res) => {
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    // Complete plan only
-    if (user.plan !== "complete") {
-      return res.status(403).json({ error: "Report analysis is available on Bloom Complete only." });
+    // Free plan: no access
+    if (user.plan === "free") {
+      return res.status(403).json({
+        error: "upgrade_required",
+        message: "Report analysis requires Bloom Pro or Complete. Upgrade to get started.",
+      });
+    }
+
+    // Pro plan: 3 reports/month limit
+    if (user.plan === "pro" && user.reportAnalysisCount >= 3) {
+      return res.status(403).json({
+        error: "limit_reached",
+        message: "You've used your 3 monthly report analyses. Upgrade to Bloom Complete for unlimited reports.",
+      });
+    }
+
+    // Increment count for pro users
+    if (user.plan === "pro") {
+      await User.findByIdAndUpdate(req.user.id, { $inc: { reportAnalysisCount: 1 } });
     }
 
     const { imageBase64, reportType } = req.body;
@@ -599,7 +615,9 @@ Rules:
     res.status(500).json({ error: "Analysis failed: " + err.message });
   }
 });
+
 app.get("/roadmap", (req, res) => { res.sendFile(path.join(__dirname, "public", "roadmap.html")); });
+
 app.listen(PORT, '0.0.0.0', function() {
   console.log("Bloom running on port " + PORT);
 });
