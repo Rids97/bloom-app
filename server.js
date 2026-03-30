@@ -293,8 +293,8 @@ if (profile.journeyStage) {
 }
 
 const systemPrompt = wantsDetail
-  ? `${BLOOM_SYSTEM_PROMPT}${profileContext}\n\nProvide a detailed, thorough answer.\nFORMATTING: Use bullet points (•) for lists, each on its own line with blank line between bullets. Use simple language, explain medical terms in brackets.\n\n--- RELEVANT CLINICAL KNOWLEDGE ---\n${relevantKnowledge}\n--- END ---`
-  : `${BLOOM_SYSTEM_PROMPT}${profileContext}\n\nRESPONSE RULES:\n1. Simple, clear language — no jargon\n2. Concise — 2-4 sentences or short bullets\n3. Use bullet points (•) when listing items — each on its own line\n4. Explain medical terms in brackets\n5. End with: "💡 Want to understand [specific aspect] in more detail?"\n\n--- RELEVANT CLINICAL KNOWLEDGE ---\n${relevantKnowledge}\n--- END ---`;
+  ? `${BLOOM_SYSTEM_PROMPT}${profileContext}\n\nProvide a detailed, thorough answer.\nFORMATTING: Use bullet points (*) for lists, each on its own line with blank line between bullets. Use simple language, explain medical terms in brackets.\n\n--- RELEVANT CLINICAL KNOWLEDGE ---\n${relevantKnowledge}\n--- END ---`
+  : `${BLOOM_SYSTEM_PROMPT}${profileContext}\n\nRESPONSE RULES:\n1. Simple, clear language -- no jargon\n2. Concise -- 2-4 sentences or short bullets\n3. Use bullet points (*) when listing items -- each on its own line\n4. Explain medical terms in brackets\n5. End with: "BLOOM_TIP Want to understand [specific aspect] in more detail?"\n\n--- RELEVANT CLINICAL KNOWLEDGE ---\n${relevantKnowledge}\n--- END ---`;
 
 const response = await groq.chat.completions.create({
   model: "llama-3.3-70b-versatile",
@@ -306,8 +306,8 @@ const rawReply = response.choices[0].message.content;
 const lines = rawReply.trim().split('\n');
 let mainReply = rawReply.trim();
 let followupSuggestion = null;
-if (lines.length > 1 && lines[lines.length - 1].startsWith('💡')) {
-  followupSuggestion = lines[lines.length - 1].replace('💡', '').trim();
+if (lines.length > 1 && lines[lines.length - 1].startsWith('BLOOM_TIP')) {
+  followupSuggestion = lines[lines.length - 1].replace('BLOOM_TIP', '').trim();
   mainReply = lines.slice(0, -1).join('\n').trim();
 }
 res.json({ reply: mainReply, followup: wantsDetail ? null : followupSuggestion, isDetailed: wantsDetail, originalMessage: userMessage, messageCount: user.messageCount, plan: user.plan });
@@ -485,16 +485,16 @@ function buildClinicalContext(p) {
   if (p.previousSurgeries && p.previousSurgeries.length) lines.push(`Previous surgeries: ${p.previousSurgeries.join(', ')}`);
   if (p.amh) lines.push(`AMH: ${p.amh} ng/mL ${p.amh < 1.0 ? '(LOW)' : p.amh < 1.5 ? '(borderline low)' : '(normal)'}`);
   if (p.fsh) lines.push(`FSH: ${p.fsh} IU/L ${p.fsh > 10 ? '(ELEVATED)' : '(normal)'}`);
-  if (p.lh) lines.push(`LH: ${p.lh} IU/L${p.fsh && p.lh/p.fsh > 2 ? ' (LH:FSH >2 — PCOS pattern)' : ''}`);
+  if (p.lh) lines.push(`LH: ${p.lh} IU/L${p.fsh && p.lh/p.fsh > 2 ? ' (LH:FSH >2 -- PCOS pattern)' : ''}`);
   if (p.tsh) lines.push(`TSH: ${p.tsh} mIU/L ${p.tsh > 2.5 ? '(above TTC optimal)' : '(optimal)'}`);
   if (p.prolactin) lines.push(`Prolactin: ${p.prolactin} ng/mL ${p.prolactin > 25 ? '(ELEVATED)' : '(normal)'}`);
   if (p.testosterone) lines.push(`Testosterone: ${p.testosterone} ng/dL ${p.testosterone > 70 ? '(ELEVATED)' : '(normal)'}`);
-  if (p.dheas) lines.push(`DHEA-S: ${p.dheas} µg/dL`);
+  if (p.dheas) lines.push(`DHEA-S: ${p.dheas} ug/dL`);
   if (p.hb) lines.push(`Hb: ${p.hb} g/dL ${p.hb < 11 ? '(ANAEMIC)' : '(normal)'}`);
   if (p.ferritin) lines.push(`Ferritin: ${p.ferritin} ng/mL`);
   if (p.fastingGlucose) lines.push(`Fasting glucose: ${p.fastingGlucose} mg/dL ${p.fastingGlucose > 100 ? '(elevated)' : '(normal)'}`);
   if (p.hba1c) lines.push(`HbA1c: ${p.hba1c}%`);
-  if (p.fastingInsulin) lines.push(`Fasting insulin: ${p.fastingInsulin} µIU/mL`);
+  if (p.fastingInsulin) lines.push(`Fasting insulin: ${p.fastingInsulin} uIU/mL`);
   if (p.vitaminD) lines.push(`Vitamin D: ${p.vitaminD} ng/mL ${p.vitaminD < 20 ? '(DEFICIENT)' : p.vitaminD < 30 ? '(insufficient)' : '(normal)'}`);
   if (p.vitaminB12) lines.push(`B12: ${p.vitaminB12} pg/mL ${p.vitaminB12 < 200 ? '(LOW)' : '(normal)'}`);
   if (p.afc) lines.push(`AFC: ${p.afc} ${p.afc < 5 ? '(LOW)' : p.afc < 10 ? '(borderline)' : '(normal)'}`);
@@ -535,12 +535,12 @@ if (journey === 'postpartum') {
   const ppSectionPrompts = {
     overview: `Generate a comprehensive postpartum overview for ${ppStageLabel}. Cover: physical recovery, emotional wellbeing, what is normal vs warning signs. Warm and specific.`,
     breastfeeding: `Generate detailed breastfeeding guidance for ${ppStageLabel}. Cover: feeding frequency (8-12 times/day newborn), latch technique, milk supply, engorgement, mastitis (signs and treatment), sore nipples, blocked ducts, when to seek lactation support. Indian-context advice.`,
-    recovery: `Generate postpartum recovery guidance for ${ppStageLabel}. Cover: lochia (normal progression: red→pink→white), perineal care (stitches, sitz bath), C-section wound care if relevant, when to return to exercise, postpartum blues vs PPD (Edinburgh score mention), when to see doctor urgently.`,
+    recovery: `Generate postpartum recovery guidance for ${ppStageLabel}. Cover: lochia (normal progression: red->pink->white), perineal care (stitches, sitz bath), C-section wound care if relevant, when to return to exercise, postpartum blues vs PPD (Edinburgh score mention), when to see doctor urgently.`,
     baby_care: `Generate baby care guidance for ${ppStageLabel}. Cover: feeding cues (rooting, sucking hands), wet nappy count (6+ per day by day 5 = adequate feeding), sleep patterns (normal newborn sleep), umbilical cord care (dry method), bathing, skin care (vernix, milia), jaundice (physiological vs pathological), temperature check, when to call paediatrician URGENTLY. Keep practical.`,
     immunization: `Generate complete immunization schedule for ${ppStageLabel}.
 ```
 
-BABY — Indian National Immunization Schedule:
+BABY – Indian National Immunization Schedule:
 Birth: BCG, OPV-0, Hepatitis B (birth dose within 24 hours)
 6 weeks: DTwP-1, IPV-1, Hib-1, HepB-2, PCV-1, Rotavirus-1
 10 weeks: DTwP-2, IPV-2, Hib-2, PCV-2, Rotavirus-2
@@ -560,7 +560,7 @@ Specify which vaccines are due at ${ppStageLabel}. Explain what each protects ag
 };
 
 ```
-  const ppSystemMsg = `You are Bloom's postpartum and newborn care specialist, created by a licensed Indian gynaecologist.\n\nPatient: ${clinicalContext || 'New mother'}\n\nFORMATTING RULES:\n- Bullet points (•) for all lists, each on own line with blank line between\n- main_content: intro sentence\\n\\n• Point one\\n\\n• Point two\n- No long paragraphs — max 2 sentences then bullets\n- Warm, supportive tone\n\nFormat as JSON:\n{"main_content":"intro\\n\\n• Point one\\n\\n• Point two","key_points":["Point 1","Point 2","Point 3","Point 4"],"personalised_tip":"1-2 sentences","clinical_note":"important warning","action_items":["Action 1","Action 2","Action 3"]}\n\nReturn ONLY valid JSON.\n\n--- CLINICAL KNOWLEDGE ---\n${relevantKnowledge}\n--- END ---`;
+  const ppSystemMsg = `You are Bloom's postpartum and newborn care specialist, created by a licensed Indian gynaecologist.\n\nPatient: ${clinicalContext || 'New mother'}\n\nFORMATTING RULES:\n- Bullet points (*) for all lists, each on own line with blank line between\n- main_content: intro sentence\\n\\n* Point one\\n\\n* Point two\n- No long paragraphs -- max 2 sentences then bullets\n- Warm, supportive tone\n\nFormat as JSON:\n{"main_content":"intro\\n\\n* Point one\\n\\n* Point two","key_points":["Point 1","Point 2","Point 3","Point 4"],"personalised_tip":"1-2 sentences","clinical_note":"important warning","action_items":["Action 1","Action 2","Action 3"]}\n\nReturn ONLY valid JSON.\n\n--- CLINICAL KNOWLEDGE ---\n${relevantKnowledge}\n--- END ---`;
 
   const ppResponse = await groq.chat.completions.create({ model: "llama-3.3-70b-versatile", messages: [{ role: "system", content: ppSystemMsg }, { role: "user", content: ppSectionPrompts[section] || ppSectionPrompts.overview }], max_tokens: 1200, temperature: 0.3 });
   const ppRaw = ppResponse.choices[0].message.content.trim();
@@ -579,10 +579,10 @@ Specify which vaccines are due at ${ppStageLabel}. Explain what each protects ag
 
 const stageDescriptions = {
   early_ttc: 'Early TTC (less than 6 months)',
-  needs_workup: 'TTC 6-12 months or has PCOS — investigations should begin',
-  needs_urgent_workup: 'TTC over 12 months — urgent investigations needed',
-  workup_partial: 'Some investigations done — workup incomplete',
-  workup_complete: 'Full workup complete — awaiting treatment',
+  needs_workup: 'TTC 6-12 months or has PCOS -- investigations should begin',
+  needs_urgent_workup: 'TTC over 12 months -- urgent investigations needed',
+  workup_partial: 'Some investigations done -- workup incomplete',
+  workup_complete: 'Full workup complete -- awaiting treatment',
   oi_active: 'Currently on ovulation induction',
   monitoring: 'Currently in follicle monitoring phase',
   iui_active: 'Currently in an IUI cycle',
@@ -620,8 +620,8 @@ const sectionPrompts = {
   overview: `Generate a personalised clinical overview.\nSTAGE: ${stageDescriptions[clinicalStage]}\nTIME: ${journey === 'ttc' ? 'TTC journey' : `Week ${week}`}\n${checkinContext}\nAddress her specific stage, conditions, and results directly. What is the priority right now?`,
 
   lifestyle: journey === 'ttc'
-    ? `Generate lifestyle and ovulation timing guidance combined.\nSTAGE: ${stageDescriptions[clinicalStage]}\n${checkinContext}\nSECTION 1 — LIFESTYLE: Indian-friendly diet for her conditions, exercise (type and frequency), sleep, stress. Specific to her profile.\nSECTION 2 — TIMING & OPK: Fertile window calculation for ${profile.cycleLength || 28}-day cycle, OPK strip use, intercourse timing, cervical mucus tracking. PCOS irregular cycle advice if relevant. Treatment monitoring tips if on OI/IUI.`
-    : `Generate lifestyle and monitoring guidance combined for Week ${week}.\n${checkinContext}\nSECTION 1 — LIFESTYLE: Diet, exercise, sleep, stress for this trimester. Indian foods.\nSECTION 2 — MONITORING: Scans/tests due this week, warning signs, upcoming appointments.`,
+    ? `Generate lifestyle and ovulation timing guidance combined.\nSTAGE: ${stageDescriptions[clinicalStage]}\n${checkinContext}\nSECTION 1 -- LIFESTYLE: Indian-friendly diet for her conditions, exercise (type and frequency), sleep, stress. Specific to her profile.\nSECTION 2 -- TIMING & OPK: Fertile window calculation for ${profile.cycleLength || 28}-day cycle, OPK strip use, intercourse timing, cervical mucus tracking. PCOS irregular cycle advice if relevant. Treatment monitoring tips if on OI/IUI.`
+    : `Generate lifestyle and monitoring guidance combined for Week ${week}.\n${checkinContext}\nSECTION 1 -- LIFESTYLE: Diet, exercise, sleep, stress for this trimester. Indian foods.\nSECTION 2 -- MONITORING: Scans/tests due this week, warning signs, upcoming appointments.`,
 
   timing: journey === 'ttc'
     ? `Generate fertile window and ovulation timing guidance.\nCycle: ${profile.cycleRegularity || 'unknown'}, ${profile.cycleLength || 28} days.\nCover OPK timing, intercourse timing, PCOS irregular cycle advice, OI monitoring if on treatment.`
@@ -646,7 +646,7 @@ const sectionPrompts = {
     let p = 'Generate specific supplement protocol.\nSTAGE: ' + (stageDescriptions[clinicalStage]||clinicalStage) + '\n';
     if(checkinContext) p += 'CHECK-IN SYMPTOMS: ' + (checkin && checkin.chips ? checkin.chips.join(', ') : '') + '\nAddress each symptom with supplement/dietary advice. Flag bleeding/reduced movements/headache/swelling as URGENT first.\n';
     if(journey === 'pregnancy' && (profile.bpReading1 || profile.bpReading2)) {
-      p += 'BP READINGS: ' + (profile.bpReading1||'') + (profile.bpReading2 ? ' / '+profile.bpReading2 : '') + '\nIf systolic >= 140 or diastolic >= 90 — flag pre-eclampsia risk at top. Advise: rest, reduce salt, avoid NSAIDs, contact doctor urgently.\n';
+      p += 'BP READINGS: ' + (profile.bpReading1||'') + (profile.bpReading2 ? ' / '+profile.bpReading2 : '') + '\nIf systolic >= 140 or diastolic >= 90 -- flag pre-eclampsia risk at top. Advise: rest, reduce salt, avoid NSAIDs, contact doctor urgently.\n';
     }
     if(journey === 'pregnancy') {
       p += 'STRICT PREGNANCY RULES:\n- Folic acid 5mg: weeks 1-12 ONLY\n- Iron 60mg: Week 14+ ONLY\n- Calcium: Week 16+ only\n- Vitamin D: safe throughout\nCurrent week: ' + week;
@@ -670,23 +670,23 @@ const sectionPrompts = {
 
 const prompt = sectionPrompts[section] || sectionPrompts.overview;
 
-const systemMsg = `You are Bloom's clinical content engine — specialist in reproductive medicine and obstetrics, created by a licensed Indian gynaecologist, grounded in evidence-based clinical guidelines.
+const systemMsg = `You are Bloom's clinical content engine -- specialist in reproductive medicine and obstetrics, created by a licensed Indian gynaecologist, grounded in evidence-based clinical guidelines.
 ```
 
 Patient clinical profile:\n${clinicalContext}
 
-FORMATTING RULES — STRICTLY FOLLOW:
+FORMATTING RULES – STRICTLY FOLLOW:
 
-- Use bullet points (•) for all multi-item content
+- Use bullet points (*) for all multi-item content
 - Each bullet on its own line with blank line between bullets
-- main_content: intro sentence\n\n• Point one\n\n• Point two\n\n• Point three
+- main_content: intro sentence\n\n* Point one\n\n* Point two\n\n* Point three
 - key_points: each a single clear sentence
 - action_items: starts with action verb, specific and short
-- NO long paragraphs — max 2 sentences then bullets
-- Simple language — explain medical terms in brackets
+- NO long paragraphs – max 2 sentences then bullets
+- Simple language – explain medical terms in brackets
 
 Format as JSON:
-{“main_content”:“intro\n\n• Point one\n\n• Point two”,“key_points”:[“Point 1”,“Point 2”,“Point 3”,“Point 4”,“Point 5”],“personalised_tip”:“Specific to THIS patient’s conditions and results”,“clinical_note”:“One important warning or clinical note”,“action_items”:[“Action 1”,“Action 2”,“Action 3”]}
+{“main_content”:“intro\n\n* Point one\n\n* Point two”,“key_points”:[“Point 1”,“Point 2”,“Point 3”,“Point 4”,“Point 5”],“personalised_tip”:“Specific to THIS patient’s conditions and results”,“clinical_note”:“One important warning or clinical note”,“action_items”:[“Action 1”,“Action 2”,“Action 3”]}
 
 Return ONLY valid JSON. No markdown, no preamble.
 
@@ -703,7 +703,7 @@ try {
   const jsonStr = jsonStart !== -1 && jsonEnd !== -1 ? cleaned.slice(jsonStart, jsonEnd + 1) : cleaned;
   parsed = JSON.parse(jsonStr);
 } catch(e) {
-  // Extract readable text — strip JSON artifacts
+  // Extract readable text -- strip JSON artifacts
   parsed = { main_content: rawText.replace(/```json|```/g,"").trim(), key_points: [], personalised_tip: "", clinical_note: "", action_items: [] };
 }
 res.json({ content: parsed, journey, month, week, section, clinicalStage });
