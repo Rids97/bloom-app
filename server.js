@@ -613,7 +613,9 @@ Specify which vaccines are due at ${ppStageLabel}. Explain what each protects ag
     const sectionPrompts = {
       overview: `Generate a personalised clinical overview.\nSTAGE: ${stageDescriptions[clinicalStage]}\nTIME: ${journey === 'ttc' ? 'TTC journey' : `Week ${week}`}\n${checkinContext}\nAddress her specific stage, conditions, and results directly. What is the priority right now?`,
 
-      lifestyle: `Generate specific lifestyle guidance.\nSTAGE: ${stageDescriptions[clinicalStage]}\n${checkinContext}\nIndian-friendly diet for her conditions, exercise, sleep, stress management. Specific, not generic.`,
+      lifestyle: journey === 'ttc'
+        ? `Generate lifestyle and ovulation timing guidance combined.\nSTAGE: ${stageDescriptions[clinicalStage]}\n${checkinContext}\nSECTION 1 — LIFESTYLE: Indian-friendly diet for her conditions, exercise (type and frequency), sleep, stress. Specific to her profile.\nSECTION 2 — TIMING & OPK: Fertile window calculation for ${profile.cycleLength || 28}-day cycle, OPK strip use, intercourse timing, cervical mucus tracking. PCOS irregular cycle advice if relevant. Treatment monitoring tips if on OI/IUI.`
+        : `Generate lifestyle and monitoring guidance combined for Week ${week}.\n${checkinContext}\nSECTION 1 — LIFESTYLE: Diet, exercise, sleep, stress for this trimester. Indian foods.\nSECTION 2 — MONITORING: Scans/tests due this week, warning signs, upcoming appointments.`,
 
       timing: journey === 'ttc'
         ? `Generate fertile window and ovulation timing guidance.\nCycle: ${profile.cycleRegularity || 'unknown'}, ${profile.cycleLength || 28} days.\nCover OPK timing, intercourse timing, PCOS irregular cycle advice, OI monitoring if on treatment.`
