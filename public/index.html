@@ -769,6 +769,15 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
           </div>
         </div>
 
+        <div class="pf-sep">🩺 Blood Pressure Readings</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px;line-height:1.5;">Last 2 BP readings — helps Bloom flag pre-eclampsia risk and tailor advice.</div>
+        <div class="pf-grid2" style="margin-bottom:10px;">
+          <div><label class="pf-label">BP reading 1 (mmHg)</label><input type="text" id="pf-bp1" placeholder="e.g. 118/76" class="pf-input pf-input-sm"/></div>
+          <div><label class="pf-label">Date</label><input type="date" id="pf-bp1-date" class="pf-input pf-input-sm"/></div>
+          <div><label class="pf-label">BP reading 2 (mmHg)</label><input type="text" id="pf-bp2" placeholder="e.g. 124/80" class="pf-input pf-input-sm"/></div>
+          <div><label class="pf-label">Date</label><input type="date" id="pf-bp2-date" class="pf-input pf-input-sm"/></div>
+        </div>
+
         <div class="pf-sep">💉 Immunizations</div>
         <div class="pf-grid2" style="margin-bottom:4px;">
           <div><label class="pf-label">TT-1 date</label><input type="date" id="pf-tt1" class="pf-input pf-input-sm"/></div>
@@ -1184,6 +1193,8 @@ function pfLoad(){
   set('pf-nuchal-result',p.ancNuchalResult);set('pf-anomaly-scan',p.ancAnomalyScan);
   set('pf-placenta',p.ancPlacentaPos);set('pf-growth-scan',p.ancGrowthScan);
   set('pf-tt1',p.immTt1Date);set('pf-tt2',p.immTt2Date||p.immTdDate);set('pf-flu',p.immFluDate);
+  set('pf-bp1',p.bpReading1);set('pf-bp1-date',p.bpReading1Date);
+  set('pf-bp2',p.bpReading2);set('pf-bp2-date',p.bpReading2Date);
   pfUpdateCompletion();
 }
 
@@ -1228,6 +1239,8 @@ async function pfSave(){
     ancDatingScan:g('pf-dating-scan'),ancNuchalNt:gn('pf-nuchal-nt'),ancNuchalResult:g('pf-nuchal-result'),
     ancAnomalyScan:g('pf-anomaly-scan'),ancPlacentaPos:g('pf-placenta'),ancGrowthScan:g('pf-growth-scan'),
     immTt1Date:g('pf-tt1'),immTdDate:g('pf-tt2'),immFluDate:g('pf-flu'),
+    bpReading1:g('pf-bp1'),bpReading1Date:g('pf-bp1-date'),
+    bpReading2:g('pf-bp2'),bpReading2Date:g('pf-bp2-date'),
   };
   try{
     const res=await fetch('/profile',{method:'PUT',headers:{'Content-Type':'application/json',Authorization:TOKEN},body:JSON.stringify(profile)});
