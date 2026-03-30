@@ -137,7 +137,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 </head>
 <body>
 <nav class="topbar">
-  <div class="topbar-logo">🌸 bloom</div>
+  <div style="display:flex;align-items:center;gap:14px;">
+    <div class="topbar-logo">🌸 bloom</div>
+    <button onclick="openRoadmapProfile()" style="font-size:12px;color:var(--muted);background:none;border:1px solid var(--border);border-radius:8px;padding:4px 12px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--terra)';this.style.color='var(--terra)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">✏️ Edit Profile</button>
+  </div>
   <div class="topbar-right">
     <span id="planBadgeRm" class="plan-badge">Bloom Complete</span>
     <a href="/app" class="back-btn">← Dashboard</a>
@@ -179,9 +182,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 
         <div class="sec-tabs" id="ttc-sec-tabs">
           <div class="stab active" onclick="loadTTCSection('overview',this)">Overview</div>
-          <div class="stab" onclick="loadTTCSection('lifestyle',this)">Lifestyle</div>
-          <div class="stab" onclick="loadTTCSection('timing',this)">Timing &amp; OPK</div>
-          <div class="stab" onclick="loadTTCSection('hormones',this)">Hormones</div>
+          <div class="stab" onclick="loadTTCSection('lifestyle',this)">Lifestyle &amp; Timing</div>
+          <div class="stab" onclick="loadTTCSection('hormones',this)">My Results</div>
           <div class="stab" onclick="loadTTCSection('supplements',this)">Supplements</div>
           <div class="stab" onclick="loadTTCSection('pretreatment',this)">Investigations</div>
           <div class="stab" onclick="loadTTCSection('immunization',this)">Immunization</div>
@@ -306,9 +308,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 
           <div class="sec-tabs" id="preg-sec-tabs">
             <div class="stab active" onclick="loadPregSection('overview',this)">Overview</div>
-            <div class="stab" onclick="loadPregSection('lifestyle',this)">Lifestyle</div>
-            <div class="stab" onclick="loadPregSection('timing',this)">Monitoring</div>
-            <div class="stab" onclick="loadPregSection('hormones',this)">Hormones</div>
+            <div class="stab" onclick="loadPregSection('lifestyle',this)">Lifestyle &amp; Monitoring</div>
             <div class="stab" onclick="loadPregSection('supplements',this)">Supplements</div>
             <div class="stab" onclick="loadPregSection('pretreatment',this)">Investigations</div>
             <div class="stab" onclick="loadPregSection('immunization',this)">Immunization</div>
@@ -398,6 +398,38 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
         <div class="tip-card">
           <div class="tip-label">Postpartum Tip</div>
           <div class="tip-text" id="pp-tip">Loading…</div>
+        </div>
+
+        <!-- Baby investigation log -->
+        <div class="inv-card">
+          <div class="inv-card-title" style="color:var(--sage-d);">🍼 Baby Investigation Log</div>
+          <div style="margin-bottom:8px;"><div style="font-size:11px;color:var(--muted);margin-bottom:3px;">What was done?</div>
+            <select id="baby-log-test" class="inv-input-sm">
+              <option value="">Select…</option>
+              <option value="weight_check">Weight check</option>
+              <option value="jaundice_test">Jaundice / bilirubin test</option>
+              <option value="hearing_screen">Hearing screening</option>
+              <option value="vaccination">Vaccination given</option>
+              <option value="paed_review">Paediatrician review</option>
+              <option value="blood_test">Blood test</option>
+              <option value="hip_usg">Hip USG</option>
+            </select>
+          </div>
+          <div style="margin-bottom:8px;"><div style="font-size:11px;color:var(--muted);margin-bottom:3px;">Result</div>
+            <select id="baby-log-result" class="inv-input-sm">
+              <option value="">Select…</option>
+              <option value="normal">Normal ✓</option>
+              <option value="borderline">Borderline — follow-up needed</option>
+              <option value="abnormal">Abnormal — treatment started</option>
+              <option value="pending">Pending</option>
+            </select>
+          </div>
+          <div style="margin-bottom:4px;"><div style="font-size:11px;color:var(--muted);margin-bottom:3px;">Notes</div>
+            <input type="text" id="baby-log-notes" placeholder="e.g. weight 3.2kg, mild jaundice…" class="inv-input-sm"/>
+          </div>
+          <button class="inv-save-btn" style="background:var(--sage-d);" onclick="saveBabyInvestigation()">Save &amp; Update Advice</button>
+          <div id="baby-inv-saved" style="display:none;font-size:12px;color:var(--sage-d);text-align:center;margin-top:6px;">✓ Saved</div>
+          <div id="baby-inv-log" style="margin-top:10px;"></div>
         </div>
 
         <!-- Mother update -->
@@ -988,8 +1020,17 @@ function renderAIContent(content,containerId){
   if(!content) return;
   // Handle raw string — parse JSON if needed
   if(typeof content==='string'){
-    try{content=JSON.parse(content.replace(/```json|```/g,'').trim());}
-    catch(e){document.getElementById(containerId).innerHTML=`<div class="ai-content fade-up"><div class="ai-main" style="line-height:1.9;">${formatContent(content)}</div></div>`;return;}
+    try{
+      const cleaned=content.replace(/```json|```/g,'').trim();
+      const s=cleaned.indexOf('{'), e=cleaned.lastIndexOf('}');
+      content=JSON.parse(s!==-1&&e!==-1?cleaned.slice(s,e+1):cleaned);
+    }catch(e){
+      document.getElementById(containerId).innerHTML=`<div class="ai-content fade-up"><div class="ai-main" style="line-height:1.9;">${formatContent(content)}</div></div>`;return;
+    }
+  }
+  // If content looks like raw JSON object (has main_content as key but wasn't parsed)
+  if(content && typeof content==='object' && !content.main_content && !content.key_points){
+    document.getElementById(containerId).innerHTML=`<div class="ai-content fade-up"><div class="ai-main">Could not load content. <button class="retry-btn" onclick="location.reload()">Retry</button></div></div>`;return;
   }
   function formatContent(text){
     if(!text) return '';
@@ -1026,6 +1067,46 @@ function scrollWeekNav(amount){
   const nav = document.getElementById('week-nav');
   if(nav) nav.scrollBy({left: amount, behavior: 'smooth'});
 }
+
+function openRoadmapProfile(){
+  window.location.href = '/app?openProfile=1';
+}
+
+function saveBabyInvestigation(){
+  const test = document.getElementById('baby-log-test').value;
+  const result = document.getElementById('baby-log-result').value;
+  const notes = document.getElementById('baby-log-notes').value;
+  if(!test) return;
+
+  const key = 'bloom_baby_inv_log_' + currentPPStage;
+  const log = JSON.parse(localStorage.getItem('bloom_baby_inv_log') || '[]');
+  log.unshift({ test, result, notes, stage: currentPPStage, date: new Date().toLocaleDateString('en-IN') });
+  localStorage.setItem('bloom_baby_inv_log', JSON.stringify(log.slice(0, 20)));
+
+  document.getElementById('baby-inv-saved').style.display = 'block';
+  setTimeout(() => document.getElementById('baby-inv-saved').style.display = 'none', 2000);
+
+  renderBabyInvLog();
+
+  // Refresh baby care section with new context
+  contentCache = {};
+  loadPPSection('baby_care', document.querySelector('#pp-sec-tabs .stab.active') || document.querySelector('#pp-sec-tabs .stab'));
+}
+
+function renderBabyInvLog(){
+  const log = JSON.parse(localStorage.getItem('bloom_baby_inv_log') || '[]');
+  const el = document.getElementById('baby-inv-log');
+  if(!el || !log.length) return;
+  const statusColors = { normal: 'var(--sage-d)', borderline: '#9A7340', abnormal: '#9E2020', pending: 'var(--muted)' };
+  el.innerHTML = '<div style="font-size:11px;color:var(--muted);font-weight:500;margin-bottom:6px;">Recent</div>' +
+    log.slice(0, 3).map(l =>
+      `<div style="font-size:12px;padding:5px 0;border-bottom:1px solid var(--border-l);display:flex;justify-content:space-between;">
+        <span>${l.test.replace(/_/g,' ')}</span>
+        <span style="color:${statusColors[l.result]||'var(--muted)'};font-weight:500;">${l.result||'—'}</span>
+      </div>`
+    ).join('');
+}
+
 init();
 </script>
 </body></html>
