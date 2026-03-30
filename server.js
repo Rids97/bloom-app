@@ -361,6 +361,7 @@ app.post("/chat", auth, async (req, res) => {
 
     const profile = user.profile || {};
     const userMessage = req.body.message || '';
+    const wantsDetail = req.body.wantsDetail || false;
     const relevantKnowledge = searchKnowledge(userMessage, profile, 10);
 
     let profileContext = '';
@@ -376,9 +377,22 @@ app.post("/chat", auth, async (req, res) => {
       if (profile.txPhase && profile.txPhase !== 'none') profileContext += ` Currently on: ${profile.txPhase}.`;
     }
 
-    const systemPrompt = `${BLOOM_SYSTEM_PROMPT}${profileContext}
+    const systemPrompt = wantsDetail
+      ? `${BLOOM_SYSTEM_PROMPT}${profileContext}
 
-Use the following clinically relevant knowledge to answer the user's question accurately. Synthesise this into a warm, clear, helpful response - do not copy it verbatim.
+The user wants a detailed explanation. Provide a thorough, well-structured answer with full clinical depth. Use simple language that a non-medical person can understand — explain any medical terms used. Be warm, complete, and educational.
+
+--- RELEVANT CLINICAL KNOWLEDGE ---
+${relevantKnowledge}
+--- END ---`
+      : `${BLOOM_SYSTEM_PROMPT}${profileContext}
+
+RESPONSE RULES:
+1. Answer in simple, clear language that anyone can understand — not medical jargon
+2. Be concise — 2-4 sentences for the main answer
+3. If a medical term is unavoidable, explain it in brackets
+4. End your response with a single follow-up offer on a new line, like: "💡 Want to understand [specific aspect] in more detail?"
+5. Do NOT write long paragraphs or lists unless the question specifically needs it
 
 --- RELEVANT CLINICAL KNOWLEDGE ---
 ${relevantKnowledge}
@@ -390,13 +404,29 @@ ${relevantKnowledge}
         { role: "system", content: systemPrompt },
         { role: "user",   content: userMessage },
       ],
-      max_tokens: 800,
+      max_tokens: wantsDetail ? 1200 : 350,
     });
 
+    const rawReply = response.choices[0].message.content;
+
+    // Split main answer from followup suggestion
+    const lines = rawReply.trim().split('\n');
+    let mainReply = rawReply.trim();
+    let followupSuggestion = null;
+
+    // Last line starting with 💡 is the followup
+    if (lines.length > 1 && lines[lines.length - 1].startsWith('💡')) {
+      followupSuggestion = lines[lines.length - 1].replace('💡', '').trim();
+      mainReply = lines.slice(0, -1).join('\n').trim();
+    }
+
     res.json({
-      reply:        response.choices[0].message.content,
+      reply: mainReply,
+      followup: wantsDetail ? null : followupSuggestion,
+      isDetailed: wantsDetail,
+      originalMessage: userMessage,
       messageCount: user.messageCount,
-      plan:         user.plan,
+      plan: user.plan,
     });
 
   } catch (err) {
@@ -404,7 +434,6 @@ ${relevantKnowledge}
     res.status(500).json({ error: "Something went wrong: " + err.message });
   }
 });
-
 // -- FERTILITY PLAN --
 app.get("/fertility-plan", auth, async (req, res) => {
   try {
@@ -758,6 +787,66 @@ app.post("/roadmap-content", auth, async (req, res) => {
       pre_ivf: 'Preparing for IVF — pre-treatment optimisation phase',
       ivf_active: 'Currently in active IVF cycle (stimulation/TWW/FET)',
     };
+
+    // Handle postpartum journey
+    if (journey === 'postpartum') {
+      const ppStage = req.body.ppStage || 'day1_3';
+      const ppStageLabels = {
+        day1_3: 'Day 1-3 after birth (hospital)',
+        week1_2: 'Week 1-2 postpartum (coming home)',
+        week3_6: 'Week 3-6 postpartum (finding rhythm)',
+        '6week_check': '6-week postnatal check',
+        month3: '3 months postpartum',
+        month6: '6 months postpartum',
+      };
+      const ppSectionPrompts = {
+        overview: `Generate a comprehensive postpartum overview for ${ppStageLabels[ppStage]}. Cover: physical recovery at this stage, what is normal, what needs medical attention, emotional wellbeing, and key priorities. Be warm and specific.`,
+        breastfeeding: `Generate detailed breastfeeding guidance for ${ppStageLabels[ppStage]}. Cover: feeding frequency, latch, milk supply, common problems (engorgement, mastitis, sore nipples), when to seek help, and formula supplementation if needed. Include practical Indian-context advice.`,
+        lifestyle: `Generate postpartum recovery guidance for ${ppStageLabels[ppStage]}. Cover: physical recovery (perineal care, C-section care if relevant), return to exercise, sleep, nutrition for recovery and breastfeeding, emotional health, and postpartum depression warning signs.`,
+        baby_care: `Generate baby care guidance for ${ppStageLabels[ppStage]}. Cover: feeding cues, sleep patterns, nappy changes, bathing, umbilical cord care (early stages), vaccination schedule, developmental milestones to expect, and when to see a paediatrician. Keep advice practical. Always recommend paediatrician for medical concerns.`,
+        supplements: `Generate postpartum nutrition and supplement guidance for ${ppStageLabels[ppStage]}. Cover: nutrition for recovery and breastfeeding, iron replacement, calcium, vitamin D, omega-3, foods to eat and avoid while breastfeeding (Indian diet context), hydration. Include specific Indian foods.`,
+      };
+
+      const ppPrompt = ppSectionPrompts[section] || ppSectionPrompts.overview;
+      const ppSystemMsg = `You are Bloom's postpartum and newborn care specialist, created by a licensed Indian gynaecologist. You provide warm, evidence-based guidance on postpartum recovery, breastfeeding, and basic newborn care.
+
+Patient profile:
+${clinicalContext || 'New mother'}
+
+Generate content that is:
+1. Evidence-based and clinically accurate
+2. Warm and supportive — postpartum is emotionally vulnerable
+3. Practical — Indian context, Indian foods, realistic advice
+4. Always recommend paediatrician for baby health concerns
+
+Format as JSON:
+{
+  "main_content": "2-3 paragraphs",
+  "key_points": ["point 1", "point 2", "point 3", "point 4"],
+  "personalised_tip": "specific tip",
+  "clinical_note": "important warning or note",
+  "action_items": ["action 1", "action 2", "action 3"]
+}
+
+Return ONLY valid JSON.
+
+--- CLINICAL KNOWLEDGE ---
+${relevantKnowledge}
+--- END ---`;
+
+      const ppResponse = await groq.chat.completions.create({
+        model: "llama-3.3-70b-versatile",
+        messages: [{ role: "system", content: ppSystemMsg }, { role: "user", content: ppPrompt }],
+        max_tokens: 1200,
+        temperature: 0.3,
+      });
+
+      const ppRaw = ppResponse.choices[0].message.content.trim();
+      let ppParsed;
+      try { ppParsed = JSON.parse(ppRaw.replace(/```json|```/g, "").trim()); }
+      catch(e) { ppParsed = { main_content: ppRaw, key_points: [], personalised_tip: "", clinical_note: "", action_items: [] }; }
+      return res.json({ content: ppParsed, journey, section, ppStage });
+    }
 
     const timeContext = journey === 'ttc' ? `Month ${month} of TTC journey` : `Week ${week} of pregnancy`;
 
