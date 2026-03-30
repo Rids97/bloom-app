@@ -1,1261 +1,498 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Bloom — Your Fertility Companion</title>
+  <title>Bloom — Your Women's Health Companion</title>
+  <script>if(localStorage.getItem('bloom_token'))window.location.href='/app';</script>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --cream: #fdf8f2;
-      --blush: #f5e6d8;
-      --rose:  #e8c4b0;
-      --dusty: #c9957a;
-      --terracotta: #b87355;
-      --deep:  #3d2318;
-      --sage:  #8a9e7e;
-      --sage-light: #c4d4bb;
-      --text:  #3d2318;
-      --muted: #9b7b6a;
-      --white: #ffffff;
+      --cream: #fdf8f2; --blush: #f5e6d8; --rose: #e8c4b0; --dusty: #c9957a;
+      --terracotta: #b87355; --deep: #3d2318; --sage: #8a9e7e; --sage-light: #c4d4bb;
+      --text: #3d2318; --muted: #9b7b6a; --white: #ffffff;
     }
-
     html { scroll-behavior: smooth; }
-
-    body {
-      background: var(--cream);
-      color: var(--text);
-      font-family: 'Jost', sans-serif;
-      font-weight: 300;
-      overflow-x: hidden;
-    }
-
-    /* ── NOISE TEXTURE OVERLAY ── */
-    body::after {
-      content: '';
-      position: fixed; inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 1000;
-      opacity: 0.5;
-    }
-
-    /* ── NAV ── */
-    nav {
-      position: fixed; top: 0; left: 0; right: 0;
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 22px 60px;
-      background: rgba(253, 248, 242, 0.88);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid rgba(200,160,130,0.15);
-    }
-
-    .nav-logo {
-      font-family: 'Playfair Display', serif;
-      font-size: 26px;
-      font-style: italic;
-      color: var(--deep);
-      letter-spacing: -0.01em;
-    }
-
-    .nav-logo span {
-      display: inline-block;
-      width: 7px; height: 7px;
-      background: var(--dusty);
-      border-radius: 50%;
-      margin-left: 3px;
-      vertical-align: middle;
-      margin-bottom: 3px;
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 40px;
-      list-style: none;
-    }
-
-    .nav-links a {
-      font-size: 13px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--muted);
-      text-decoration: none;
-      transition: color 0.2s;
-    }
-
+    body { background: var(--cream); color: var(--text); font-family: 'Jost', sans-serif; font-weight: 300; overflow-x: hidden; }
+    body::after { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events: none; z-index: 1000; opacity: 0.5; }
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 22px 60px; background: rgba(253,248,242,0.88); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(200,160,130,0.15); }
+    .nav-logo { font-family: 'Playfair Display', serif; font-size: 26px; font-style: italic; color: var(--deep); }
+    .nav-logo span { display: inline-block; width: 7px; height: 7px; background: var(--dusty); border-radius: 50%; margin-left: 3px; vertical-align: middle; margin-bottom: 3px; }
+    .nav-links { display: flex; gap: 40px; list-style: none; }
+    .nav-links a { font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); text-decoration: none; transition: color 0.2s; }
     .nav-links a:hover { color: var(--deep); }
-
-    .nav-cta {
-      font-family: 'Jost', sans-serif;
-      font-size: 12px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      padding: 11px 26px;
-      background: var(--deep);
-      color: var(--cream);
-      text-decoration: none;
-      border-radius: 40px;
-      transition: background 0.2s, transform 0.15s;
-    }
-
+    .nav-cta { font-family: 'Jost', sans-serif; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; padding: 11px 26px; background: var(--deep); color: var(--cream); text-decoration: none; border-radius: 40px; transition: background 0.2s, transform 0.15s; }
     .nav-cta:hover { background: var(--terracotta); transform: translateY(-1px); }
-
-    /* ── HERO ── */
-    .hero {
-      min-height: 100vh;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      align-items: center;
-      padding: 120px 60px 80px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .hero::before {
-      content: '';
-      position: absolute;
-      right: -120px; top: 50%;
-      transform: translateY(-50%);
-      width: 700px; height: 700px;
-      background: radial-gradient(circle, var(--blush) 0%, rgba(245,230,216,0.4) 50%, transparent 70%);
-      border-radius: 50%;
-      pointer-events: none;
-    }
-
-    .hero-text {
-      position: relative;
-      z-index: 2;
-      animation: heroFadeUp 1s cubic-bezier(0.16,1,0.3,1) both;
-    }
-
-    @keyframes heroFadeUp {
-      from { opacity: 0; transform: translateY(32px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    .hero-eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 11px;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--dusty);
-      margin-bottom: 28px;
-    }
-
-    .hero-eyebrow::before {
-      content: '';
-      display: block;
-      width: 32px; height: 1px;
-      background: var(--dusty);
-    }
-
-    h1 {
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(52px, 5.5vw, 80px);
-      font-weight: 400;
-      line-height: 1.08;
-      letter-spacing: -0.02em;
-      color: var(--deep);
-      margin-bottom: 28px;
-    }
-
-    h1 em {
-      font-style: italic;
-      color: var(--terracotta);
-    }
-
-    .hero-desc {
-      font-size: 17px;
-      line-height: 1.75;
-      color: var(--muted);
-      max-width: 420px;
-      margin-bottom: 48px;
-      font-weight: 300;
-    }
-
-    .hero-actions {
-      display: flex;
-      gap: 16px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .btn-primary {
-      font-family: 'Jost', sans-serif;
-      font-size: 13px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      padding: 16px 36px;
-      background: var(--deep);
-      color: var(--cream);
-      text-decoration: none;
-      border-radius: 50px;
-      border: none;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
-      box-shadow: 0 4px 24px rgba(61,35,24,0.15);
-    }
-
-    .btn-primary:hover {
-      background: var(--terracotta);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 32px rgba(184,115,85,0.25);
-    }
-
-    .btn-ghost {
-      font-family: 'Jost', sans-serif;
-      font-size: 13px;
-      letter-spacing: 0.1em;
-      color: var(--muted);
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: color 0.2s;
-    }
-
+    .hero { min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr; align-items: center; padding: 120px 60px 80px; position: relative; overflow: hidden; }
+    .hero::before { content: ''; position: absolute; right: -120px; top: 50%; transform: translateY(-50%); width: 700px; height: 700px; background: radial-gradient(circle, var(--blush) 0%, rgba(245,230,216,0.4) 50%, transparent 70%); border-radius: 50%; pointer-events: none; }
+    .hero-text { position: relative; z-index: 2; animation: heroFadeUp 1s cubic-bezier(0.16,1,0.3,1) both; }
+    @keyframes heroFadeUp { from { opacity: 0; transform: translateY(32px); } to { opacity: 1; transform: translateY(0); } }
+    .hero-eyebrow { display: inline-flex; align-items: center; gap: 10px; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--dusty); margin-bottom: 28px; }
+    .hero-eyebrow::before { content: ''; display: block; width: 32px; height: 1px; background: var(--dusty); }
+    h1 { font-family: 'Playfair Display', serif; font-size: clamp(46px, 5vw, 74px); font-weight: 400; line-height: 1.08; letter-spacing: -0.02em; color: var(--deep); margin-bottom: 22px; }
+    h1 em { font-style: italic; color: var(--terracotta); }
+    .hero-desc { font-size: 16px; line-height: 1.8; color: var(--muted); max-width: 440px; margin-bottom: 32px; font-weight: 300; }
+    .coverage-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 40px; }
+    .pill { font-size: 12px; padding: 6px 14px; border-radius: 30px; border: 1px solid rgba(200,149,122,0.35); color: var(--muted); background: transparent; letter-spacing: 0.03em; }
+    .hero-actions { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+    .btn-primary { font-family: 'Jost', sans-serif; font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; padding: 16px 36px; background: var(--deep); color: var(--cream); text-decoration: none; border-radius: 50px; border: none; cursor: pointer; transition: background 0.2s, transform 0.15s, box-shadow 0.2s; box-shadow: 0 4px 24px rgba(61,35,24,0.15); }
+    .btn-primary:hover { background: var(--terracotta); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(184,115,85,0.25); }
+    .btn-ghost { font-family: 'Jost', sans-serif; font-size: 13px; letter-spacing: 0.1em; color: var(--muted); text-decoration: none; display: flex; align-items: center; gap: 8px; transition: color 0.2s; }
     .btn-ghost:hover { color: var(--deep); }
     .btn-ghost::after { content: '→'; transition: transform 0.2s; }
     .btn-ghost:hover::after { transform: translateX(4px); }
-
-    .hero-visual {
-      position: relative;
-      z-index: 2;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      animation: heroFadeUp 1s 0.2s cubic-bezier(0.16,1,0.3,1) both;
-    }
-
-    .orb-container {
-      position: relative;
-      width: 420px; height: 420px;
-    }
-
-    .orb-ring {
-      position: absolute; inset: 0;
-      border-radius: 50%;
-      border: 1px solid rgba(200,149,122,0.25);
-      animation: slowSpin 20s linear infinite;
-    }
-
-    .orb-ring:nth-child(2) {
-      inset: 30px;
-      border-color: rgba(138,158,126,0.2);
-      animation-direction: reverse;
-      animation-duration: 28s;
-    }
-
-    .orb-ring:nth-child(3) {
-      inset: 60px;
-      border-color: rgba(200,149,122,0.15);
-      animation-duration: 36s;
-    }
-
-    .orb-ring::before {
-      content: '';
-      position: absolute;
-      top: -4px; left: 50%;
-      width: 8px; height: 8px;
-      background: var(--dusty);
-      border-radius: 50%;
-      transform: translateX(-50%);
-    }
-
+    .hero-visual { position: relative; z-index: 2; display: flex; justify-content: center; align-items: center; animation: heroFadeUp 1s 0.2s cubic-bezier(0.16,1,0.3,1) both; }
+    .orb-container { position: relative; width: 420px; height: 420px; }
+    .orb-ring { position: absolute; inset: 0; border-radius: 50%; border: 1px solid rgba(200,149,122,0.25); animation: slowSpin 20s linear infinite; }
+    .orb-ring:nth-child(2) { inset: 30px; border-color: rgba(138,158,126,0.2); animation-direction: reverse; animation-duration: 28s; }
+    .orb-ring:nth-child(3) { inset: 60px; border-color: rgba(200,149,122,0.15); animation-duration: 36s; }
+    .orb-ring::before { content: ''; position: absolute; top: -4px; left: 50%; width: 8px; height: 8px; background: var(--dusty); border-radius: 50%; transform: translateX(-50%); }
     .orb-ring:nth-child(2)::before { background: var(--sage); top: auto; bottom: -4px; }
     .orb-ring:nth-child(3)::before { display: none; }
-
-    @keyframes slowSpin {
-      from { transform: rotate(0deg); }
-      to   { transform: rotate(360deg); }
-    }
-
-    .orb-center {
-      position: absolute;
-      inset: 90px;
-      background: radial-gradient(circle at 40% 35%, var(--blush), var(--rose) 60%, var(--dusty));
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 20px 60px rgba(184,115,85,0.3), inset 0 -10px 30px rgba(61,35,24,0.1);
-      animation: breathe 6s ease-in-out infinite;
-    }
-
-    @keyframes breathe {
-      0%, 100% { transform: scale(1); }
-      50%       { transform: scale(1.025); }
-    }
-
-    .orb-symbol {
-      font-family: 'Playfair Display', serif;
-      font-size: 52px;
-      font-style: italic;
-      color: rgba(253,248,242,0.9);
-      user-select: none;
-      text-shadow: 0 2px 12px rgba(61,35,24,0.2);
-    }
-
-    .stat-card {
-      position: absolute;
-      background: var(--white);
-      border-radius: 16px;
-      padding: 14px 20px;
-      box-shadow: 0 8px 32px rgba(61,35,24,0.1);
-      animation: float 5s ease-in-out infinite;
-    }
-
+    @keyframes slowSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .orb-center { position: absolute; inset: 90px; background: radial-gradient(circle at 40% 35%, var(--blush), var(--rose) 60%, var(--dusty)); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 20px 60px rgba(184,115,85,0.3), inset 0 -10px 30px rgba(61,35,24,0.1); animation: breathe 6s ease-in-out infinite; }
+    @keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.025); } }
+    .orb-symbol { font-family: 'Playfair Display', serif; font-size: 52px; font-style: italic; color: rgba(253,248,242,0.9); user-select: none; }
+    .stat-card { position: absolute; background: var(--white); border-radius: 16px; padding: 14px 20px; box-shadow: 0 8px 32px rgba(61,35,24,0.1); animation: float 5s ease-in-out infinite; }
     .stat-card:nth-child(5) { top: 30px; right: -20px; animation-delay: -1s; }
     .stat-card:nth-child(6) { bottom: 60px; left: -30px; animation-delay: -2.5s; }
+    @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
+    .stat-num { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 500; color: var(--deep); line-height: 1; }
+    .stat-label { font-size: 11px; color: var(--muted); letter-spacing: 0.06em; margin-top: 4px; }
+    .stat-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--sage); margin-bottom: 10px; }
+    .trust-bar { background: var(--blush); border-top: 1px solid rgba(200,149,122,0.2); border-bottom: 1px solid rgba(200,149,122,0.2); padding: 22px 60px; display: flex; align-items: center; justify-content: center; gap: 60px; flex-wrap: wrap; }
+    .trust-item { display: flex; align-items: center; gap: 10px; font-size: 12px; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; }
+    .trust-icon { width: 20px; height: 20px; opacity: 0.6; }
+
+```
+.covers { padding: 100px 60px; background: var(--white); }
+.covers-inner { max-width: 1200px; margin: 0 auto; }
+.covers-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: 60px; }
+.cover-card { border-radius: 18px; padding: 30px 26px; border: 1px solid rgba(200,149,122,0.14); background: var(--cream); transition: transform 0.3s, box-shadow 0.3s; }
+.cover-card:hover { transform: translateY(-5px); box-shadow: 0 16px 48px rgba(61,35,24,0.08); }
+.cover-card.dark { background: var(--deep); }
+.cover-emoji { font-size: 26px; margin-bottom: 14px; }
+.cover-title { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 400; color: var(--deep); margin-bottom: 9px; }
+.cover-card.dark .cover-title { color: var(--cream); }
+.cover-desc { font-size: 13px; line-height: 1.75; color: var(--muted); }
+.cover-card.dark .cover-desc { color: rgba(253,248,242,0.6); }
+.features { padding: 100px 60px; max-width: 1200px; margin: 0 auto; }
+.section-header { text-align: center; margin-bottom: 70px; }
+.section-tag { display: inline-block; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--dusty); margin-bottom: 16px; }
+h2 { font-family: 'Playfair Display', serif; font-size: clamp(34px, 4vw, 52px); font-weight: 400; line-height: 1.15; letter-spacing: -0.02em; color: var(--deep); margin-bottom: 16px; }
+h2 em { font-style: italic; color: var(--terracotta); }
+.section-sub { font-size: 15px; color: var(--muted); max-width: 460px; margin: 0 auto; line-height: 1.7; }
+.features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.feature-card { background: var(--white); border-radius: 20px; padding: 34px 30px; border: 1px solid rgba(200,149,122,0.12); transition: transform 0.3s, box-shadow 0.3s; position: relative; overflow: hidden; }
+.feature-card::before { content: ''; position: absolute; bottom: -30px; right: -30px; width: 100px; height: 100px; border-radius: 50%; background: var(--blush); opacity: 0.5; transition: transform 0.4s; }
+.feature-card:hover { transform: translateY(-5px); box-shadow: 0 16px 48px rgba(61,35,24,0.08); }
+.feature-card:hover::before { transform: scale(1.5); }
+.feature-card.highlight { background: var(--deep); }
+.feature-card.highlight::before { background: rgba(255,255,255,0.04); }
+.feature-icon { width: 44px; height: 44px; border-radius: 12px; background: var(--blush); display: flex; align-items: center; justify-content: center; margin-bottom: 20px; font-size: 20px; }
+.feature-card.highlight .feature-icon { background: rgba(255,255,255,0.1); }
+h3 { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 400; margin-bottom: 10px; color: var(--deep); line-height: 1.2; }
+.feature-card.highlight h3 { color: var(--cream); }
+.feature-text { font-size: 13.5px; line-height: 1.75; color: var(--muted); }
+.feature-card.highlight .feature-text { color: rgba(253,248,242,0.6); }
+.how { padding: 100px 60px; background: var(--blush); }
+.how-inner { max-width: 1100px; margin: 0 auto; }
+.steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; margin-top: 60px; position: relative; }
+.steps::before { content: ''; position: absolute; top: 28px; left: 10%; right: 10%; height: 1px; background: linear-gradient(90deg, transparent, var(--rose), var(--rose), transparent); }
+.step { text-align: center; }
+.step-num { width: 56px; height: 56px; background: var(--cream); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-family: 'Playfair Display', serif; font-size: 20px; font-style: italic; color: var(--terracotta); box-shadow: 0 4px 16px rgba(184,115,85,0.15); position: relative; z-index: 1; }
+.step h4 { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 400; color: var(--deep); margin-bottom: 10px; }
+.step p { font-size: 13px; color: var(--muted); line-height: 1.7; }
+.testimonials { padding: 100px 60px; max-width: 1200px; margin: 0 auto; }
+.testimonials-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 56px; }
+.tcard { background: var(--white); border-radius: 20px; padding: 32px 28px; border: 1px solid rgba(200,149,122,0.12); position: relative; }
+.tcard::before { content: '"'; position: absolute; top: 20px; right: 26px; font-family: 'Playfair Display', serif; font-size: 80px; line-height: 1; color: var(--rose); opacity: 0.35; }
+.tcard-text { font-size: 15px; line-height: 1.8; color: var(--text); margin-bottom: 20px; font-style: italic; font-family: 'Playfair Display', serif; }
+.tcard-author { display: flex; align-items: center; gap: 12px; }
+.tcard-avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, var(--rose), var(--blush)); display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-size: 14px; color: var(--deep); }
+.tcard-name { font-size: 13px; font-weight: 500; color: var(--deep); }
+.tcard-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.stars { color: var(--dusty); font-size: 13px; margin-bottom: 14px; letter-spacing: 2px; }
+.pricing { padding: 100px 60px; max-width: 1200px; margin: 0 auto; }
+.pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 56px; align-items: start; }
+.plan { border-radius: 24px; padding: 38px 32px; border: 1px solid rgba(200,149,122,0.18); background: var(--white); transition: transform 0.3s, box-shadow 0.3s; }
+.plan:hover { transform: translateY(-5px); box-shadow: 0 20px 50px rgba(61,35,24,0.08); }
+.plan.featured { background: var(--deep); border-color: transparent; transform: scale(1.04); box-shadow: 0 24px 60px rgba(61,35,24,0.22); }
+.plan.featured:hover { transform: scale(1.04) translateY(-5px); }
+.plan-badge { display: inline-block; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; padding: 5px 14px; border-radius: 30px; background: var(--dusty); color: var(--white); margin-bottom: 20px; }
+.plan.featured .plan-badge { background: var(--rose); color: var(--deep); }
+.plan-name { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 400; color: var(--deep); margin-bottom: 6px; }
+.plan.featured .plan-name { color: var(--cream); }
+.plan-tagline { font-size: 13px; color: var(--muted); margin-bottom: 22px; line-height: 1.5; }
+.plan.featured .plan-tagline { color: rgba(253,248,242,0.5); }
+.plan-price { display: flex; align-items: flex-end; gap: 4px; margin-bottom: 6px; }
+.price-currency { font-size: 20px; color: var(--deep); margin-bottom: 6px; }
+.plan.featured .price-currency { color: var(--rose); }
+.price-amount { font-family: 'Playfair Display', serif; font-size: 52px; font-weight: 500; line-height: 1; color: var(--deep); }
+.plan.featured .price-amount { color: var(--cream); }
+.price-period { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+.plan.featured .price-period { color: rgba(253,248,242,0.4); }
+.plan-divider { height: 1px; background: rgba(200,149,122,0.15); margin: 22px 0; }
+.plan.featured .plan-divider { background: rgba(253,248,242,0.1); }
+.plan-features { list-style: none; margin-bottom: 28px; display: flex; flex-direction: column; gap: 11px; }
+.plan-features li { display: flex; align-items: flex-start; gap: 10px; font-size: 13.5px; color: var(--text); line-height: 1.4; }
+.plan.featured .plan-features li { color: rgba(253,248,242,0.8); }
+.check { width: 18px; height: 18px; border-radius: 50%; background: var(--sage-light); color: var(--sage); display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; margin-top: 1px; }
+.plan.featured .check { background: rgba(196,212,187,0.2); color: var(--sage-light); }
+.cross { width: 18px; height: 18px; border-radius: 50%; background: rgba(200,149,122,0.1); color: var(--rose); display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; margin-top: 1px; }
+.plan-features li.dim { opacity: 0.4; }
+.limit-badge { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 20px; background: rgba(200,149,122,0.15); color: var(--dusty); margin-left: 4px; vertical-align: middle; }
+.plan.featured .limit-badge { background: rgba(232,196,176,0.2); color: var(--rose); }
+.btn-plan { width: 100%; font-family: 'Jost', sans-serif; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; padding: 14px; border-radius: 50px; border: 1.5px solid var(--deep); background: transparent; color: var(--deep); cursor: pointer; text-decoration: none; display: block; text-align: center; transition: background 0.2s, color 0.2s, transform 0.15s; }
+.btn-plan:hover { background: var(--deep); color: var(--cream); transform: translateY(-1px); }
+.btn-plan-filled { width: 100%; font-family: 'Jost', sans-serif; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; padding: 14px; border-radius: 50px; border: none; background: var(--rose); color: var(--deep); cursor: pointer; text-decoration: none; display: block; text-align: center; transition: background 0.2s, transform 0.15s; font-weight: 500; }
+.btn-plan-filled:hover { background: #f0d4c0; transform: translateY(-1px); }
+.plan-note { font-size: 11px; text-align: center; color: var(--muted); margin-top: 12px; }
+.plan.featured .plan-note { color: rgba(253,248,242,0.3); }
+.cta-section { margin: 0 60px 100px; background: var(--deep); border-radius: 28px; padding: 70px 60px; text-align: center; position: relative; overflow: hidden; }
+.cta-section::before { content: ''; position: absolute; top: -80px; left: 50%; transform: translateX(-50%); width: 500px; height: 500px; background: radial-gradient(circle, rgba(232,196,176,0.1) 0%, transparent 65%); border-radius: 50%; }
+.cta-section h2 { color: var(--cream); margin-bottom: 16px; }
+.cta-section h2 em { color: var(--rose); }
+.cta-section p { color: rgba(253,248,242,0.55); font-size: 15px; max-width: 440px; margin: 0 auto 38px; line-height: 1.7; }
+.btn-light { font-family: 'Jost', sans-serif; font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; padding: 17px 44px; background: var(--cream); color: var(--deep); border: none; border-radius: 50px; text-decoration: none; cursor: pointer; transition: background 0.2s, transform 0.15s; display: inline-block; position: relative; z-index: 1; }
+.btn-light:hover { background: var(--blush); transform: translateY(-2px); }
+.cta-note { font-size: 12px; color: rgba(253,248,242,0.3); margin-top: 16px; position: relative; z-index: 1; }
+footer { border-top: 1px solid rgba(200,149,122,0.15); padding: 36px 60px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
+.footer-logo { font-family: 'Playfair Display', serif; font-size: 22px; font-style: italic; color: var(--deep); }
+.footer-links { display: flex; gap: 32px; list-style: none; }
+.footer-links a { font-size: 12px; letter-spacing: 0.08em; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+.footer-links a:hover { color: var(--deep); }
+.footer-copy { font-size: 11px; color: var(--muted); opacity: 0.6; }
+.reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1); }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+@media (max-width: 960px) {
+  nav { padding: 18px 28px; }
+  .nav-links { display: none; }
+  .hero { grid-template-columns: 1fr; padding: 100px 28px 60px; text-align: center; }
+  .hero::before { display: none; }
+  .hero-desc { margin: 0 auto 28px; }
+  .coverage-pills { justify-content: center; }
+  .hero-actions { justify-content: center; }
+  .hero-visual { margin-top: 48px; }
+  .orb-container { width: 300px; height: 300px; }
+  .stat-card:nth-child(5) { right: 0; top: 10px; }
+  .stat-card:nth-child(6) { left: 0; bottom: 20px; }
+  .covers { padding: 70px 28px; }
+  .covers-grid { grid-template-columns: 1fr 1fr; }
+  .features { padding: 70px 28px; }
+  .features-grid { grid-template-columns: 1fr; }
+  .steps { grid-template-columns: 1fr 1fr; }
+  .steps::before { display: none; }
+  .testimonials { padding: 70px 28px; }
+  .testimonials-grid { grid-template-columns: 1fr; }
+  .how { padding: 70px 28px; }
+  .pricing { padding: 70px 28px; }
+  .pricing-grid { grid-template-columns: 1fr; }
+  .plan.featured { transform: none; }
+  .cta-section { margin: 0 20px 80px; padding: 60px 28px; }
+  .trust-bar { gap: 28px; padding: 20px 28px; }
+  .credibility-bar { gap: 20px; padding: 22px 28px; flex-direction: column; align-items: flex-start; }
+  .cred-divider { display: none; }
+  footer { padding: 28px; flex-direction: column; align-items: flex-start; }
+}
+```
 
-    @keyframes float {
-      0%, 100% { transform: translateY(0px); }
-      50%       { transform: translateY(-10px); }
-    }
-
-    .stat-num {
-      font-family: 'Playfair Display', serif;
-      font-size: 26px;
-      font-weight: 500;
-      color: var(--deep);
-      line-height: 1;
-    }
-
-    .stat-label {
-      font-size: 11px;
-      color: var(--muted);
-      letter-spacing: 0.06em;
-      margin-top: 4px;
-    }
-
-    .stat-dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: var(--sage);
-      margin-bottom: 10px;
-    }
-
-    /* ── TRUST BAR ── */
-    .trust-bar {
-      background: var(--blush);
-      border-top: 1px solid rgba(200,149,122,0.2);
-      border-bottom: 1px solid rgba(200,149,122,0.2);
-      padding: 22px 60px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 60px;
-      flex-wrap: wrap;
-    }
-
-    .trust-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 12px;
-      letter-spacing: 0.08em;
-      color: var(--muted);
-      text-transform: uppercase;
-    }
-
-    .trust-icon {
-      width: 20px; height: 20px;
-      opacity: 0.6;
-    }
-
-    /* ── CLINICAL CREDIBILITY BANNER ── */
-    .credibility-bar {
-      background: var(--deep);
-      padding: 28px 60px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 48px;
-      flex-wrap: wrap;
-    }
-
-    .cred-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      color: rgba(253,248,242,0.75);
-      font-size: 13px;
-      letter-spacing: 0.06em;
-    }
-
-    .cred-icon {
-      font-size: 18px;
-      opacity: 0.9;
-    }
-
-    .cred-item strong {
-      color: var(--rose);
-      font-weight: 500;
-    }
-
-    .cred-divider {
-      width: 1px;
-      height: 28px;
-      background: rgba(253,248,242,0.15);
-    }
-
-    /* ── FEATURES ── */
-    .features {
-      padding: 120px 60px;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .section-header {
-      text-align: center;
-      margin-bottom: 80px;
-    }
-
-    .section-tag {
-      display: inline-block;
-      font-size: 11px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--dusty);
-      margin-bottom: 18px;
-    }
-
-    h2 {
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(36px, 4vw, 54px);
-      font-weight: 400;
-      line-height: 1.15;
-      letter-spacing: -0.02em;
-      color: var(--deep);
-      margin-bottom: 18px;
-    }
-
-    h2 em { font-style: italic; color: var(--terracotta); }
-
-    .section-sub {
-      font-size: 16px;
-      color: var(--muted);
-      max-width: 480px;
-      margin: 0 auto;
-      line-height: 1.7;
-    }
-
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
-    }
-
-    .feature-card {
-      background: var(--white);
-      border-radius: 20px;
-      padding: 40px 36px;
-      border: 1px solid rgba(200,149,122,0.12);
-      transition: transform 0.3s, box-shadow 0.3s;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .feature-card::before {
-      content: '';
-      position: absolute;
-      bottom: -30px; right: -30px;
-      width: 100px; height: 100px;
-      border-radius: 50%;
-      background: var(--blush);
-      opacity: 0.5;
-      transition: transform 0.4s;
-    }
-
-    .feature-card:hover { transform: translateY(-6px); box-shadow: 0 20px 60px rgba(61,35,24,0.1); }
-    .feature-card:hover::before { transform: scale(1.5); }
-
-    .feature-card.highlight {
-      background: var(--deep);
-      color: var(--cream);
-    }
-
-    .feature-card.highlight::before { background: rgba(255,255,255,0.05); }
-
-    .feature-icon {
-      width: 48px; height: 48px;
-      border-radius: 14px;
-      background: var(--blush);
-      display: flex; align-items: center; justify-content: center;
-      margin-bottom: 24px;
-      font-size: 22px;
-    }
-
-    .feature-card.highlight .feature-icon { background: rgba(255,255,255,0.1); }
-
-    h3 {
-      font-family: 'Playfair Display', serif;
-      font-size: 22px;
-      font-weight: 400;
-      margin-bottom: 12px;
-      color: var(--deep);
-      line-height: 1.2;
-    }
-
-    .feature-card.highlight h3 { color: var(--cream); }
-
-    .feature-text {
-      font-size: 14px;
-      line-height: 1.75;
-      color: var(--muted);
-    }
-
-    .feature-card.highlight .feature-text { color: rgba(253,248,242,0.65); }
-
-    /* ── HOW IT WORKS ── */
-    .how {
-      padding: 100px 60px;
-      background: var(--blush);
-    }
-
-    .how-inner {
-      max-width: 1100px;
-      margin: 0 auto;
-    }
-
-    .steps {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 32px;
-      margin-top: 64px;
-      position: relative;
-    }
-
-    .steps::before {
-      content: '';
-      position: absolute;
-      top: 28px; left: 10%; right: 10%;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--rose), var(--rose), transparent);
-    }
-
-    .step { text-align: center; position: relative; }
-
-    .step-num {
-      width: 56px; height: 56px;
-      background: var(--cream);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 20px;
-      font-family: 'Playfair Display', serif;
-      font-size: 20px;
-      font-style: italic;
-      color: var(--terracotta);
-      box-shadow: 0 4px 16px rgba(184,115,85,0.15);
-      position: relative;
-      z-index: 1;
-    }
-
-    .step h4 {
-      font-family: 'Playfair Display', serif;
-      font-size: 18px;
-      font-weight: 400;
-      color: var(--deep);
-      margin-bottom: 10px;
-    }
-
-    .step p { font-size: 13px; color: var(--muted); line-height: 1.7; }
-
-    /* ── TESTIMONIALS ── */
-    .testimonials {
-      padding: 120px 60px;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .testimonials-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
-      margin-top: 64px;
-    }
-
-    .tcard {
-      background: var(--white);
-      border-radius: 20px;
-      padding: 36px 32px;
-      border: 1px solid rgba(200,149,122,0.12);
-      position: relative;
-    }
-
-    .tcard::before {
-      content: '"';
-      position: absolute;
-      top: 20px; right: 28px;
-      font-family: 'Playfair Display', serif;
-      font-size: 80px;
-      line-height: 1;
-      color: var(--rose);
-      opacity: 0.4;
-    }
-
-    .tcard-text {
-      font-size: 15px;
-      line-height: 1.8;
-      color: var(--text);
-      margin-bottom: 24px;
-      font-style: italic;
-      font-family: 'Playfair Display', serif;
-      font-weight: 400;
-    }
-
-    .tcard-author { display: flex; align-items: center; gap: 12px; }
-
-    .tcard-avatar {
-      width: 38px; height: 38px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--rose), var(--blush));
-      display: flex; align-items: center; justify-content: center;
-      font-family: 'Playfair Display', serif;
-      font-size: 14px;
-      color: var(--deep);
-    }
-
-    .tcard-name { font-size: 13px; font-weight: 500; color: var(--deep); letter-spacing: 0.04em; }
-    .tcard-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
-    .stars { color: var(--dusty); font-size: 13px; margin-bottom: 16px; letter-spacing: 2px; }
-
-    /* ── PRICING ── */
-    .pricing {
-      padding: 120px 60px 100px;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .pricing-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
-      margin-top: 64px;
-      align-items: start;
-    }
-
-    .plan {
-      border-radius: 24px;
-      padding: 44px 36px 40px;
-      border: 1px solid rgba(200,149,122,0.18);
-      background: var(--white);
-      position: relative;
-      transition: transform 0.3s, box-shadow 0.3s;
-    }
-
-    .plan:hover { transform: translateY(-6px); box-shadow: 0 24px 60px rgba(61,35,24,0.1); }
-
-    .plan.featured {
-      background: var(--deep);
-      border-color: transparent;
-      transform: scale(1.04);
-      box-shadow: 0 24px 60px rgba(61,35,24,0.22);
-    }
-
-    .plan.featured:hover { transform: scale(1.04) translateY(-6px); }
-
-    .plan-badge {
-      display: inline-block;
-      font-size: 10px;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      padding: 5px 14px;
-      border-radius: 30px;
-      background: var(--dusty);
-      color: var(--white);
-      margin-bottom: 24px;
-    }
-
-    .plan.featured .plan-badge { background: var(--rose); color: var(--deep); }
-
-    .plan-name {
-      font-family: 'Playfair Display', serif;
-      font-size: 26px;
-      font-weight: 400;
-      color: var(--deep);
-      margin-bottom: 6px;
-    }
-
-    .plan.featured .plan-name { color: var(--cream); }
-
-    .plan-tagline { font-size: 13px; color: var(--muted); margin-bottom: 28px; line-height: 1.5; }
-    .plan.featured .plan-tagline { color: rgba(253,248,242,0.55); }
-
-    .plan-price { display: flex; align-items: flex-end; gap: 4px; margin-bottom: 6px; }
-
-    .price-currency { font-family: 'Jost', sans-serif; font-size: 20px; color: var(--deep); margin-bottom: 6px; }
-    .plan.featured .price-currency { color: var(--rose); }
-
-    .price-amount {
-      font-family: 'Playfair Display', serif;
-      font-size: 54px;
-      font-weight: 500;
-      line-height: 1;
-      color: var(--deep);
-      letter-spacing: -0.02em;
-    }
-
-    .plan.featured .price-amount { color: var(--cream); }
-
-    .price-period { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
-    .plan.featured .price-period { color: rgba(253,248,242,0.45); }
-
-    .plan-divider { height: 1px; background: rgba(200,149,122,0.15); margin: 28px 0; }
-    .plan.featured .plan-divider { background: rgba(253,248,242,0.1); }
-
-    .plan-features {
-      list-style: none;
-      margin-bottom: 36px;
-      display: flex;
-      flex-direction: column;
-      gap: 13px;
-    }
-
-    .plan-features li {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      font-size: 14px;
-      color: var(--text);
-      line-height: 1.4;
-    }
-
-    .plan.featured .plan-features li { color: rgba(253,248,242,0.8); }
-
-    .plan-features li .check {
-      width: 18px; height: 18px;
-      border-radius: 50%;
-      background: var(--sage-light);
-      color: var(--sage);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 10px;
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
-
-    .plan.featured .plan-features li .check {
-      background: rgba(196,212,187,0.2);
-      color: var(--sage-light);
-    }
-
-    .plan-features li .cross {
-      width: 18px; height: 18px;
-      border-radius: 50%;
-      background: rgba(200,149,122,0.1);
-      color: var(--rose);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 10px;
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
-
-    .plan-features li.dim { opacity: 0.4; }
-
-    /* Limit badge inline */
-    .limit-badge {
-      display: inline-block;
-      font-size: 10px;
-      padding: 2px 7px;
-      border-radius: 20px;
-      background: rgba(200,149,122,0.15);
-      color: var(--dusty);
-      margin-left: 4px;
-      letter-spacing: 0.04em;
-      vertical-align: middle;
-    }
-
-    .plan.featured .limit-badge {
-      background: rgba(232,196,176,0.2);
-      color: var(--rose);
-    }
-
-    .btn-plan {
-      width: 100%;
-      font-family: 'Jost', sans-serif;
-      font-size: 12px;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      padding: 15px;
-      border-radius: 50px;
-      border: 1.5px solid var(--deep);
-      background: transparent;
-      color: var(--deep);
-      cursor: pointer;
-      text-decoration: none;
-      display: block;
-      text-align: center;
-      transition: background 0.2s, color 0.2s, transform 0.15s;
-    }
-
-    .btn-plan:hover { background: var(--deep); color: var(--cream); transform: translateY(-1px); }
-
-    .btn-plan-filled {
-      width: 100%;
-      font-family: 'Jost', sans-serif;
-      font-size: 12px;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      padding: 15px;
-      border-radius: 50px;
-      border: none;
-      background: var(--rose);
-      color: var(--deep);
-      cursor: pointer;
-      text-decoration: none;
-      display: block;
-      text-align: center;
-      transition: background 0.2s, transform 0.15s;
-      font-weight: 500;
-    }
-
-    .btn-plan-filled:hover { background: #f0d4c0; transform: translateY(-1px); }
-
-    .plan-note { font-size: 11px; text-align: center; color: var(--muted); margin-top: 14px; letter-spacing: 0.04em; }
-    .plan.featured .plan-note { color: rgba(253,248,242,0.3); }
-
-    /* ── CTA BANNER ── */
-    .cta-section {
-      margin: 0 60px 100px;
-      background: var(--deep);
-      border-radius: 28px;
-      padding: 70px 60px;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .cta-section::before {
-      content: '';
-      position: absolute;
-      top: -80px; left: 50%;
-      transform: translateX(-50%);
-      width: 500px; height: 500px;
-      background: radial-gradient(circle, rgba(232,196,176,0.1) 0%, transparent 65%);
-      border-radius: 50%;
-    }
-
-    .cta-section h2 { color: var(--cream); font-size: clamp(32px, 3.5vw, 48px); margin-bottom: 16px; }
-    .cta-section h2 em { color: var(--rose); }
-
-    .cta-section p {
-      color: rgba(253,248,242,0.55);
-      font-size: 15px;
-      max-width: 420px;
-      margin: 0 auto 40px;
-      line-height: 1.7;
-    }
-
-    .btn-light {
-      font-family: 'Jost', sans-serif;
-      font-size: 13px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      padding: 17px 44px;
-      background: var(--cream);
-      color: var(--deep);
-      border: none;
-      border-radius: 50px;
-      text-decoration: none;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.15s;
-      display: inline-block;
-      position: relative;
-      z-index: 1;
-    }
-
-    .btn-light:hover { background: var(--blush); transform: translateY(-2px); }
-
-    .cta-note {
-      font-size: 12px;
-      color: rgba(253,248,242,0.3);
-      margin-top: 16px;
-      letter-spacing: 0.06em;
-      position: relative;
-      z-index: 1;
-    }
-
-    /* ── FOOTER ── */
-    footer {
-      border-top: 1px solid rgba(200,149,122,0.15);
-      padding: 40px 60px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 20px;
-    }
-
-    .footer-logo { font-family: 'Playfair Display', serif; font-size: 22px; font-style: italic; color: var(--deep); }
-
-    .footer-links { display: flex; gap: 32px; list-style: none; }
-
-    .footer-links a { font-size: 12px; letter-spacing: 0.08em; color: var(--muted); text-decoration: none; transition: color 0.2s; }
-    .footer-links a:hover { color: var(--deep); }
-
-    .footer-copy { font-size: 11px; color: var(--muted); opacity: 0.6; letter-spacing: 0.06em; }
-
-    /* ── SCROLL ANIMATIONS ── */
-    .reveal {
-      opacity: 0;
-      transform: translateY(28px);
-      transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1);
-    }
-
-    .reveal.visible { opacity: 1; transform: translateY(0); }
-    .reveal-delay-1 { transition-delay: 0.1s; }
-    .reveal-delay-2 { transition-delay: 0.2s; }
-    .reveal-delay-3 { transition-delay: 0.3s; }
-
-    /* ── RESPONSIVE ── */
-    @media (max-width: 960px) {
-      nav { padding: 18px 28px; }
-      .nav-links { display: none; }
-      .hero { grid-template-columns: 1fr; padding: 100px 28px 60px; text-align: center; }
-      .hero::before { display: none; }
-      .hero-desc { margin: 0 auto 40px; }
-      .hero-actions { justify-content: center; }
-      .hero-visual { margin-top: 48px; }
-      .orb-container { width: 300px; height: 300px; }
-      .stat-card:nth-child(5) { right: 0; top: 10px; }
-      .stat-card:nth-child(6) { left: 0; bottom: 20px; }
-      .features { padding: 80px 28px; }
-      .features-grid { grid-template-columns: 1fr; }
-      .steps { grid-template-columns: 1fr 1fr; }
-      .steps::before { display: none; }
-      .testimonials { padding: 80px 28px; }
-      .testimonials-grid { grid-template-columns: 1fr; }
-      .how { padding: 80px 28px; }
-      .pricing { padding: 80px 28px; }
-      .pricing-grid { grid-template-columns: 1fr; }
-      .plan.featured { transform: none; }
-      .plan.featured:hover { transform: translateY(-6px); }
-      .cta-section { margin: 0 20px 80px; padding: 60px 28px; }
-      .trust-bar { gap: 28px; padding: 20px 28px; }
-      .credibility-bar { gap: 24px; padding: 24px 28px; flex-direction: column; align-items: flex-start; }
-      .cred-divider { display: none; }
-      footer { padding: 32px 28px; flex-direction: column; align-items: flex-start; }
-    }
   </style>
 </head>
 <body>
 
-  <!-- NAV -->
-  <nav>
-    <div class="nav-logo">Bloom<span></span></div>
-    <ul class="nav-links">
-      <li><a href="#features">Features</a></li>
-      <li><a href="#how">How it works</a></li>
-      <li><a href="#stories">Stories</a></li>
-      <li><a href="#pricing">Pricing</a></li>
-    </ul>
-    <a href="/login.html" class="nav-cta">Start Free</a>
-  </nav>
+<nav>
+  <div class="nav-logo">Bloom<span></span></div>
+  <ul class="nav-links">
+    <li><a href="#covers">What Bloom covers</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#stories">Stories</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+  </ul>
+  <a href="/login" class="nav-cta">Start Free</a>
+</nav>
 
-  <!-- HERO -->
-  <section class="hero">
-    <div class="hero-text">
-      <div class="hero-eyebrow">AI Fertility Companion</div>
-      <h1>Your journey<br/>to <em>motherhood,</em><br/>supported.</h1>
-      <p class="hero-desc">Bloom uses AI trained on clinical textbooks to guide you through every phase of your fertility journey — with the warmth of a trusted companion.</p>
-      <div class="hero-actions">
-        <a href="/login.html" class="btn-primary">Begin your journey</a>
-        <a href="#how" class="btn-ghost">See how it works</a>
-      </div>
-    </div>
+<!-- HERO -->
 
-    <div class="hero-visual">
-      <div class="orb-container">
-        <div class="orb-ring"></div>
-        <div class="orb-ring"></div>
-        <div class="orb-ring"></div>
-        <div class="orb-center">
-          <span class="orb-symbol">b</span>
-        </div>
-        <div class="stat-card">
-          <div class="stat-dot"></div>
-          <div class="stat-num">94%</div>
-          <div class="stat-label">Feel more informed</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-dot" style="background: var(--dusty)"></div>
-          <div class="stat-num">12k+</div>
-          <div class="stat-label">Women supported</div>
-        </div>
-      </div>
+<section class="hero">
+  <div class="hero-text">
+    <div class="hero-eyebrow">AI Women's Health Companion</div>
+    <h1>Your body.<br/><em>Every question.</em><br/>One companion.</h1>
+    <p class="hero-desc">From your first period question to your last cycle concern — Bloom gives you clinical-grade answers, a personalised roadmap, and a companion who never judges and never sleeps.</p>
+    <div class="coverage-pills">
+      <span class="pill">🌸 Fertility &amp; Trying to Conceive</span>
+      <span class="pill">🤰 Pregnancy</span>
+      <span class="pill">🌿 PCOS</span>
+      <span class="pill">🔬 Hormones</span>
+      <span class="pill">🧬 Endometriosis</span>
+      <span class="pill">👶 Postpartum</span>
+      <span class="pill">🌙 Menopause</span>
+      <span class="pill">📋 Gynaecology</span>
     </div>
-  </section>
-
-  <!-- TRUST BAR -->
-  <div class="trust-bar">
-    <div class="trust-item">
-      <svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-      Clinically informed
-    </div>
-    <div class="trust-item">
-      <svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-      Private & secure
-    </div>
-    <div class="trust-item">
-      <svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-      Available 24 / 7
-    </div>
-    <div class="trust-item">
-      <svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-      Compassionate AI
+    <div class="hero-actions">
+      <a href="/login" class="btn-primary">Begin for free</a>
+      <a href="#covers" class="btn-ghost">See what Bloom covers</a>
     </div>
   </div>
+  <div class="hero-visual">
+    <div class="orb-container">
+      <div class="orb-ring"></div>
+      <div class="orb-ring"></div>
+      <div class="orb-ring"></div>
+      <div class="orb-center"><span class="orb-symbol">b</span></div>
 
-  <!-- CLINICAL CREDIBILITY BAR -->
-  <div class="credibility-bar">
-    <div class="cred-item">
-      <span class="cred-icon">👩‍⚕️</span>
-      <span><strong>Built by a Gynecologist</strong> — not just a tech team</span>
-    </div>
-   <div class="cred-divider"></div>
-<div class="cred-item">
-  <span class="cred-icon">📖</span>
-  <span><strong>Backed by clinical expertise</strong> — evidence-based answers</span>
+```
 </div>
+```
+
+  </div>
+</section>
+
+<!-- TRUST BAR -->
+
+<div class="trust-bar">
+  <div class="trust-item">
+    <svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+    Clinically grounded
+  </div>
+  <div class="trust-item">
+    <svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+    Private &amp; secure
+  </div>
+  <div class="trust-item">
+    <svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+    Available 24/7
+  </div>
+  <div class="trust-item">
+    <svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+    Compassionate AI
   </div>
 
-  <!-- FEATURES -->
-  <section class="features" id="features">
+</div>
+
+<!-- WHAT BLOOM COVERS -->
+
+<section class="covers" id="covers">
+  <div class="covers-inner">
     <div class="section-header">
-      <div class="section-tag reveal">What Bloom offers</div>
-      <h2 class="reveal reveal-delay-1">Everything you need,<br/><em>nothing you don't.</em></h2>
-      <p class="section-sub reveal reveal-delay-2">Bloom is your intelligent guide — personalised, private, and always present.</p>
+      <div class="section-tag reveal">Complete coverage</div>
+      <h2 class="reveal reveal-delay-1">One app for <em>every chapter</em><br/>of a woman's health.</h2>
+      <p class="section-sub reveal reveal-delay-2">Whether you're 22 or 52 — Bloom has answers for wherever you are right now.</p>
     </div>
-
-    <div class="features-grid">
-      <div class="feature-card reveal">
-        <div class="feature-icon">🌸</div>
-        <h3>Cycle Intelligence</h3>
-        <p class="feature-text">Track your cycle with AI that learns your unique patterns, predicts ovulation windows, and adapts over time.</p>
+    <div class="covers-grid">
+      <div class="cover-card reveal">
+        <div class="cover-emoji">🌸</div>
+        <div class="cover-title">Fertility &amp; Trying to Conceive</div>
+        <div class="cover-desc">Ovulation tracking, fertile window, ovulation strip guidance, IUI/IVF support, two-week wait questions, and conception science — explained clearly.</div>
       </div>
-      <div class="feature-card highlight reveal reveal-delay-1">
-        <div class="feature-icon">💬</div>
-        <h3>Your Fertility Companion</h3>
-        <p class="feature-text">Ask anything — from medication timings to emotional support between appointments. Bloom is here every step of the way.</p>
+      <div class="cover-card dark reveal reveal-delay-1">
+        <div class="cover-emoji">🤰</div>
+        <div class="cover-title">Pregnancy &amp; Obstetrics</div>
+        <div class="cover-desc">Week-by-week guidance, ANC blood tests, scan interpretation, supplement protocols, warning signs — from booking to birth.</div>
       </div>
-      <div class="feature-card reveal reveal-delay-2">
-        <div class="feature-icon">🧬</div>
-        <h3>Report Analyzer</h3>
-        <p class="feature-text">Upload your hormone panels, ultrasounds, and blood reports. Bloom explains every value in plain language with fertility context.</p>
+      <div class="cover-card reveal reveal-delay-2">
+        <div class="cover-emoji">🌿</div>
+        <div class="cover-title">PCOS &amp; Hormones</div>
+        <div class="cover-desc">Insulin resistance, cycle regulation, Inositol, Metformin, testosterone, DHEA-S — evidence-based PCOS answers.</div>
       </div>
-      <div class="feature-card reveal reveal-delay-1">
-        <div class="feature-icon">📊</div>
-        <h3>Fertile Window Tracker</h3>
-        <p class="feature-text">Know exactly when your fertile window opens — backed by clinical ovulation science, not generic averages.</p>
+      <div class="cover-card reveal reveal-delay-3">
+        <div class="cover-emoji">🧬</div>
+        <div class="cover-title">Endometriosis &amp; Fibroids</div>
+        <div class="cover-desc">Pain management, surgical options, impact on fertility, medical treatments, and what to ask your specialist.</div>
       </div>
-      <div class="feature-card reveal reveal-delay-2">
-        <div class="feature-icon">🌿</div>
-        <h3>Personalised Roadmap</h3>
-        <p class="feature-text">Get a complete fertility plan — nutrition, supplements, lifestyle, and a 4-week action roadmap — built around your unique profile.</p>
+      <div class="cover-card reveal reveal-delay-1">
+        <div class="cover-emoji">👶</div>
+        <div class="cover-title">Postpartum</div>
+        <div class="cover-desc">Recovery, breastfeeding, baby care, immunization schedules, postpartum depression, and returning to yourself.</div>
       </div>
-      <div class="feature-card reveal reveal-delay-3">
-        <div class="feature-icon">📋</div>
-        <h3>Clinical-Grade Knowledge</h3>
-        <p class="feature-text">Every answer is grounded in Speroff's and Williams — the gold standard references used by gynecologists worldwide.</p>
+      <div class="cover-card reveal reveal-delay-2">
+        <div class="cover-emoji">🌙</div>
+        <div class="cover-title">Menopause &amp; Perimenopause</div>
+        <div class="cover-desc">Hot flushes, HRT options, bone health, mood changes, sleep — navigating the transition with confidence.</div>
       </div>
-    </div>
-  </section>
-
-  <!-- HOW IT WORKS -->
-  <section class="how" id="how">
-    <div class="how-inner">
-      <div class="section-header">
-        <div class="section-tag reveal">Simple to begin</div>
-        <h2 class="reveal reveal-delay-1">How <em>Bloom</em> works</h2>
+      <div class="cover-card reveal reveal-delay-3">
+        <div class="cover-emoji">🔬</div>
+        <div class="cover-title">Lab Reports &amp; Tests</div>
+        <div class="cover-desc">Upload any hormone panel, blood test, or ultrasound — Bloom explains every value in plain language, in your context.</div>
       </div>
-      <div class="steps">
-        <div class="step reveal">
-          <div class="step-num">1</div>
-          <h4>Create your profile</h4>
-          <p>Tell Bloom about where you are in your journey — whether you're just starting out or mid-cycle.</p>
-        </div>
-        <div class="step reveal reveal-delay-1">
-          <div class="step-num">2</div>
-          <h4>Share your story</h4>
-          <p>Log your cycle, symptoms, medications, and questions. The more Bloom knows, the better it guides.</p>
-        </div>
-        <div class="step reveal reveal-delay-2">
-          <div class="step-num">3</div>
-          <h4>Ask anything</h4>
-          <p>Chat with Bloom any time. Get clear, compassionate answers informed by clinical fertility science.</p>
-        </div>
-        <div class="step reveal reveal-delay-3">
-          <div class="step-num">4</div>
-          <h4>Thrive with support</h4>
-          <p>Feel informed, confident, and cared for — every day of your journey.</p>
-        </div>
+      <div class="cover-card reveal">
+        <div class="cover-emoji">💬</div>
+        <div class="cover-title">Any Question, Any Time</div>
+        <div class="cover-desc">Irregular spotting? Confusing scan result? Medication side effects? Whatever's on your mind — ask Bloom at 2am. No judgment.</div>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- TESTIMONIALS -->
-  <section class="testimonials" id="stories">
+<!-- FEATURES -->
+
+<section class="features" id="features">
+  <div class="section-header">
+    <div class="section-tag reveal">Built-in tools</div>
+    <h2 class="reveal reveal-delay-1">Everything you need,<br/><em>nothing you don't.</em></h2>
+    <p class="section-sub reveal reveal-delay-2">Clinical AI combined with practical tools — so you're always doing, not just reading.</p>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card highlight reveal">
+      <div class="feature-icon">💬</div>
+      <h3>Bloom AI Chat</h3>
+      <p class="feature-text">Ask anything about your health — get clear, evidence-based answers grounded in clinical medicine. Like a knowledgeable friend who actually knows your case.</p>
+    </div>
+    <div class="feature-card reveal reveal-delay-1">
+      <div class="feature-icon">🗺️</div>
+      <h3>My Roadmap</h3>
+      <p class="feature-text">A personalised guide for your conception journey, pregnancy, or postpartum recovery — week by week, with supplements, investigations, and stage-specific advice.</p>
+    </div>
+    <div class="feature-card reveal reveal-delay-2">
+      <div class="feature-icon">🧪</div>
+      <h3>Report Analyzer</h3>
+      <p class="feature-text">Upload hormone panels, ultrasounds, or blood tests. Bloom reads every value, flags what's abnormal, and explains what it means specifically for you.</p>
+    </div>
+    <div class="feature-card reveal reveal-delay-1">
+      <div class="feature-icon">📅</div>
+      <h3>Cycle &amp; Fertile Window</h3>
+      <p class="feature-text">Clinical-grade cycle tracking — ovulation prediction, fertile window, phase-specific tips, and ovulation strip guidance. Not just a period tracker.</p>
+    </div>
+    <div class="feature-card reveal reveal-delay-2">
+      <div class="feature-icon">👤</div>
+      <h3>Your Clinical Profile</h3>
+      <p class="feature-text">Log your AMH, FSH, TSH, OGTT, ANC scans and BP readings — Bloom personalises every response, supplement plan, and roadmap to your exact values.</p>
+    </div>
+    <div class="feature-card reveal reveal-delay-3">
+      <div class="feature-icon">💊</div>
+      <h3>Supplement Protocol</h3>
+      <p class="feature-text">Based on your profile, conditions, and lab values — Bloom generates a specific supplement plan with Indian brands, doses, timing, and exactly why each helps you.</p>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+
+<section class="how" id="how">
+  <div class="how-inner">
     <div class="section-header">
-      <div class="section-tag reveal">Real stories</div>
-      <h2 class="reveal reveal-delay-1">Women who found<br/><em>their bloom.</em></h2>
+      <div class="section-tag reveal">Simple to begin</div>
+      <h2 class="reveal reveal-delay-1">How <em>Bloom</em> works</h2>
     </div>
-    <div class="testimonials-grid">
-      <div class="tcard reveal">
-        <div class="stars">★★★★★</div>
-        <p class="tcard-text">Bloom answered the questions I was too scared to ask my doctor. I finally understood my cycle and felt in control for the first time in years.</p>
-        <div class="tcard-author">
-          <div class="tcard-avatar">P</div>
-          <div>
-            <div class="tcard-name">Priya M.</div>
-            <div class="tcard-meta">TTC for 14 months · Mumbai</div>
-          </div>
-        </div>
+    <div class="steps">
+      <div class="step reveal">
+        <div class="step-num">1</div>
+        <h4>Create your profile</h4>
+        <p>Tell Bloom where you are — trying to conceive, pregnant, postpartum, or curious. Add your conditions and test values.</p>
       </div>
-      <div class="tcard reveal reveal-delay-1">
-        <div class="stars">★★★★★</div>
-        <p class="tcard-text">Going through IVF is overwhelming. Bloom was with me at 2am when my anxiety was at its peak. It felt like having a knowledgeable friend in my pocket.</p>
-        <div class="tcard-author">
-          <div class="tcard-avatar">A</div>
-          <div>
-            <div class="tcard-name">Anjali R.</div>
-            <div class="tcard-meta">IVF cycle 2 · Bangalore</div>
-          </div>
-        </div>
+      <div class="step reveal reveal-delay-1">
+        <div class="step-num">2</div>
+        <h4>Get your roadmap</h4>
+        <p>Bloom builds a personalised journey — week by week, stage by stage, tailored to your exact profile.</p>
       </div>
-      <div class="tcard reveal reveal-delay-2">
-        <div class="stars">★★★★★</div>
-        <p class="tcard-text">The report analyzer explained my AMH results better than my clinic did. I walked into my next appointment fully prepared — my doctor was impressed.</p>
-        <div class="tcard-author">
-          <div class="tcard-avatar">S</div>
-          <div>
-            <div class="tcard-name">Sunita K.</div>
-            <div class="tcard-meta">PCOS journey · Delhi</div>
-          </div>
-        </div>
+      <div class="step reveal reveal-delay-2">
+        <div class="step-num">3</div>
+        <h4>Ask anything</h4>
+        <p>Chat with Bloom any time. Upload reports. Get answers that are relevant to you — not generic information.</p>
+      </div>
+      <div class="step reveal reveal-delay-3">
+        <div class="step-num">4</div>
+        <h4>Walk in informed</h4>
+        <p>Go to your doctor appointment prepared. Understand your results. Know what to ask. Feel in control.</p>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- PRICING -->
-  <section class="pricing" id="pricing">
-    <div class="section-header">
-      <div class="section-tag reveal">Simple pricing</div>
-      <h2 class="reveal reveal-delay-1">Choose your<br/><em>level of care.</em></h2>
-      <p class="section-sub reveal reveal-delay-2">Start free. Upgrade when you're ready. No hidden fees, ever.</p>
+<!-- PRICING -->
+
+<section class="pricing" id="pricing">
+  <div class="section-header">
+    <div class="section-tag reveal">Simple pricing</div>
+    <h2 class="reveal reveal-delay-1">Choose your<br/><em>level of care.</em></h2>
+    <p class="section-sub reveal reveal-delay-2">Start free. Upgrade when you're ready. No hidden fees, ever.</p>
+  </div>
+  <div class="pricing-grid">
+    <div class="plan reveal">
+      <div class="plan-name">Free</div>
+      <div class="plan-tagline">Try Bloom — no commitment.</div>
+      <div class="plan-price"><span class="price-currency">₹</span><span class="price-amount">0</span></div>
+      <div class="price-period">forever free</div>
+      <div class="plan-divider"></div>
+      <ul class="plan-features">
+        <li><span class="check">✓</span> Bloom AI Chat <span class="limit-badge">3 messages</span></li>
+        <li><span class="check">✓</span> Cycle tracker</li>
+        <li class="dim"><span class="cross">✕</span> Fertile window calculator</li>
+        <li class="dim"><span class="cross">✕</span> Report analyzer</li>
+        <li class="dim"><span class="cross">✕</span> Personalised roadmap</li>
+      </ul>
+      <a href="/login" class="btn-plan">Get started free</a>
+      <p class="plan-note">No card required</p>
     </div>
-
-    <div class="pricing-grid">
-
-      <!-- FREE -->
-      <div class="plan reveal">
-        <div class="plan-name">Free</div>
-        <div class="plan-tagline">Try Bloom with no commitment needed.</div>
-        <div class="plan-price">
-          <span class="price-currency">₹</span>
-          <span class="price-amount">0</span>
-        </div>
-        <div class="price-period">forever free</div>
-        <div class="plan-divider"></div>
-        <ul class="plan-features">
-          <li><span class="check">✓</span> Bloom Chat AI <span class="limit-badge">3/day</span></li>
-          <li><span class="check">✓</span> Menstrual cycle tracker</li>
-          <li class="dim"><span class="cross">✕</span> Fertile window calculator</li>
-          <li class="dim"><span class="cross">✕</span> Report analyzer</li>
-          <li class="dim"><span class="cross">✕</span> Personalised roadmap</li>
-          <li class="dim"><span class="cross">✕</span> Priority support</li>
-        </ul>
-        <a href="/login.html" class="btn-plan">Get started free</a>
-        <p class="plan-note">No card required</p>
-      </div>
-
-      <!-- BLOOM PRO -->
-      <div class="plan featured reveal reveal-delay-1">
-        <div class="plan-badge">Most popular</div>
-        <div class="plan-name">Bloom Pro</div>
-        <div class="plan-tagline">Everything you need for your daily fertility journey.</div>
-        <div class="plan-price">
-          <span class="price-currency">₹</span>
-          <span class="price-amount">149</span>
-        </div>
-        <div class="price-period">per month · cancel any time</div>
-        <div class="plan-divider"></div>
-        <ul class="plan-features">
-          <li><span class="check">✓</span> Bloom Chat AI <span class="limit-badge">unlimited</span></li>
-          <li><span class="check">✓</span> Menstrual cycle tracker</li>
-          <li><span class="check">✓</span> Fertile window calculator</li>
-          <li><span class="check">✓</span> Report analyzer <span class="limit-badge">3/month</span></li>
-          <li class="dim"><span class="cross">✕</span> Personalised roadmap</li>
-          <li class="dim"><span class="cross">✕</span> Priority support</li>
-        </ul>
-        <a href="/login.html" class="btn-plan-filled">Start Bloom Pro</a>
-        <p class="plan-note">Cancel any time · no hidden fees</p>
-      </div>
-
-      <!-- BLOOM COMPLETE -->
-      <div class="plan reveal reveal-delay-2">
-        <div class="plan-badge" style="background: var(--sage); color: var(--white);">Premium</div>
-        <div class="plan-name">Bloom Complete</div>
-        <div class="plan-tagline">A fully personalised plan, built just for you.</div>
-        <div class="plan-price">
-          <span class="price-currency">₹</span>
-          <span class="price-amount">449</span>
-        </div>
-        <div class="price-period">per month · everything included</div>
-        <div class="plan-divider"></div>
-        <ul class="plan-features">
-          <li><span class="check">✓</span> Everything in Bloom Pro</li>
-          <li><span class="check">✓</span> Report analyzer <span class="limit-badge">unlimited</span></li>
-          <li><span class="check">✓</span> Personalised fertility roadmap</li>
-          <li><span class="check">✓</span> Nutrition, supplement & lifestyle plan</li>
-          <li><span class="check">✓</span> 4-week action roadmap</li>
-          <li><span class="check">✓</span> Priority support</li>
-        </ul>
-        <a href="/login.html" class="btn-plan">Get Bloom Complete</a>
-        <p class="plan-note">Most comprehensive plan available</p>
-      </div>
-
+    <div class="plan featured reveal reveal-delay-1">
+      <div class="plan-badge">Most popular</div>
+      <div class="plan-name">Bloom Pro</div>
+      <div class="plan-tagline">Unlimited AI + reports for your daily journey.</div>
+      <div class="plan-price"><span class="price-currency">₹</span><span class="price-amount">149</span></div>
+      <div class="price-period">per month · cancel any time</div>
+      <div class="plan-divider"></div>
+      <ul class="plan-features">
+        <li><span class="check">✓</span> Bloom AI Chat <span class="limit-badge">unlimited</span></li>
+        <li><span class="check">✓</span> Cycle tracker + fertile window</li>
+        <li><span class="check">✓</span> Report analyzer <span class="limit-badge">3/month</span></li>
+        <li><span class="check">✓</span> Clinical profile</li>
+        <li class="dim"><span class="cross">✕</span> Personalised roadmap</li>
+      </ul>
+      <a href="/login" class="btn-plan-filled">Start Bloom Pro</a>
+      <p class="plan-note">Cancel any time</p>
     </div>
-  </section>
+    <div class="plan reveal reveal-delay-2">
+      <div class="plan-badge" style="background:var(--sage);color:var(--white);">Complete care</div>
+      <div class="plan-name">Bloom Complete</div>
+      <div class="plan-tagline">Your full personalised health companion.</div>
+      <div class="plan-price"><span class="price-currency">₹</span><span class="price-amount">449</span></div>
+      <div class="price-period">per month · everything included</div>
+      <div class="plan-divider"></div>
+      <ul class="plan-features">
+        <li><span class="check">✓</span> Everything in Pro</li>
+        <li><span class="check">✓</span> Report analyzer <span class="limit-badge">unlimited</span></li>
+        <li><span class="check">✓</span> Full personalised roadmap</li>
+        <li><span class="check">✓</span> Conception + Pregnancy + Postpartum</li>
+        <li><span class="check">✓</span> Supplement protocol</li>
+      </ul>
+      <a href="/login" class="btn-plan">Get Bloom Complete</a>
+      <p class="plan-note">Most comprehensive plan</p>
+    </div>
+  </div>
+</section>
 
-  <!-- CTA BANNER -->
-  <section class="cta-section">
-    <h2>Ready to <em>bloom?</em></h2>
-    <p>Start free today. Clinical-grade fertility guidance — built by a gynecologist, for you.</p>
-    <a href="/login.html" class="btn-light">Begin your journey →</a>
-    <p class="cta-note">Free forever · Pro from ₹149/month · Cancel any time</p>
-  </section>
+<!-- CTA -->
 
-  <!-- FOOTER -->
-  <footer>
-    <div class="footer-logo">Bloom</div>
-    <ul class="footer-links">
-      <li><a href="#">Privacy</a></li>
-      <li><a href="#">Terms</a></li>
-      <li><a href="#">Contact</a></li>
-      <li><a href="#">Blog</a></li>
-    </ul>
-    <span class="footer-copy">© 2026 Bloom. Made with care.</span>
-  </footer>
+<section class="cta-section">
+  <h2>Your body. <em>Every question.</em><br/>One companion.</h2>
+  <p>Start free today. Clinical-grade women's health guidance — built by a gynaecologist, for every woman.</p>
+  <a href="/login" class="btn-light">Begin for free →</a>
+  <p class="cta-note">Free forever · Pro from ₹149/month · Cancel any time</p>
+</section>
 
-  <script>
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(e => {
-        if (e.isIntersecting) {
-          e.target.classList.add('visible');
-          observer.unobserve(e.target);
-        }
-      });
-    }, { threshold: 0.1 });
+<footer>
+  <div class="footer-logo">Bloom</div>
+  <ul class="footer-links">
+    <li><a href="#">Privacy</a></li>
+    <li><a href="#">Terms</a></li>
+    <li><a href="#">Contact</a></li>
+  </ul>
+  <span class="footer-copy">© 2026 Bloom. Built by a licensed gynaecologist.</span>
+</footer>
 
-    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-  </script>
+<script>
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
 
 </body>
 </html>
