@@ -1117,6 +1117,214 @@ function renderBabyInvLog(){
 }
 
 init();
+
+const SYM_OPTIONS=['pcos_diagnosed','irregular_periods','acne','excess_hair','hair_loss','painful_periods','endometriosis_diagnosed','fibroids_diagnosed','thyroid_disorder','low_libido','mood_changes','bloating','breast_tenderness','spotting_between_periods','heavy_bleeding','night_sweats','hot_flushes'];
+const SYM_LABELS={'pcos_diagnosed':'PCOS diagnosed','irregular_periods':'Irregular periods','acne':'Acne / oily skin','excess_hair':'Excess hair (hirsutism)','hair_loss':'Hair thinning','painful_periods':'Painful periods','endometriosis_diagnosed':'Endometriosis','fibroids_diagnosed':'Fibroids','thyroid_disorder':'Thyroid disorder','low_libido':'Low libido','mood_changes':'Mood changes / anxiety','bloating':'Bloating','breast_tenderness':'Breast tenderness','spotting_between_periods':'Spotting between periods','heavy_bleeding':'Heavy periods','night_sweats':'Night sweats','hot_flushes':'Hot flushes'};
+const MED_OPTIONS=['Metformin','Letrozole','Clomiphene','Progesterone','Inositol','CoQ10','Folic acid','Iron','Vitamin D','Omega-3','Levothyroxine','Cabergoline','DHEA','Aspirin low-dose','Heparin/Clexane','Estrogen','Provera'];
+
+function pfBuildChips(){
+  const symGrid=document.getElementById('pf-sym-grid');
+  if(symGrid&&!symGrid.children.length){
+    SYM_OPTIONS.forEach(v=>{
+      const d=document.createElement('div');
+      d.className='pf-chip';d.dataset.val=v;d.textContent=SYM_LABELS[v]||v;
+      d.onclick=function(){this.classList.toggle('selected');pfUpdateCompletion();};
+      symGrid.appendChild(d);
+    });
+  }
+  const medGrid=document.getElementById('pf-med-grid');
+  if(medGrid&&!medGrid.children.length){
+    MED_OPTIONS.forEach(v=>{
+      const d=document.createElement('div');
+      d.className='pf-chip';d.dataset.val=v;d.textContent=v;
+      d.onclick=function(){this.classList.toggle('selected');pfUpdateCompletion();};
+      medGrid.appendChild(d);
+    });
+  }
+  // Wire up all chip groups
+  document.querySelectorAll('#pf-flow-chips .pf-chip, #pf-pain-chips .pf-chip, #pf-outcome-chips .pf-chip, #pf-fertility-conditions .pf-chip, #pf-surgeries .pf-chip, #pf-sa-chips .pf-chip, #pf-prev-tx-chips .pf-chip, #pf-inv-done-chips .pf-chip, #pf-usg-chips .pf-chip, #pf-doctor-chips .pf-chip, #pf-high-risk .pf-chip').forEach(chip=>{
+    if(!chip._wired){
+      chip._wired=true;
+      chip.onclick=function(){this.classList.toggle('selected');pfUpdateCompletion();};
+    }
+  });
+}
+
+function pfSwitchTab(name, btn){
+  document.querySelectorAll('.pf-tab-panel').forEach(p=>p.style.display='none');
+  document.querySelectorAll('.pf-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('pf-tab-'+name).style.display='block';
+  btn.classList.add('active');
+}
+
+function pfUpdateCompletion(){
+  const fields=['pf-name','pf-age','pf-journey','pf-cycle','pf-lmp','pf-amh','pf-fsh','pf-tsh','pf-hb','pf-vitamin-d','pf-workup-status','pf-preg-lmp'];
+  let filled=0;
+  fields.forEach(id=>{const el=document.getElementById(id);if(el&&el.value) filled++;});
+  // Chip groups
+  ['pf-sym-grid','pf-flow-chips','pf-fertility-conditions'].forEach(id=>{
+    if(document.querySelectorAll('#'+id+' .pf-chip.selected').length) filled++;
+  });
+  const pct=Math.round((filled/(fields.length+3))*100);
+  const bar=document.getElementById('pf-pct-bar');
+  const lbl=document.getElementById('pf-pct-label');
+  if(bar) bar.style.width=Math.min(pct,100)+'%';
+  if(lbl) lbl.textContent=Math.min(pct,100)+'%';
+}
+
+function getChipVals(containerId){
+  return [...document.querySelectorAll('#'+containerId+' .pf-chip.selected')].map(c=>c.dataset.val);
+}
+
+function setChipVals(containerId, vals){
+  if(!vals||!vals.length) return;
+  document.querySelectorAll('#'+containerId+' .pf-chip').forEach(c=>{
+    c.classList.toggle('selected', vals.includes(c.dataset.val));
+  });
+}
+
+function pfLoad(){
+  const p=userData.profile||{};
+  const set=(id,val)=>{const el=document.getElementById(id);if(el&&val!==undefined&&val!==null) el.value=val;};
+  // Basic
+  set('pf-name',p.name);set('pf-age',p.age);set('pf-journey',p.journeyStage);
+  set('pf-cycle',p.cycleLength);set('pf-period',p.periodLength);set('pf-notes',p.notes);
+  setChipVals('pf-sym-grid',p.symptoms);
+  setChipVals('pf-med-grid',p.medications);
+  // Menstrual
+  set('pf-lmp',p.lmp);set('pf-cycle-regularity',p.cycleRegularity);
+  set('pf-menarche',p.menarche);
+  setChipVals('pf-flow-chips',p.flowHeaviness);
+  setChipVals('pf-pain-chips',p.painLevel);
+  // Fertility
+  set('pf-ttc-duration',p.ttcDuration);set('pf-gravida',p.gravida);
+  set('pf-obs-living',p.obsLiving);set('pf-tx-cycles',p.txCycles);
+  setChipVals('pf-outcome-chips',p.pregnancyOutcomes);
+  setChipVals('pf-fertility-conditions',p.fertilityConditions);
+  setChipVals('pf-surgeries',p.previousSurgeries);
+  setChipVals('pf-sa-chips',p.semenAnalysis);
+  setChipVals('pf-prev-tx-chips',p.prevTreatments);
+  // Tests
+  setChipVals('pf-inv-done-chips',p.investigationsDone);
+  set('pf-amh',p.amh);set('pf-fsh',p.fsh);set('pf-lh',p.lh);
+  set('pf-tsh',p.tsh);set('pf-prolactin',p.prolactin);
+  set('pf-testosterone',p.testosterone);set('pf-dheas',p.dheas);
+  set('pf-estradiol',p.estradiol);set('pf-progesterone',p.progesterone);
+  set('pf-hb',p.hb);set('pf-ferritin',p.ferritin);
+  set('pf-fasting-glucose',p.fastingGlucose);set('pf-hba1c',p.hba1c);
+  set('pf-fasting-insulin',p.fastingInsulin);set('pf-vitamin-d',p.vitaminD);
+  set('pf-b12',p.vitaminB12);set('pf-blood-group',p.bloodGroup);
+  set('pf-cbc',p.cbc);set('pf-afc',p.afc);set('pf-endo',p.endometrialThickness);
+  setChipVals('pf-usg-chips',p.usgFindings);
+  set('pf-hsg',p.hsgResult);
+  // Treatment
+  set('pf-workup-status',p.workupStatus);set('pf-tx-phase',p.txPhase);
+  set('pf-cycle-day',p.cycleDay);set('pf-next-step',p.nextStep);
+  set('pf-concerns',p.concerns);
+  setChipVals('pf-doctor-chips',p.doctorInvolved);
+  // Pregnancy
+  set('pf-preg-lmp',p.pregLmp);set('pf-preg-edd',p.pregEdd);
+  set('pf-booking-week',p.pregBookingWeek);set('pf-preg-conception',p.pregConception);
+  setChipVals('pf-high-risk',p.pregHighRisk);
+  set('pf-anc-blood-group',p.ancBloodGroup);
+  set('pf-anc-hb1',p.ancHb1);set('pf-anc-hb2',p.ancHb2);set('pf-anc-hb3',p.ancHb3);
+  set('pf-anc-vdrl',p.ancVdrl);set('pf-anc-hiv',p.ancHiv);set('pf-anc-hbsag',p.ancHbsag);
+  set('pf-ogtt-fasting',p.ancOgttFasting);set('pf-ogtt-1hr',p.ancOgtt1hr);set('pf-ogtt-2hr',p.ancOgtt2hr);
+  set('pf-anc-tsh',p.ancTsh);set('pf-anc-ferritin',p.ancFerritin);
+  set('pf-anc-platelets',p.ancPlateletCount);
+  set('pf-dating-scan',p.ancDatingScan);set('pf-nuchal-nt',p.ancNuchalNt);
+  set('pf-nuchal-result',p.ancNuchalResult);set('pf-anomaly-scan',p.ancAnomalyScan);
+  set('pf-placenta',p.ancPlacentaPos);set('pf-growth-scan',p.ancGrowthScan);
+  set('pf-tt1',p.immTt1Date);set('pf-tt2',p.immTt2Date||p.immTdDate);set('pf-flu',p.immFluDate);
+  set('pf-bp1',p.bpReading1);set('pf-bp1-date',p.bpReading1Date);
+  set('pf-bp2',p.bpReading2);set('pf-bp2-date',p.bpReading2Date);
+  pfUpdateCompletion();
+}
+
+async function pfSave(){
+  const g=(id)=>{const el=document.getElementById(id);return el?el.value:''};
+  const gn=(id)=>{const v=parseFloat(g(id));return isNaN(v)?null:v;};
+  const gi=(id)=>{const v=parseInt(g(id));return isNaN(v)?null:v;};
+  const profile={
+    name:g('pf-name'),age:gi('pf-age'),journeyStage:g('pf-journey'),
+    cycleLength:gi('pf-cycle'),periodLength:gi('pf-period'),notes:g('pf-notes'),
+    symptoms:getChipVals('pf-sym-grid'),medications:getChipVals('pf-med-grid'),
+    lmp:g('pf-lmp'),cycleRegularity:g('pf-cycle-regularity'),menarche:gi('pf-menarche'),
+    flowHeaviness:getChipVals('pf-flow-chips'),painLevel:getChipVals('pf-pain-chips'),
+    ttcDuration:g('pf-ttc-duration'),gravida:g('pf-gravida'),obsLiving:gi('pf-obs-living'),
+    txCycles:gi('pf-tx-cycles'),
+    pregnancyOutcomes:getChipVals('pf-outcome-chips'),
+    fertilityConditions:getChipVals('pf-fertility-conditions'),
+    previousSurgeries:getChipVals('pf-surgeries'),
+    semenAnalysis:getChipVals('pf-sa-chips'),
+    prevTreatments:getChipVals('pf-prev-tx-chips'),
+    investigationsDone:getChipVals('pf-inv-done-chips'),
+    amh:gn('pf-amh'),fsh:gn('pf-fsh'),lh:gn('pf-lh'),tsh:gn('pf-tsh'),
+    prolactin:gn('pf-prolactin'),testosterone:gn('pf-testosterone'),
+    dheas:gn('pf-dheas'),estradiol:gn('pf-estradiol'),progesterone:gn('pf-progesterone'),
+    hb:gn('pf-hb'),ferritin:gn('pf-ferritin'),fastingGlucose:gn('pf-fasting-glucose'),
+    hba1c:gn('pf-hba1c'),fastingInsulin:gn('pf-fasting-insulin'),
+    vitaminD:gn('pf-vitamin-d'),vitaminB12:gn('pf-b12'),
+    bloodGroup:g('pf-blood-group'),cbc:g('pf-cbc'),
+    afc:gn('pf-afc'),endometrialThickness:gn('pf-endo'),
+    usgFindings:getChipVals('pf-usg-chips'),hsgResult:g('pf-hsg'),
+    workupStatus:g('pf-workup-status'),txPhase:g('pf-tx-phase'),
+    cycleDay:gi('pf-cycle-day'),nextStep:g('pf-next-step'),concerns:g('pf-concerns'),
+    doctorInvolved:getChipVals('pf-doctor-chips'),
+    pregLmp:g('pf-preg-lmp'),pregEdd:g('pf-preg-edd'),
+    pregBookingWeek:gi('pf-booking-week'),pregConception:g('pf-preg-conception'),
+    pregHighRisk:getChipVals('pf-high-risk'),
+    ancBloodGroup:g('pf-anc-blood-group'),
+    ancHb1:gn('pf-anc-hb1'),ancHb2:gn('pf-anc-hb2'),ancHb3:gn('pf-anc-hb3'),
+    ancVdrl:g('pf-anc-vdrl'),ancHiv:g('pf-anc-hiv'),ancHbsag:g('pf-anc-hbsag'),
+    ancOgttFasting:gn('pf-ogtt-fasting'),ancOgtt1hr:gn('pf-ogtt-1hr'),ancOgtt2hr:gn('pf-ogtt-2hr'),
+    ancTsh:gn('pf-anc-tsh'),ancFerritin:gn('pf-anc-ferritin'),ancPlateletCount:gi('pf-anc-platelets'),
+    ancDatingScan:g('pf-dating-scan'),ancNuchalNt:gn('pf-nuchal-nt'),ancNuchalResult:g('pf-nuchal-result'),
+    ancAnomalyScan:g('pf-anomaly-scan'),ancPlacentaPos:g('pf-placenta'),ancGrowthScan:g('pf-growth-scan'),
+    immTt1Date:g('pf-tt1'),immTdDate:g('pf-tt2'),immFluDate:g('pf-flu'),
+    bpReading1:g('pf-bp1'),bpReading1Date:g('pf-bp1-date'),
+    bpReading2:g('pf-bp2'),bpReading2Date:g('pf-bp2-date'),
+  };
+  try{
+    const res=await fetch('/profile',{method:'PUT',headers:{'Content-Type':'application/json',Authorization:TOKEN},body:JSON.stringify(profile)});
+    if(res.ok){
+      userData=await res.json();
+      // Sync LMP to cycle tracker
+      const msg=document.getElementById('pf-saved-msg');
+      if(msg){ msg.style.display='block'; }
+      userProfile = userData.profile || {};
+      contentCache = {};
+      setTimeout(()=>{
+        if(msg) msg.style.display='none';
+        const modal=document.getElementById('profileModal');
+        if(modal) modal.style.display='none';
+        if(typeof renderPersonaTags==='function') renderPersonaTags();
+        if(typeof initTTC==='function') initTTC();
+      }, 1200);
+    }
+  }catch(e){alert('Could not save profile. Please try again.');}
+}
+
+function calcPregLmpFromEdd(){
+  const edd=document.getElementById('pf-preg-edd').value;
+  if(!edd) return;
+  const d=new Date(edd);d.setDate(d.getDate()-280);
+  document.getElementById('pf-preg-lmp').value=d.toISOString().split('T')[0];
+}
+
+function openProfileModal(){
+  pfBuildChips();pfLoad();
+  document.getElementById('profileModal').style.display='flex';
+}
+
+function buildRoadmapProfileModal(){
+  pfBuildChips();pfLoad();
+  document.getElementById('profileModal').style.display='flex';
+}
+
+
+</body></html>
+
 </script>
 <div id="profileModal" style="position:fixed;inset:0;z-index:300;background:rgba(44,36,32,0.52);display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);">
   <div style="background:#fff;border-radius:18px;width:620px;max-width:97vw;max-height:94vh;overflow:hidden;position:relative;border:1px solid #E8DDD5;display:flex;flex-direction:column;box-shadow:0 24px 60px rgba(44,36,32,0.18);">
@@ -1589,214 +1797,4 @@ init();
     </div>
   </div>
 </div>
-<script>
-
-<script>
-const SYM_OPTIONS=['pcos_diagnosed','irregular_periods','acne','excess_hair','hair_loss','painful_periods','endometriosis_diagnosed','fibroids_diagnosed','thyroid_disorder','low_libido','mood_changes','bloating','breast_tenderness','spotting_between_periods','heavy_bleeding','night_sweats','hot_flushes'];
-const SYM_LABELS={'pcos_diagnosed':'PCOS diagnosed','irregular_periods':'Irregular periods','acne':'Acne / oily skin','excess_hair':'Excess hair (hirsutism)','hair_loss':'Hair thinning','painful_periods':'Painful periods','endometriosis_diagnosed':'Endometriosis','fibroids_diagnosed':'Fibroids','thyroid_disorder':'Thyroid disorder','low_libido':'Low libido','mood_changes':'Mood changes / anxiety','bloating':'Bloating','breast_tenderness':'Breast tenderness','spotting_between_periods':'Spotting between periods','heavy_bleeding':'Heavy periods','night_sweats':'Night sweats','hot_flushes':'Hot flushes'};
-const MED_OPTIONS=['Metformin','Letrozole','Clomiphene','Progesterone','Inositol','CoQ10','Folic acid','Iron','Vitamin D','Omega-3','Levothyroxine','Cabergoline','DHEA','Aspirin low-dose','Heparin/Clexane','Estrogen','Provera'];
-
-function pfBuildChips(){
-  const symGrid=document.getElementById('pf-sym-grid');
-  if(symGrid&&!symGrid.children.length){
-    SYM_OPTIONS.forEach(v=>{
-      const d=document.createElement('div');
-      d.className='pf-chip';d.dataset.val=v;d.textContent=SYM_LABELS[v]||v;
-      d.onclick=function(){this.classList.toggle('selected');pfUpdateCompletion();};
-      symGrid.appendChild(d);
-    });
-  }
-  const medGrid=document.getElementById('pf-med-grid');
-  if(medGrid&&!medGrid.children.length){
-    MED_OPTIONS.forEach(v=>{
-      const d=document.createElement('div');
-      d.className='pf-chip';d.dataset.val=v;d.textContent=v;
-      d.onclick=function(){this.classList.toggle('selected');pfUpdateCompletion();};
-      medGrid.appendChild(d);
-    });
-  }
-  // Wire up all chip groups
-  document.querySelectorAll('#pf-flow-chips .pf-chip, #pf-pain-chips .pf-chip, #pf-outcome-chips .pf-chip, #pf-fertility-conditions .pf-chip, #pf-surgeries .pf-chip, #pf-sa-chips .pf-chip, #pf-prev-tx-chips .pf-chip, #pf-inv-done-chips .pf-chip, #pf-usg-chips .pf-chip, #pf-doctor-chips .pf-chip, #pf-high-risk .pf-chip').forEach(chip=>{
-    if(!chip._wired){
-      chip._wired=true;
-      chip.onclick=function(){this.classList.toggle('selected');pfUpdateCompletion();};
-    }
-  });
-}
-
-function pfSwitchTab(name, btn){
-  document.querySelectorAll('.pf-tab-panel').forEach(p=>p.style.display='none');
-  document.querySelectorAll('.pf-tab').forEach(b=>b.classList.remove('active'));
-  document.getElementById('pf-tab-'+name).style.display='block';
-  btn.classList.add('active');
-}
-
-function pfUpdateCompletion(){
-  const fields=['pf-name','pf-age','pf-journey','pf-cycle','pf-lmp','pf-amh','pf-fsh','pf-tsh','pf-hb','pf-vitamin-d','pf-workup-status','pf-preg-lmp'];
-  let filled=0;
-  fields.forEach(id=>{const el=document.getElementById(id);if(el&&el.value) filled++;});
-  // Chip groups
-  ['pf-sym-grid','pf-flow-chips','pf-fertility-conditions'].forEach(id=>{
-    if(document.querySelectorAll('#'+id+' .pf-chip.selected').length) filled++;
-  });
-  const pct=Math.round((filled/(fields.length+3))*100);
-  const bar=document.getElementById('pf-pct-bar');
-  const lbl=document.getElementById('pf-pct-label');
-  if(bar) bar.style.width=Math.min(pct,100)+'%';
-  if(lbl) lbl.textContent=Math.min(pct,100)+'%';
-}
-
-function getChipVals(containerId){
-  return [...document.querySelectorAll('#'+containerId+' .pf-chip.selected')].map(c=>c.dataset.val);
-}
-
-function setChipVals(containerId, vals){
-  if(!vals||!vals.length) return;
-  document.querySelectorAll('#'+containerId+' .pf-chip').forEach(c=>{
-    c.classList.toggle('selected', vals.includes(c.dataset.val));
-  });
-}
-
-function pfLoad(){
-  const p=userData.profile||{};
-  const set=(id,val)=>{const el=document.getElementById(id);if(el&&val!==undefined&&val!==null) el.value=val;};
-  // Basic
-  set('pf-name',p.name);set('pf-age',p.age);set('pf-journey',p.journeyStage);
-  set('pf-cycle',p.cycleLength);set('pf-period',p.periodLength);set('pf-notes',p.notes);
-  setChipVals('pf-sym-grid',p.symptoms);
-  setChipVals('pf-med-grid',p.medications);
-  // Menstrual
-  set('pf-lmp',p.lmp);set('pf-cycle-regularity',p.cycleRegularity);
-  set('pf-menarche',p.menarche);
-  setChipVals('pf-flow-chips',p.flowHeaviness);
-  setChipVals('pf-pain-chips',p.painLevel);
-  // Fertility
-  set('pf-ttc-duration',p.ttcDuration);set('pf-gravida',p.gravida);
-  set('pf-obs-living',p.obsLiving);set('pf-tx-cycles',p.txCycles);
-  setChipVals('pf-outcome-chips',p.pregnancyOutcomes);
-  setChipVals('pf-fertility-conditions',p.fertilityConditions);
-  setChipVals('pf-surgeries',p.previousSurgeries);
-  setChipVals('pf-sa-chips',p.semenAnalysis);
-  setChipVals('pf-prev-tx-chips',p.prevTreatments);
-  // Tests
-  setChipVals('pf-inv-done-chips',p.investigationsDone);
-  set('pf-amh',p.amh);set('pf-fsh',p.fsh);set('pf-lh',p.lh);
-  set('pf-tsh',p.tsh);set('pf-prolactin',p.prolactin);
-  set('pf-testosterone',p.testosterone);set('pf-dheas',p.dheas);
-  set('pf-estradiol',p.estradiol);set('pf-progesterone',p.progesterone);
-  set('pf-hb',p.hb);set('pf-ferritin',p.ferritin);
-  set('pf-fasting-glucose',p.fastingGlucose);set('pf-hba1c',p.hba1c);
-  set('pf-fasting-insulin',p.fastingInsulin);set('pf-vitamin-d',p.vitaminD);
-  set('pf-b12',p.vitaminB12);set('pf-blood-group',p.bloodGroup);
-  set('pf-cbc',p.cbc);set('pf-afc',p.afc);set('pf-endo',p.endometrialThickness);
-  setChipVals('pf-usg-chips',p.usgFindings);
-  set('pf-hsg',p.hsgResult);
-  // Treatment
-  set('pf-workup-status',p.workupStatus);set('pf-tx-phase',p.txPhase);
-  set('pf-cycle-day',p.cycleDay);set('pf-next-step',p.nextStep);
-  set('pf-concerns',p.concerns);
-  setChipVals('pf-doctor-chips',p.doctorInvolved);
-  // Pregnancy
-  set('pf-preg-lmp',p.pregLmp);set('pf-preg-edd',p.pregEdd);
-  set('pf-booking-week',p.pregBookingWeek);set('pf-preg-conception',p.pregConception);
-  setChipVals('pf-high-risk',p.pregHighRisk);
-  set('pf-anc-blood-group',p.ancBloodGroup);
-  set('pf-anc-hb1',p.ancHb1);set('pf-anc-hb2',p.ancHb2);set('pf-anc-hb3',p.ancHb3);
-  set('pf-anc-vdrl',p.ancVdrl);set('pf-anc-hiv',p.ancHiv);set('pf-anc-hbsag',p.ancHbsag);
-  set('pf-ogtt-fasting',p.ancOgttFasting);set('pf-ogtt-1hr',p.ancOgtt1hr);set('pf-ogtt-2hr',p.ancOgtt2hr);
-  set('pf-anc-tsh',p.ancTsh);set('pf-anc-ferritin',p.ancFerritin);
-  set('pf-anc-platelets',p.ancPlateletCount);
-  set('pf-dating-scan',p.ancDatingScan);set('pf-nuchal-nt',p.ancNuchalNt);
-  set('pf-nuchal-result',p.ancNuchalResult);set('pf-anomaly-scan',p.ancAnomalyScan);
-  set('pf-placenta',p.ancPlacentaPos);set('pf-growth-scan',p.ancGrowthScan);
-  set('pf-tt1',p.immTt1Date);set('pf-tt2',p.immTt2Date||p.immTdDate);set('pf-flu',p.immFluDate);
-  set('pf-bp1',p.bpReading1);set('pf-bp1-date',p.bpReading1Date);
-  set('pf-bp2',p.bpReading2);set('pf-bp2-date',p.bpReading2Date);
-  pfUpdateCompletion();
-}
-
-async function pfSave(){
-  const g=(id)=>{const el=document.getElementById(id);return el?el.value:''};
-  const gn=(id)=>{const v=parseFloat(g(id));return isNaN(v)?null:v;};
-  const gi=(id)=>{const v=parseInt(g(id));return isNaN(v)?null:v;};
-  const profile={
-    name:g('pf-name'),age:gi('pf-age'),journeyStage:g('pf-journey'),
-    cycleLength:gi('pf-cycle'),periodLength:gi('pf-period'),notes:g('pf-notes'),
-    symptoms:getChipVals('pf-sym-grid'),medications:getChipVals('pf-med-grid'),
-    lmp:g('pf-lmp'),cycleRegularity:g('pf-cycle-regularity'),menarche:gi('pf-menarche'),
-    flowHeaviness:getChipVals('pf-flow-chips'),painLevel:getChipVals('pf-pain-chips'),
-    ttcDuration:g('pf-ttc-duration'),gravida:g('pf-gravida'),obsLiving:gi('pf-obs-living'),
-    txCycles:gi('pf-tx-cycles'),
-    pregnancyOutcomes:getChipVals('pf-outcome-chips'),
-    fertilityConditions:getChipVals('pf-fertility-conditions'),
-    previousSurgeries:getChipVals('pf-surgeries'),
-    semenAnalysis:getChipVals('pf-sa-chips'),
-    prevTreatments:getChipVals('pf-prev-tx-chips'),
-    investigationsDone:getChipVals('pf-inv-done-chips'),
-    amh:gn('pf-amh'),fsh:gn('pf-fsh'),lh:gn('pf-lh'),tsh:gn('pf-tsh'),
-    prolactin:gn('pf-prolactin'),testosterone:gn('pf-testosterone'),
-    dheas:gn('pf-dheas'),estradiol:gn('pf-estradiol'),progesterone:gn('pf-progesterone'),
-    hb:gn('pf-hb'),ferritin:gn('pf-ferritin'),fastingGlucose:gn('pf-fasting-glucose'),
-    hba1c:gn('pf-hba1c'),fastingInsulin:gn('pf-fasting-insulin'),
-    vitaminD:gn('pf-vitamin-d'),vitaminB12:gn('pf-b12'),
-    bloodGroup:g('pf-blood-group'),cbc:g('pf-cbc'),
-    afc:gn('pf-afc'),endometrialThickness:gn('pf-endo'),
-    usgFindings:getChipVals('pf-usg-chips'),hsgResult:g('pf-hsg'),
-    workupStatus:g('pf-workup-status'),txPhase:g('pf-tx-phase'),
-    cycleDay:gi('pf-cycle-day'),nextStep:g('pf-next-step'),concerns:g('pf-concerns'),
-    doctorInvolved:getChipVals('pf-doctor-chips'),
-    pregLmp:g('pf-preg-lmp'),pregEdd:g('pf-preg-edd'),
-    pregBookingWeek:gi('pf-booking-week'),pregConception:g('pf-preg-conception'),
-    pregHighRisk:getChipVals('pf-high-risk'),
-    ancBloodGroup:g('pf-anc-blood-group'),
-    ancHb1:gn('pf-anc-hb1'),ancHb2:gn('pf-anc-hb2'),ancHb3:gn('pf-anc-hb3'),
-    ancVdrl:g('pf-anc-vdrl'),ancHiv:g('pf-anc-hiv'),ancHbsag:g('pf-anc-hbsag'),
-    ancOgttFasting:gn('pf-ogtt-fasting'),ancOgtt1hr:gn('pf-ogtt-1hr'),ancOgtt2hr:gn('pf-ogtt-2hr'),
-    ancTsh:gn('pf-anc-tsh'),ancFerritin:gn('pf-anc-ferritin'),ancPlateletCount:gi('pf-anc-platelets'),
-    ancDatingScan:g('pf-dating-scan'),ancNuchalNt:gn('pf-nuchal-nt'),ancNuchalResult:g('pf-nuchal-result'),
-    ancAnomalyScan:g('pf-anomaly-scan'),ancPlacentaPos:g('pf-placenta'),ancGrowthScan:g('pf-growth-scan'),
-    immTt1Date:g('pf-tt1'),immTdDate:g('pf-tt2'),immFluDate:g('pf-flu'),
-    bpReading1:g('pf-bp1'),bpReading1Date:g('pf-bp1-date'),
-    bpReading2:g('pf-bp2'),bpReading2Date:g('pf-bp2-date'),
-  };
-  try{
-    const res=await fetch('/profile',{method:'PUT',headers:{'Content-Type':'application/json',Authorization:TOKEN},body:JSON.stringify(profile)});
-    if(res.ok){
-      userData=await res.json();
-      // Sync LMP to cycle tracker
-      const msg=document.getElementById('pf-saved-msg');
-      if(msg){ msg.style.display='block'; }
-      userProfile = userData.profile || {};
-      contentCache = {};
-      setTimeout(()=>{
-        if(msg) msg.style.display='none';
-        const modal=document.getElementById('profileModal');
-        if(modal) modal.style.display='none';
-        if(typeof renderPersonaTags==='function') renderPersonaTags();
-        if(typeof initTTC==='function') initTTC();
-      }, 1200);
-    }
-  }catch(e){alert('Could not save profile. Please try again.');}
-}
-
-function calcPregLmpFromEdd(){
-  const edd=document.getElementById('pf-preg-edd').value;
-  if(!edd) return;
-  const d=new Date(edd);d.setDate(d.getDate()-280);
-  document.getElementById('pf-preg-lmp').value=d.toISOString().split('T')[0];
-}
-
-function openProfileModal(){
-  pfBuildChips();pfLoad();
-  document.getElementById('profileModal').style.display='flex';
-}
-
-function buildRoadmapProfileModal(){
-  pfBuildChips();pfLoad();
-  document.getElementById('profileModal').style.display='flex';
-}
-</script>
-</body></html>
-
-</script>
 </body></html>
