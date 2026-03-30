@@ -791,6 +791,8 @@ app.post("/roadmap-content", auth, async (req, res) => {
     // Handle postpartum journey
     if (journey === 'postpartum') {
       const ppStage = req.body.ppStage || 'day1_3';
+      const ppQuery = `postpartum breastfeeding newborn baby care recovery ${ppStage}`;
+      const relevantKnowledge = searchKnowledge(ppQuery, profile, 10);
       const ppStageLabels = {
         day1_3: 'Day 1-3 after birth (hospital)',
         week1_2: 'Week 1-2 postpartum (coming home)',
