@@ -182,6 +182,8 @@ const UserSchema = new mongoose.Schema({
     // Immunizations
     immTt1Date: String, immTt2Date: String, immTdDate: String,
     immFluDate: String, immCovidDone: Boolean,
+    bpReading1: String, bpReading1Date: String,
+    bpReading2: String, bpReading2Date: String,
   },
   fertilityPlan: { content: String, generatedAt: Date },
 });
@@ -510,6 +512,8 @@ app.post("/roadmap-content", auth, async (req, res) => {
       if (p.ancAnomalyScan) lines.push(`Anomaly scan: ${p.ancAnomalyScan}`);
       if (p.ancPlacentaPos) lines.push(`Placenta: ${p.ancPlacentaPos}`);
       if (p.pregHighRisk && p.pregHighRisk.length) lines.push(`High risk: ${p.pregHighRisk.join(', ')}`);
+      if (p.bpReading1) lines.push(`BP reading 1: ${p.bpReading1}${p.bpReading1Date ? ' on ' + p.bpReading1Date : ''}`);
+      if (p.bpReading2) lines.push(`BP reading 2: ${p.bpReading2}${p.bpReading2Date ? ' on ' + p.bpReading2Date : ''}`);
       if (p.notes) lines.push(`Notes: ${p.notes}`);
       return lines.join('\n');
     }
@@ -555,8 +559,15 @@ Specify which vaccines are due at ${ppStageLabel}. Explain what each protects ag
       const ppResponse = await groq.chat.completions.create({ model: "llama-3.3-70b-versatile", messages: [{ role: "system", content: ppSystemMsg }, { role: "user", content: ppSectionPrompts[section] || ppSectionPrompts.overview }], max_tokens: 1200, temperature: 0.3 });
       const ppRaw = ppResponse.choices[0].message.content.trim();
       let ppParsed;
-      try { ppParsed = JSON.parse(ppRaw.replace(/```json|```/g, "").trim()); }
-      catch(e) { ppParsed = { main_content: ppRaw, key_points: [], personalised_tip: "", clinical_note: "", action_items: [] }; }
+      try {
+        const ppCleaned = ppRaw.replace(/```json|```/g, "").trim();
+        const ppStart = ppCleaned.indexOf('{');
+        const ppEnd = ppCleaned.lastIndexOf('}');
+        const ppStr = ppStart !== -1 && ppEnd !== -1 ? ppCleaned.slice(ppStart, ppEnd + 1) : ppCleaned;
+        ppParsed = JSON.parse(ppStr);
+      } catch(e) {
+        ppParsed = { main_content: ppRaw.replace(/```json|```/g,"").trim(), key_points: [], personalised_tip: "", clinical_note: "", action_items: [] };
+      }
       return res.json({ content: ppParsed, journey, section, ppStage });
     }
 
@@ -611,6 +622,9 @@ Specify which vaccines are due at ${ppStageLabel}. Explain what each protects ag
       hormones: `Generate hormone explanation for this patient's results.\nSTAGE: ${stageDescriptions[clinicalStage]}\n${profile.amh || profile.fsh || profile.lh || profile.tsh ? `Interpret her values:\n${profile.amh ? `AMH ${profile.amh} ng/mL` : ''}\n${profile.fsh ? `FSH ${profile.fsh} IU/L` : ''}\n${profile.lh && profile.fsh ? `LH:FSH ${(profile.lh/profile.fsh).toFixed(1)}` : ''}\n${profile.tsh ? `TSH ${profile.tsh} mIU/L` : ''}` : 'No hormone tests done yet. Explain which tests she needs and when.'}`,
 
       supplements: `Generate specific supplement protocol.\nSTAGE: ${stageDescriptions[clinicalStage]}\n${checkinContext ? `CHECK-IN SYMPTOMS: ${checkin && checkin.chips ? checkin.chips.join(', ') : ''}\nAddress each symptom with supplement/dietary advice. Flag bleeding/reduced movements/headache/swelling as URGENT first.` : ''}
+${journey === 'pregnancy' && (profile.bpReading1 || profile.bpReading2) ? `
+BP READINGS: ${profile.bpReading1 || ''}${profile.bpReading2 ? ' / ' + profile.bpReading2 : ''}
+If systolic ≥140 or diastolic ≥90 in ANY reading — flag pre-eclampsia risk prominently at top. Advise: rest, reduce salt, avoid NSAIDs, contact doctor urgently.` : ''}
 ${journey === 'pregnancy' ? `STRICT PREGNANCY RULES:\n- Folic acid 5mg: weeks 1-12 ONLY\n- Iron 60mg: Week 14+ ONLY\n- Calcium: Week 16+ only\n- Vitamin D: safe throughout\nCurrent week: ${week}` : `TTC SUPPLEMENTS:\n${syms.includes('pcos_diagnosed') ? '- PCOS: Myo-inositol 2g + D-chiro 50mg BD, Vitamin D, NAC 600mg, Omega-3' : ''}\n${profile.amh && profile.amh < 1.5 ? '- Low AMH: CoQ10 ubiquinol 400-600mg, DHEA 25mg (doctor supervised), Vitamin D' : ''}\n${profile.vitaminD && profile.vitaminD < 30 ? `- Vitamin D ${profile.vitaminD} ng/mL (deficient): 60,000 IU weekly x 8 weeks` : ''}\n- Universal TTC: Folic acid 5mg, Vitamin D 1000 IU, Omega-3 1g`}
 Include Indian brand names. Format: • Supplement — Dose — Timing — Why`,
 
@@ -646,8 +660,16 @@ Return ONLY valid JSON. No markdown, no preamble.
     const response = await groq.chat.completions.create({ model: "llama-3.3-70b-versatile", messages: [{ role: "system", content: systemMsg }, { role: "user", content: prompt }], max_tokens: 1200, temperature: 0.3 });
     const rawText = response.choices[0].message.content.trim();
     let parsed;
-    try { parsed = JSON.parse(rawText.replace(/```json|```/g, "").trim()); }
-    catch(e) { parsed = { main_content: rawText, key_points: [], personalised_tip: "", clinical_note: "", action_items: [] }; }
+    try {
+      const cleaned = rawText.replace(/```json|```/g, "").trim();
+      const jsonStart = cleaned.indexOf('{');
+      const jsonEnd = cleaned.lastIndexOf('}');
+      const jsonStr = jsonStart !== -1 && jsonEnd !== -1 ? cleaned.slice(jsonStart, jsonEnd + 1) : cleaned;
+      parsed = JSON.parse(jsonStr);
+    } catch(e) {
+      // Extract readable text — strip JSON artifacts
+      parsed = { main_content: rawText.replace(/```json|```/g,"").trim(), key_points: [], personalised_tip: "", clinical_note: "", action_items: [] };
+    }
     res.json({ content: parsed, journey, month, week, section, clinicalStage });
 
   } catch (err) {
