@@ -1081,12 +1081,29 @@ function scrollWeekNav(amount){
 function openRoadmapProfile(){
   const modal = document.getElementById('profileModal');
   if(!modal) return;
+
+  // Force build chips — check if sym grid has children, if not build
   if(typeof pfBuildChips === 'function') pfBuildChips();
-  // Small delay to ensure chips are in DOM before loading values
-  setTimeout(() => {
-    if(typeof pfLoad === 'function') pfLoad();
-    modal.style.display='flex';
-  }, 200);
+
+  // Wait for chips to be in DOM, then load values
+  let attempts = 0;
+  function tryLoad(){
+    const symGrid = document.getElementById('pf-sym-grid');
+    if(symGrid && symGrid.children.length > 0){
+      if(typeof pfLoad === 'function') pfLoad();
+      modal.style.display = 'flex';
+    } else {
+      attempts++;
+      if(attempts < 20){
+        setTimeout(tryLoad, 50);
+      } else {
+        // Force show even if chips not ready
+        if(typeof pfLoad === 'function') pfLoad();
+        modal.style.display = 'flex';
+      }
+    }
+  }
+  setTimeout(tryLoad, 30);
 }
 
 function saveBabyInvestigation(){
