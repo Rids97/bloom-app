@@ -1075,7 +1075,10 @@ function scrollWeekNav(amount){
 }
 
 function openRoadmapProfile(){
-  buildRoadmapProfileModal();
+  if(typeof pfBuildChips === 'function') pfBuildChips();
+  if(typeof pfLoad === 'function') pfLoad();
+  const modal = document.getElementById('profileModal');
+  if(modal) modal.style.display='flex';
 }
 
 function saveBabyInvestigation(){
@@ -1762,16 +1765,16 @@ async function pfSave(){
       userData=await res.json();
       // Sync LMP to cycle tracker
       const msg=document.getElementById('pf-saved-msg');
-      msg.style.display='block';
-      // Refresh roadmap with new profile data
+      if(msg){ msg.style.display='block'; }
       userProfile = userData.profile || {};
       contentCache = {};
       setTimeout(()=>{
-        msg.style.display='none';
-        document.getElementById('profileModal').style.display='none';
-        renderPersonaTags();
-        initTTC();
-      }, 1500);
+        if(msg) msg.style.display='none';
+        const modal=document.getElementById('profileModal');
+        if(modal) modal.style.display='none';
+        if(typeof renderPersonaTags==='function') renderPersonaTags();
+        if(typeof initTTC==='function') initTTC();
+      }, 1200);
     }
   }catch(e){alert('Could not save profile. Please try again.');}
 }
