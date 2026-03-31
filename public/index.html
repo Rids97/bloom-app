@@ -819,7 +819,7 @@ async function init(){
 
 function renderProfile(){
   const p=userData.profile||{};
-  const name=p.name||userData.email?.split('@')[0]||'there';
+  const emailName=userData.email?userData.email.split('@')[0]:'there'; const name=p.name||emailName;
   const initials=name[0]?.toUpperCase()||'?';
   document.getElementById('avatarEl').textContent=initials;
   document.getElementById('sideAvatar').textContent=initials;
@@ -830,7 +830,7 @@ function renderProfile(){
   document.getElementById('statPeriod').textContent=p.periodLength?p.periodLength+'d':'—';
   const h=new Date().getHours();
   const g=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
-  document.getElementById('greetTitle').innerHTML=g+', <em>'+(p.name||'there')+'</em> 🌸';
+  const greetName=p.name||(userData.email?userData.email.split('@')[0]:'there'); document.getElementById('greetTitle').innerHTML=g+', <em>'+greetName+'</em> 🌸';
   document.getElementById('greetDate').textContent=new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'});
   if(p.symptoms&&p.symptoms.length){document.getElementById('symptomsSection').style.display='block';document.getElementById('symptomsList').innerHTML=p.symptoms.map(s=>'<span class="sym-tag">'+s+'</span>').join('');}
   const badge=document.getElementById('planBadge');
@@ -840,8 +840,6 @@ function renderProfile(){
   const upgradeBtn=document.getElementById('upgrade-topbar-btn');
   if(upgradeBtn) upgradeBtn.style.display=userPlan==='complete'?'none':'inline-block';
   // Show upgrade button for non-complete users
-  const upgradeBtn=document.getElementById('upgrade-topbar-btn');
-  if(upgradeBtn) upgradeBtn.style.display=(userPlan!=='complete'?'inline-block':'none');
   if(p.cycleLength) document.getElementById('ccCycleLen').value=p.cycleLength;
   if(p.periodLength) document.getElementById('ccPeriodLen').value=p.periodLength;
   const saved=localStorage.getItem('bloom_last_period');
