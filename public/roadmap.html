@@ -1029,56 +1029,74 @@ function renderPPMilestones(stage){
   document.getElementById('pp-milestones').innerHTML=(items[stage]||[]).map(m=>`<div class="milestone-item"><div class="m-dot done"></div>${m}</div>`).join('');
 }
 
-// PATCHED: renderAIContent with arrow formatting
+// PATCHED: renderAIContent — definitive JSON fix
 function renderAIContent(content,containerId){
   if(!content) return;
+
+  // Step 1: Aggressively parse JSON from string
   if(typeof content==='string'){
-    try{
-      const cleaned=content.replace(/```json|```/g,'').trim();
-      const s=cleaned.indexOf('{'),e2=cleaned.lastIndexOf('}');
-      content=JSON.parse(s!==-1&&e2!==-1?cleaned.slice(s,e2+1):cleaned);
-    }catch(parseErr){
-      document.getElementById(containerId).innerHTML=`<div class="ai-content fade-up"><div class="ai-main" style="line-height:1.9;">${formatContent(content)}</div></div>`;return;
+    let cleaned=content.replace(/```json|```/g,'').trim();
+    const first=cleaned.indexOf('{');
+    const last=cleaned.lastIndexOf('}');
+    if(first!==-1&&last!==-1&&last>first){
+      try{
+        content=JSON.parse(cleaned.slice(first,last+1));
+      }catch(parseErr){
+        // Field-by-field extraction fallback
+        try{
+          const extractStr=(key)=>{const rx=new RegExp('"'+key+'"\\s*:\\s*"((?:[^"\\\\]|\\\\.)*)\"');const m=cleaned.match(rx);return m?m[1].replace(/\\n/g,'\n').replace(/\\"/g,'"'):'';}
+          const extractArr=(key)=>{const rx=new RegExp('"'+key+'"\\s*:\\s*\\[([^\\]]+)\\]');const m=cleaned.match(rx);if(!m) return [];return m[1].match(/"((?:[^"\\]|\\.)*)"/g)?.map(s=>s.slice(1,-1).replace(/\\n/g,'\n'))||[];}
+          content={main_content:extractStr('main_content'),key_points:extractArr('key_points'),personalised_tip:extractStr('personalised_tip'),clinical_note:extractStr('clinical_note'),action_items:extractArr('action_items')};
+        }catch(e2){
+          document.getElementById(containerId).innerHTML=`<div class="ai-content fade-up"><div class="ai-main">${formatContent(cleaned)}</div></div>`;return;
+        }
+      }
+    } else {
+      document.getElementById(containerId).innerHTML=`<div class="ai-content fade-up"><div class="ai-main">${formatContent(cleaned)}</div></div>`;return;
     }
   }
-  if(content&&typeof content==='object'&&!content.main_content&&!content.key_points){
+
+  if(!content||typeof content!=='object'){
     document.getElementById(containerId).innerHTML=`<div class="ai-content fade-up"><div class="ai-main">Could not load content. <button class="retry-btn" onclick="location.reload()">Retry</button></div></div>`;return;
   }
 
-  // PATCHED formatContent — arrow bullets with spacing
   function formatContent(text){
     if(!text) return '';
     return text.split('\n').map(line=>{
       line=line.trim();
-      if(!line) return '<div style="height:10px;"></div>';
-      // Arrow → bullets (primary format from server)
+      if(!line) return '<div style="height:14px;"></div>';
       if(line.startsWith('→')){
         const txt=line.replace(/^→\s*/,'');
-        return `<div style="display:flex;gap:10px;padding:8px 0 8px 8px;border-left:2px solid var(--terra-l);margin:4px 0;background:rgba(196,112,79,0.03);border-radius:0 6px 6px 0;"><span style="color:var(--terra);font-weight:700;flex-shrink:0;margin-top:2px;font-size:15px;">→</span><span style="line-height:1.8;">${txt}</span></div><div style="height:8px;"></div>`;
+        return `<div style="display:flex;gap:12px;padding:10px 14px;border-left:3px solid var(--terra-l);margin:8px 0;background:rgba(196,112,79,0.04);border-radius:0 8px 8px 0;"><span style="color:var(--terra);font-weight:700;flex-shrink:0;font-size:18px;margin-top:1px;">→</span><span style="line-height:1.9;font-size:19px;">${txt}</span></div><div style="height:6px;"></div>`;
       }
-      // Legacy bullet formats — convert to arrow style
       if(line.startsWith('•')||line.startsWith('* ')||line.startsWith('- ')){
         const txt=line.replace(/^[•\*\-]\s*/,'');
-        return `<div style="display:flex;gap:10px;padding:8px 0 8px 8px;border-left:2px solid var(--terra-l);margin:4px 0;background:rgba(196,112,79,0.03);border-radius:0 6px 6px 0;"><span style="color:var(--terra);font-weight:700;flex-shrink:0;margin-top:2px;font-size:15px;">→</span><span style="line-height:1.8;">${txt}</span></div><div style="height:8px;"></div>`;
+        return `<div style="display:flex;gap:12px;padding:10px 14px;border-left:3px solid var(--terra-l);margin:8px 0;background:rgba(196,112,79,0.04);border-radius:0 8px 8px 0;"><span style="color:var(--terra);font-weight:700;flex-shrink:0;font-size:18px;margin-top:1px;">→</span><span style="line-height:1.9;font-size:19px;">${txt}</span></div><div style="height:6px;"></div>`;
       }
-      // SECTION headers with numbers
-      if(line.match(/^SECTION\s+\d+/i)) return `<div style="font-weight:600;color:var(--sage-d);margin-top:18px;margin-bottom:8px;padding:8px 14px;background:var(--sage-l);border-radius:8px;font-size:14px;">${line}</div>`;
-      // Short ALL CAPS section titles
-      if(line.match(/^[A-Z][^.!?]*:$/)&&line.length<70) return `<div style="font-weight:600;color:var(--terra-d);margin-top:16px;margin-bottom:6px;font-size:15px;">${line}</div>`;
-      return `<div style="padding:3px 0;line-height:1.85;">${line}</div>`;
+      if(line.match(/^[A-Z][^.!?]{0,60}:$/)&&line.length<70) return `<div style="font-weight:700;color:var(--terra-d);margin-top:20px;margin-bottom:8px;font-size:17px;padding-bottom:4px;border-bottom:2px solid var(--terra-l);">${line}</div>`;
+      return `<div style="padding:5px 0;line-height:1.9;font-size:19px;">${line}</div>`;
     }).join('');
   }
 
   let html=`<div class="ai-content fade-up">`;
-  if(content.main_content) html+=`<div class="ai-main" style="line-height:1.9;">${formatContent(content.main_content)}</div>`;
+  if(content.main_content) html+=`<div class="ai-main" style="line-height:1.9;margin-bottom:1.5rem;">${formatContent(content.main_content)}</div>`;
   if(content.key_points&&content.key_points.length){
-    html+=`<div class="key-points"><div class="key-points-title">Key Clinical Points</div>${content.key_points.map(p=>`<div class="key-point">${p.replace(/^→\s*/,'')}</div>`).join('')}</div>`;
+    html+=`<div class="key-points"><div class="key-points-title">Key Clinical Points</div>`;
+    content.key_points.forEach(pt=>{
+      const clean=pt.replace(/^→\s*/,'');
+      html+=`<div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border-l);"><span style="color:var(--terra);font-weight:700;flex-shrink:0;font-size:18px;margin-top:2px;">→</span><span style="font-size:19px;line-height:1.85;">${clean}</span></div>`;
+    });
+    html+=`</div>`;
   }
-  if(content.personalised_tip){html+=`<div class="persona-tip"><span class="persona-tip-icon">💡</span><div class="persona-tip-text"><strong>For you:</strong> ${content.personalised_tip}</div></div>`;}
-  if(content.clinical_note){html+=`<div class="clinical-note"><div class="clinical-note-title">⚠ Clinical Note</div><div class="clinical-note-text">${content.clinical_note}</div></div>`;}
-  // PATCHED: action items with → prefix
+  if(content.personalised_tip) html+=`<div class="persona-tip"><span class="persona-tip-icon">💡</span><div class="persona-tip-text" style="font-size:19px;line-height:1.85;"><strong>For you:</strong> ${content.personalised_tip}</div></div>`;
+  if(content.clinical_note) html+=`<div class="clinical-note"><div class="clinical-note-title">⚠ Clinical Note</div><div class="clinical-note-text" style="font-size:19px;line-height:1.85;">${content.clinical_note}</div></div>`;
   if(content.action_items&&content.action_items.length){
-    html+=`<div class="action-items"><div class="action-items-title">Action Items</div>${content.action_items.map(a=>`<div class="action-item">${a.startsWith('→')?a.replace(/^→\s*/,''):a}</div>`).join('')}</div>`;
+    html+=`<div class="action-items"><div class="action-items-title">Action Items</div>`;
+    content.action_items.forEach(a=>{
+      const clean=a.replace(/^→\s*/,'');
+      html+=`<div class="action-item" style="font-size:18px;line-height:1.8;">→ ${clean}</div>`;
+    });
+    html+=`</div>`;
   }
   html+=`<div class="ai-source">📚 Evidence-based · Built by a licensed gynaecologist · Personalised to your profile</div></div>`;
   document.getElementById(containerId).innerHTML=html;
@@ -1156,7 +1174,7 @@ function pfBuildChips(){
     });
   }
   // PATCHED: added new chip groups
-  document.querySelectorAll('#pf-flow-chips .pf-chip, #pf-pain-chips .pf-chip, #pf-outcome-chips .pf-chip, #pf-fertility-conditions .pf-chip, #pf-surgeries .pf-chip, #pf-sa-chips .pf-chip, #pf-prev-tx-chips .pf-chip, #pf-inv-done-chips .pf-chip, #pf-usg-chips .pf-chip, #pf-doctor-chips .pf-chip, #pf-high-risk .pf-chip, #pf-delivery-mode-chips .pf-chip, #pf-lscs-reason-chips .pf-chip, #pf-obs-complications .pf-chip').forEach(chip=>{
+  document.querySelectorAll('#pf-flow-chips .pf-chip, #pf-pain-chips .pf-chip, #pf-outcome-chips .pf-chip, #pf-fertility-conditions .pf-chip, #pf-surgeries .pf-chip, #pf-sa-chips .pf-chip, #pf-prev-tx-chips .pf-chip, #pf-inv-done-chips .pf-chip, #pf-usg-chips .pf-chip, #pf-doctor-chips .pf-chip, #pf-high-risk .pf-chip, #pf-delivery-mode-chips .pf-chip, #pf-lscs-reason-chips .pf-chip, #pf-obs-complications .pf-chip, #pf-intermenstrual-chips .pf-chip, #pf-pms-chips .pf-chip').forEach(chip=>{
     if(!chip._wired){
       chip._wired=true;
       chip.onclick=function(){this.classList.toggle('selected');pfUpdateCompletion();};
@@ -1385,9 +1403,7 @@ function buildRoadmapProfileModal(){pfBuildChips();pfLoad();document.getElementB
       <div style="display:flex;gap:4px;flex-wrap:wrap;" id="pf-tabs">
         <button class="pf-tab active" data-tab="basic" onclick="pfSwitchTab('basic',this)">🌸 Basic</button>
         <button class="pf-tab" data-tab="menstrual" onclick="pfSwitchTab('menstrual',this)">📅 Menstrual</button>
-        <button class="pf-tab" data-tab="fertility" onclick="pfSwitchTab('fertility',this)">🌱 Fertility</button>
-        <button class="pf-tab" data-tab="tests" onclick="pfSwitchTab('tests',this)">🧪 Tests</button>
-        <button class="pf-tab" data-tab="treatment" onclick="pfSwitchTab('treatment',this)">💊 Treatment</button>
+        <button class="pf-tab" data-tab="fertility" onclick="pfSwitchTab('fertility',this)">🌱 Fertility &amp; Tests</button>
         <button class="pf-tab" data-tab="pregnancy" onclick="pfSwitchTab('pregnancy',this)">🤰 Pregnancy</button>
       </div>
     </div>
@@ -1529,12 +1545,63 @@ function buildRoadmapProfileModal(){pfBuildChips();pfLoad();document.getElementB
           </div>
         </div>
         <div><label class="pf-label">Number of treatment cycles done</label><input type="number" id="pf-tx-cycles" placeholder="e.g. 2" min="0" max="20" class="pf-input" style="width:100px;"/></div>
-      </div>
 
-      <!-- TAB: TESTS -->
-      <div id="pf-tab-tests" class="pf-tab-panel" style="display:none;">
-        <div class="pf-section-intro">🧪 Enter your test values — this directly improves your roadmap and personalised advice.</div>
-        <div style="margin-bottom:10px;"><label class="pf-label">Investigations done</label>
+        <!-- TREATMENT STATUS merged into Fertility tab -->
+        <div class="pf-sep">💊 Current Treatment Status</div>
+        <div style="margin-bottom:10px;"><label class="pf-label">Where are you in your workup?</label>
+          <select id="pf-workup-status" class="pf-input">
+            <option value="">Select…</option>
+            <option value="no_workup">No investigations done yet</option>
+            <option value="workup_partial">Some investigations done</option>
+            <option value="workup_complete">All investigations done</option>
+            <option value="on_treatment">On active treatment</option>
+            <option value="between_cycles">Between treatment cycles</option>
+            <option value="ivf_prep">Preparing for IVF</option>
+          </select>
+        </div>
+        <div style="margin-bottom:10px;"><label class="pf-label">Current treatment phase</label>
+          <select id="pf-tx-phase" class="pf-input">
+            <option value="">Select…</option>
+            <option value="none">Not on any treatment</option>
+            <option value="oi_letrozole">Ovulation induction — Letrozole</option>
+            <option value="oi_clomiphene">Ovulation induction — Clomiphene</option>
+            <option value="iui_cycle">IUI cycle</option>
+            <option value="ivf_stimulation">IVF — stimulation</option>
+            <option value="ivf_tww">IVF — two-week wait</option>
+            <option value="ivf_fet">FET (frozen embryo transfer)</option>
+            <option value="luteal_support">Luteal phase support</option>
+            <option value="monitoring">Monitoring / follicle tracking</option>
+          </select>
+        </div>
+        <div class="pf-grid2" style="margin-bottom:10px;">
+          <div><label class="pf-label">Current cycle day</label><input type="number" id="pf-cycle-day" placeholder="e.g. 9" min="1" max="45" class="pf-input"/></div>
+        </div>
+        <div style="margin-bottom:10px;"><label class="pf-label">Doctor involved</label>
+          <div class="pf-chip-row" id="pf-doctor-chips">
+            <div class="pf-chip" data-val="gp_only">GP only</div>
+            <div class="pf-chip" data-val="gynaecologist">Gynaecologist</div>
+            <div class="pf-chip" data-val="fertility_specialist">Fertility specialist</div>
+            <div class="pf-chip" data-val="none_yet">No doctor yet</div>
+          </div>
+        </div>
+        <div style="margin-bottom:10px;"><label class="pf-label">Next planned step</label>
+          <select id="pf-next-step" class="pf-input">
+            <option value="">Select…</option>
+            <option value="get_investigations">Get investigations done</option>
+            <option value="see_doctor">See a doctor</option>
+            <option value="start_oi">Start ovulation induction</option>
+            <option value="continue_oi">Continue OI cycle</option>
+            <option value="plan_iui">Plan IUI</option>
+            <option value="plan_ivf">Plan IVF</option>
+            <option value="tww">In two-week wait</option>
+            <option value="test_result">Awaiting test result</option>
+          </select>
+        </div>
+        <div style="margin-bottom:14px;"><label class="pf-label">Concerns for next appointment</label><textarea id="pf-concerns" rows="2" placeholder="e.g. Want to ask about starting Letrozole, concerned about AMH result…" class="pf-input" style="resize:vertical;"></textarea></div>
+
+        <!-- TESTS merged into Fertility tab -->
+        <div class="pf-sep">🧪 Investigations Done</div>
+        <div style="margin-bottom:10px;">
           <div class="pf-chip-row" id="pf-inv-done-chips">
             <div class="pf-chip" data-val="amh">AMH</div>
             <div class="pf-chip" data-val="fsh_lh">FSH / LH</div>
@@ -1670,11 +1737,43 @@ function buildRoadmapProfileModal(){pfBuildChips();pfLoad();document.getElementB
         <div><label class="pf-label">Concerns for next appointment</label><textarea id="pf-concerns" rows="3" placeholder="e.g. Want to ask about starting Letrozole, concerned about AMH result…" class="pf-input" style="resize:vertical;"></textarea></div>
       </div>
 
-      <!-- TAB: PREGNANCY — PATCHED with full obstetric history + extended ANC -->
+      <!-- TAB: PREGNANCY — Current Pregnancy FIRST, then Obstetric History -->
       <div id="pf-tab-pregnancy" class="pf-tab-panel" style="display:none;">
-        <div class="pf-section-intro">🤰 This tab captures your full obstetric history and ANC investigations — the more you fill, the more personalised your pregnancy roadmap becomes.</div>
+        <div class="pf-section-intro">🤰 This tab captures your current pregnancy details, obstetric history, and ANC investigations — the more you fill, the more personalised your pregnancy roadmap becomes.</div>
 
-        <!-- OBSTETRIC HISTORY -->
+        <!-- CURRENT PREGNANCY FIRST -->
+        <div class="pf-sep">🌸 Current Pregnancy</div>
+        <div class="pf-grid2" style="margin-bottom:10px;">
+          <div><label class="pf-label">LMP (last menstrual period)</label><input type="date" id="pf-preg-lmp" class="pf-input"/></div>
+          <div><label class="pf-label">EDD (expected due date)</label><input type="date" id="pf-preg-edd" class="pf-input" onchange="calcPregLmpFromEdd()"/></div>
+        </div>
+        <div class="pf-grid2" style="margin-bottom:10px;">
+          <div><label class="pf-label">Booking week</label><input type="number" id="pf-booking-week" placeholder="e.g. 8" min="4" max="40" class="pf-input"/></div>
+          <div><label class="pf-label">How conceived</label>
+            <select id="pf-preg-conception" class="pf-input">
+              <option value="">Select…</option>
+              <option value="natural">Natural conception</option>
+              <option value="iui">IUI</option><option value="ivf">IVF</option>
+              <option value="icsi">ICSI</option><option value="fet">FET</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-bottom:14px;"><label class="pf-label">High risk factors</label>
+          <div class="pf-chip-row" id="pf-high-risk">
+            <div class="pf-chip" data-val="diabetes">Diabetes / GDM</div>
+            <div class="pf-chip" data-val="hypertension">Hypertension</div>
+            <div class="pf-chip" data-val="thyroid">Thyroid disorder</div>
+            <div class="pf-chip" data-val="prev_cs">Previous C-section</div>
+            <div class="pf-chip" data-val="twins">Twins / multiple</div>
+            <div class="pf-chip" data-val="prev_preterm">Previous preterm birth</div>
+            <div class="pf-chip" data-val="placenta_praevia">Placenta praevia</div>
+            <div class="pf-chip" data-val="short_cervix">Short cervix</div>
+            <div class="pf-chip" data-val="apla">Antiphospholipid syndrome</div>
+            <div class="pf-chip" data-val="recurrent_loss">Recurrent pregnancy loss</div>
+          </div>
+        </div>
+
+        <!-- OBSTETRIC HISTORY SECOND -->
         <div class="pf-sep">📋 Obstetric History (G/P/A/L)</div>
         <div style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6;background:#F5EDE6;padding:10px 14px;border-radius:8px;border-left:3px solid var(--terra);">
           G = Gravida (total pregnancies) · P = Para (deliveries after 20 weeks) · A = Abortions (spontaneous + induced) · L = Living children
@@ -1725,38 +1824,6 @@ function buildRoadmapProfileModal(){pfBuildChips();pfLoad();document.getElementB
         </div>
         <div style="margin-bottom:14px;"><label class="pf-label">H/o prior surgeries (gynaec / abdominal)</label>
           <textarea id="pf-obs-prior-surgeries" rows="2" placeholder="e.g. Appendicectomy 2019, myomectomy 2021, previous LSCS scar details…" class="pf-input" style="resize:vertical;font-size:14px;"></textarea>
-        </div>
-
-        <!-- CURRENT PREGNANCY -->
-        <div class="pf-sep">🌸 Current Pregnancy</div>
-        <div class="pf-grid2" style="margin-bottom:10px;">
-          <div><label class="pf-label">LMP (last menstrual period)</label><input type="date" id="pf-preg-lmp" class="pf-input"/></div>
-          <div><label class="pf-label">EDD (expected due date)</label><input type="date" id="pf-preg-edd" class="pf-input" onchange="calcPregLmpFromEdd()"/></div>
-        </div>
-        <div class="pf-grid2" style="margin-bottom:10px;">
-          <div><label class="pf-label">Booking week</label><input type="number" id="pf-booking-week" placeholder="e.g. 8" min="4" max="40" class="pf-input"/></div>
-          <div><label class="pf-label">How conceived</label>
-            <select id="pf-preg-conception" class="pf-input">
-              <option value="">Select…</option>
-              <option value="natural">Natural conception</option>
-              <option value="iui">IUI</option><option value="ivf">IVF</option>
-              <option value="icsi">ICSI</option><option value="fet">FET</option>
-            </select>
-          </div>
-        </div>
-        <div style="margin-bottom:10px;"><label class="pf-label">High risk factors</label>
-          <div class="pf-chip-row" id="pf-high-risk">
-            <div class="pf-chip" data-val="diabetes">Diabetes / GDM</div>
-            <div class="pf-chip" data-val="hypertension">Hypertension</div>
-            <div class="pf-chip" data-val="thyroid">Thyroid disorder</div>
-            <div class="pf-chip" data-val="prev_cs">Previous C-section</div>
-            <div class="pf-chip" data-val="twins">Twins / multiple</div>
-            <div class="pf-chip" data-val="prev_preterm">Previous preterm birth</div>
-            <div class="pf-chip" data-val="placenta_praevia">Placenta praevia</div>
-            <div class="pf-chip" data-val="short_cervix">Short cervix</div>
-            <div class="pf-chip" data-val="apla">Antiphospholipid syndrome</div>
-            <div class="pf-chip" data-val="recurrent_loss">Recurrent pregnancy loss</div>
-          </div>
         </div>
 
         <!-- ANC BLOOD TESTS — EXTENDED -->
