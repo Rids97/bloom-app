@@ -7,345 +7,334 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --bg: #0d0f0b;
-      --surface: #13160f;
-      --border: #2a2e24;
-      --accent: #a8c97f;
-      --accent-dim: #6b8f4a;
-      --text: #e8ead4;
-      --text-muted: #7a8066;
-      --error: #c97f7f;
+      --bg: #0d0f0b; --surface: #13160f; --border: #2a2e24;
+      --accent: #a8c97f; --accent-dim: #6b8f4a; --text: #e8ead4;
+      --text-muted: #7a8066; --error: #c97f7f;
     }
-
-    html, body {
-      height: 100%;
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'DM Mono', monospace;
-      overflow: hidden;
-    }
-
-    /* Organic background */
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'DM Mono', monospace; overflow: hidden; }
     body::before {
-      content: '';
-      position: fixed; inset: 0;
-      background:
-        radial-gradient(ellipse 60% 50% at 20% 80%, rgba(168,201,127,0.07) 0%, transparent 60%),
-        radial-gradient(ellipse 40% 60% at 80% 20%, rgba(107,143,74,0.05) 0%, transparent 50%);
+      content: ''; position: fixed; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 20% 80%, rgba(168,201,127,0.07) 0%, transparent 60%),
+                  radial-gradient(ellipse 40% 60% at 80% 20%, rgba(107,143,74,0.05) 0%, transparent 50%);
       pointer-events: none;
     }
-
-    /* SVG botanical lines */
-    .botanical {
-      position: fixed;
-      opacity: 0.12;
-      pointer-events: none;
-    }
+    .botanical { position: fixed; opacity: 0.12; pointer-events: none; }
     .botanical-left { bottom: -40px; left: -60px; width: 380px; }
     .botanical-right { top: -40px; right: -60px; width: 280px; transform: rotate(180deg); }
-
-    .container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 24px;
-    }
-
+    .container { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 24px; }
     .card {
-      width: 100%;
-      max-width: 400px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      padding: 52px 44px 48px;
-      position: relative;
+      width: 100%; max-width: 420px; background: var(--surface);
+      border: 1px solid var(--border); padding: 48px 44px 44px; position: relative;
       animation: fadeUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
     }
-
     .card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--accent), transparent);
-      opacity: 0.6;
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent); opacity: 0.6;
     }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(24px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 36px;
-    }
-
-    .logo-icon {
-      width: 28px; height: 28px;
-      border: 1.5px solid var(--accent);
-      border-radius: 50%;
-      position: relative;
-      display: flex; align-items: center; justify-content: center;
-    }
-
-    .logo-icon::after {
-      content: '';
-      width: 8px; height: 8px;
-      background: var(--accent);
-      border-radius: 50%;
-    }
-
-    .logo-text {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 22px;
-      font-weight: 300;
-      letter-spacing: 0.12em;
-      color: var(--text);
-    }
-
-    h1 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 32px;
-      font-weight: 300;
-      font-style: italic;
-      letter-spacing: -0.01em;
-      color: var(--text);
-      margin-bottom: 8px;
-      line-height: 1.1;
-    }
-
-    .subtitle {
-      font-size: 11px;
-      color: var(--text-muted);
-      letter-spacing: 0.08em;
-      margin-bottom: 36px;
-    }
-
-    .tabs {
-      display: flex;
-      gap: 0;
-      margin-bottom: 28px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .tab {
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      letter-spacing: 0.1em;
-      color: var(--text-muted);
-      background: none;
-      border: none;
-      padding: 8px 0;
-      margin-right: 28px;
-      cursor: pointer;
-      position: relative;
-      transition: color 0.2s;
-    }
-
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+    .logo { display: flex; align-items: center; gap: 10px; margin-bottom: 32px; }
+    .logo-icon { width: 28px; height: 28px; border: 1.5px solid var(--accent); border-radius: 50%; position: relative; display: flex; align-items: center; justify-content: center; }
+    .logo-icon::after { content: ''; width: 8px; height: 8px; background: var(--accent); border-radius: 50%; }
+    .logo-text { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 300; letter-spacing: 0.12em; color: var(--text); }
+    h1 { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 300; font-style: italic; letter-spacing: -0.01em; color: var(--text); margin-bottom: 6px; line-height: 1.1; }
+    .subtitle { font-size: 11px; color: var(--text-muted); letter-spacing: 0.08em; margin-bottom: 28px; }
+    .tabs { display: flex; margin-bottom: 24px; border-bottom: 1px solid var(--border); }
+    .tab { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: var(--text-muted); background: none; border: none; padding: 8px 0; margin-right: 28px; cursor: pointer; position: relative; transition: color 0.2s; }
     .tab.active { color: var(--accent); }
-
-    .tab.active::after {
-      content: '';
-      position: absolute;
-      bottom: -1px; left: 0; right: 0;
-      height: 1px;
-      background: var(--accent);
-    }
-
-    .field {
-      margin-bottom: 18px;
-    }
-
-    label {
-      display: block;
-      font-size: 10px;
-      letter-spacing: 0.12em;
-      color: var(--text-muted);
-      margin-bottom: 8px;
-      text-transform: uppercase;
-    }
-
-    input {
-      width: 100%;
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--text);
-      font-family: 'DM Mono', monospace;
-      font-size: 13px;
-      padding: 12px 14px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
+    .tab.active::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 1px; background: var(--accent); }
+    .field { margin-bottom: 16px; }
+    label { display: block; font-size: 10px; letter-spacing: 0.12em; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; }
+    input { width: 100%; background: transparent; border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; padding: 12px 14px; outline: none; transition: border-color 0.2s; }
     input:focus { border-color: var(--accent-dim); }
     input::placeholder { color: var(--text-muted); opacity: 0.5; }
-
-    .btn {
-      width: 100%;
-      margin-top: 8px;
-      padding: 14px;
-      background: var(--accent);
-      color: var(--bg);
-      border: none;
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
-    }
-
+    .btn { width: 100%; margin-top: 6px; padding: 14px; background: var(--accent); color: var(--bg); border: none; font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; cursor: pointer; transition: background 0.2s, transform 0.1s; }
     .btn:hover { background: #bde090; }
     .btn:active { transform: scale(0.99); }
-
-    .btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .msg {
-      margin-top: 14px;
-      font-size: 11px;
-      letter-spacing: 0.04em;
-      min-height: 16px;
-      text-align: center;
-      color: var(--text-muted);
-      transition: color 0.2s;
-    }
-
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-secondary { width: 100%; margin-top: 8px; padding: 12px; background: transparent; color: var(--text-muted); border: 1px solid var(--border); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.1em; cursor: pointer; transition: border-color 0.2s, color 0.2s; }
+    .btn-secondary:hover { border-color: var(--accent-dim); color: var(--accent); }
+    .msg { margin-top: 12px; font-size: 11px; letter-spacing: 0.04em; min-height: 16px; text-align: center; color: var(--text-muted); transition: color 0.2s; }
     .msg.error { color: var(--error); }
     .msg.success { color: var(--accent); }
-
-    .divider {
-      display: flex; align-items: center; gap: 12px;
-      margin: 20px 0;
-    }
-
-    .divider::before, .divider::after {
-      content: ''; flex: 1;
-      height: 1px;
-      background: var(--border);
-    }
-
-    .divider span {
-      font-size: 10px;
-      color: var(--text-muted);
-      letter-spacing: 0.1em;
-    }
+    .forgot-link { display: block; text-align: right; font-size: 10px; color: var(--text-muted); letter-spacing: 0.06em; cursor: pointer; margin-top: -8px; margin-bottom: 16px; background: none; border: none; font-family: 'DM Mono', monospace; padding: 0; transition: color 0.2s; }
+    .forgot-link:hover { color: var(--accent); }
+    .otp-hint { font-size: 10px; color: var(--text-muted); letter-spacing: 0.04em; margin-bottom: 12px; line-height: 1.6; padding: 10px 12px; border: 1px solid var(--border); background: rgba(168,201,127,0.04); }
+    .resend-link { font-size: 10px; color: var(--text-muted); text-align: center; margin-top: 10px; cursor: pointer; background: none; border: none; font-family: 'DM Mono', monospace; width: 100%; padding: 4px; }
+    .resend-link:hover { color: var(--accent); }
+    .screen { display: none; }
+    .screen.active { display: block; }
+    .step-indicator { display: flex; gap: 6px; margin-bottom: 20px; }
+    .step-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); }
+    .step-dot.active { background: var(--accent); }
+    .step-dot.done { background: var(--accent-dim); }
   </style>
 </head>
 <body>
+<svg class="botanical botanical-left" viewBox="0 0 300 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M60 400 Q80 320 120 280 Q160 240 140 180 Q120 120 160 80" stroke="#a8c97f" stroke-width="1.5" fill="none"/>
+  <path d="M120 280 Q80 260 50 230 Q20 200 30 170" stroke="#a8c97f" stroke-width="1" fill="none"/>
+  <path d="M120 280 Q155 265 170 240 Q185 215 175 195" stroke="#a8c97f" stroke-width="1" fill="none"/>
+  <path d="M140 180 Q105 160 90 135 Q75 110 85 90" stroke="#a8c97f" stroke-width="1" fill="none"/>
+  <path d="M140 180 Q170 165 180 145 Q190 125 182 108" stroke="#a8c97f" stroke-width="1" fill="none"/>
+  <ellipse cx="30" cy="170" rx="18" ry="28" transform="rotate(-30 30 170)" stroke="#a8c97f" stroke-width="0.8" fill="none"/>
+  <ellipse cx="175" cy="195" rx="16" ry="24" transform="rotate(20 175 195)" stroke="#a8c97f" stroke-width="0.8" fill="none"/>
+  <ellipse cx="85" cy="90" rx="14" ry="22" transform="rotate(-15 85 90)" stroke="#a8c97f" stroke-width="0.8" fill="none"/>
+  <ellipse cx="182" cy="108" rx="13" ry="20" transform="rotate(25 182 108)" stroke="#a8c97f" stroke-width="0.8" fill="none"/>
+</svg>
+<svg class="botanical botanical-right" viewBox="0 0 300 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M60 400 Q80 320 120 280 Q160 240 140 180 Q120 120 160 80" stroke="#a8c97f" stroke-width="1.5" fill="none"/>
+  <path d="M120 280 Q80 260 50 230 Q20 200 30 170" stroke="#a8c97f" stroke-width="1" fill="none"/>
+  <path d="M140 180 Q105 160 90 135 Q75 110 85 90" stroke="#a8c97f" stroke-width="1" fill="none"/>
+  <ellipse cx="30" cy="170" rx="18" ry="28" transform="rotate(-30 30 170)" stroke="#a8c97f" stroke-width="0.8" fill="none"/>
+</svg>
 
-  <!-- Botanical SVGs -->
-  <svg class="botanical botanical-left" viewBox="0 0 300 400" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M60 400 Q80 320 120 280 Q160 240 140 180 Q120 120 160 80" stroke="#a8c97f" stroke-width="1.5" fill="none"/>
-    <path d="M120 280 Q80 260 50 230 Q20 200 30 170" stroke="#a8c97f" stroke-width="1" fill="none"/>
-    <path d="M120 280 Q155 265 170 240 Q185 215 175 195" stroke="#a8c97f" stroke-width="1" fill="none"/>
-    <path d="M140 180 Q105 160 90 135 Q75 110 85 90" stroke="#a8c97f" stroke-width="1" fill="none"/>
-    <path d="M140 180 Q170 165 180 145 Q190 125 182 108" stroke="#a8c97f" stroke-width="1" fill="none"/>
-    <ellipse cx="30" cy="170" rx="18" ry="28" transform="rotate(-30 30 170)" stroke="#a8c97f" stroke-width="0.8" fill="none"/>
-    <ellipse cx="175" cy="195" rx="16" ry="24" transform="rotate(20 175 195)" stroke="#a8c97f" stroke-width="0.8" fill="none"/>
-    <ellipse cx="85" cy="90" rx="14" ry="22" transform="rotate(-15 85 90)" stroke="#a8c97f" stroke-width="0.8" fill="none"/>
-    <ellipse cx="182" cy="108" rx="13" ry="20" transform="rotate(25 182 108)" stroke="#a8c97f" stroke-width="0.8" fill="none"/>
-  </svg>
-
-  <svg class="botanical botanical-right" viewBox="0 0 300 400" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M60 400 Q80 320 120 280 Q160 240 140 180 Q120 120 160 80" stroke="#a8c97f" stroke-width="1.5" fill="none"/>
-    <path d="M120 280 Q80 260 50 230 Q20 200 30 170" stroke="#a8c97f" stroke-width="1" fill="none"/>
-    <path d="M140 180 Q105 160 90 135 Q75 110 85 90" stroke="#a8c97f" stroke-width="1" fill="none"/>
-    <ellipse cx="30" cy="170" rx="18" ry="28" transform="rotate(-30 30 170)" stroke="#a8c97f" stroke-width="0.8" fill="none"/>
-  </svg>
-
-  <div class="container">
-    <div class="card">
-      <div class="logo">
-        <div class="logo-icon"></div>
-        <span class="logo-text">BLOOM AI</span>
-      </div>
-
-      <h1>Welcome<br/>back.</h1>
-      <p class="subtitle">INTELLIGENT CONVERSATION</p>
-
-      <div class="tabs">
-        <button class="tab active" id="tab-login" onclick="switchTab('login')">SIGN IN</button>
-        <button class="tab" id="tab-signup" onclick="switchTab('signup')">CREATE ACCOUNT</button>
-      </div>
-
-      <div class="field">
-        <label for="email">Email address</label>
-        <input type="email" id="email" placeholder="you@example.com" />
-      </div>
-
-      <div class="field">
-        <label for="password">Password</label>
-        <input type="password" id="password" placeholder="••••••••" onkeydown="if(event.key==='Enter') handleSubmit()" />
-      </div>
-
-      <button class="btn" id="submit-btn" onclick="handleSubmit()">CONTINUE →</button>
-
-      <p class="msg" id="msg"></p>
+<div class="container">
+  <div class="card">
+    <div class="logo">
+      <div class="logo-icon"></div>
+      <span class="logo-text">BLOOM AI</span>
     </div>
+
+    <!-- ── SIGN IN SCREEN ── -->
+    <div class="screen active" id="screen-login">
+      <h1>Welcome<br/>back.</h1>
+      <p class="subtitle">SIGN IN TO YOUR ACCOUNT</p>
+      <div class="tabs">
+        <button class="tab active" onclick="showSignin()">SIGN IN</button>
+        <button class="tab" onclick="showSignup()">CREATE ACCOUNT</button>
+      </div>
+      <div class="field"><label>Email address</label><input type="email" id="login-email" placeholder="you@example.com" /></div>
+      <div class="field"><label>Password</label><input type="password" id="login-password" placeholder="••••••••" onkeydown="if(event.key==='Enter') doLogin()" /></div>
+      <button class="forgot-link" onclick="showForgot()">Forgot password?</button>
+      <button class="btn" id="login-btn" onclick="doLogin()">SIGN IN →</button>
+      <p class="msg" id="login-msg"></p>
+    </div>
+
+    <!-- ── CREATE ACCOUNT SCREEN (step 1: email + password) ── -->
+    <div class="screen" id="screen-signup">
+      <h1>Create<br/>account.</h1>
+      <p class="subtitle">STEP 1 OF 2 — ENTER YOUR DETAILS</p>
+      <div class="tabs">
+        <button class="tab" onclick="showSignin()">SIGN IN</button>
+        <button class="tab active">CREATE ACCOUNT</button>
+      </div>
+      <div class="step-indicator"><div class="step-dot active"></div><div class="step-dot"></div></div>
+      <div class="field"><label>Email address</label><input type="email" id="signup-email" placeholder="you@example.com" /></div>
+      <div class="field"><label>Password (min 8 characters)</label><input type="password" id="signup-password" placeholder="••••••••" /></div>
+      <div class="field"><label>Confirm password</label><input type="password" id="signup-password2" placeholder="••••••••" onkeydown="if(event.key==='Enter') sendOTP()" /></div>
+      <button class="btn" id="otp-send-btn" onclick="sendOTP()">SEND VERIFICATION CODE →</button>
+      <p class="msg" id="signup-msg"></p>
+    </div>
+
+    <!-- ── OTP VERIFICATION SCREEN (step 2) ── -->
+    <div class="screen" id="screen-otp">
+      <h1>Verify<br/>email.</h1>
+      <p class="subtitle">STEP 2 OF 2 — ENTER YOUR CODE</p>
+      <div class="tabs">
+        <button class="tab" onclick="showSignin()">SIGN IN</button>
+        <button class="tab active">CREATE ACCOUNT</button>
+      </div>
+      <div class="step-indicator"><div class="step-dot done"></div><div class="step-dot active"></div></div>
+      <div class="otp-hint">A 6-digit code was sent to <span id="otp-email-display" style="color:var(--accent);"></span>. Check your inbox (and spam folder).</div>
+      <div class="field"><label>Verification code</label><input type="text" id="otp-input" placeholder="000000" maxlength="6" inputmode="numeric" onkeydown="if(event.key==='Enter') verifyOTP()" style="font-size:22px;letter-spacing:0.2em;text-align:center;" /></div>
+      <button class="btn" id="otp-verify-btn" onclick="verifyOTP()">VERIFY &amp; CREATE ACCOUNT →</button>
+      <button class="resend-link" id="resend-btn" onclick="resendOTP()">Didn't receive it? Resend code</button>
+      <p class="msg" id="otp-msg"></p>
+    </div>
+
+    <!-- ── FORGOT PASSWORD SCREEN ── -->
+    <div class="screen" id="screen-forgot">
+      <h1>Reset<br/>password.</h1>
+      <p class="subtitle">ENTER YOUR EMAIL ADDRESS</p>
+      <div class="tabs">
+        <button class="tab active" onclick="showSignin()">SIGN IN</button>
+        <button class="tab" onclick="showSignup()">CREATE ACCOUNT</button>
+      </div>
+      <p style="font-size:11px;color:var(--text-muted);margin-bottom:20px;line-height:1.8;">We'll send you a secure link to reset your password. Your account and all data remain intact.</p>
+      <div class="field"><label>Email address</label><input type="email" id="forgot-email" placeholder="you@example.com" onkeydown="if(event.key==='Enter') sendReset()" /></div>
+      <button class="btn" id="forgot-btn" onclick="sendReset()">SEND RESET LINK →</button>
+      <button class="btn-secondary" onclick="showSignin()">← BACK TO SIGN IN</button>
+      <p class="msg" id="forgot-msg"></p>
+    </div>
+
   </div>
+</div>
 
-  <script>
-    let mode = 'login';
+<script>
+  // ── STATE ──
+  let signupEmail = '';
+  let signupPassword = '';
 
-    function switchTab(newMode) {
-      mode = newMode;
-      document.getElementById('tab-login').classList.toggle('active', mode === 'login');
-      document.getElementById('tab-signup').classList.toggle('active', mode === 'signup');
-      document.getElementById('submit-btn').textContent = mode === 'login' ? 'CONTINUE →' : 'CREATE ACCOUNT →';
-      setMsg('', '');
-    }
+  function setMsg(id, text, type = '') {
+    const el = document.getElementById(id);
+    el.textContent = text;
+    el.className = 'msg' + (type ? ' ' + type : '');
+  }
 
-    function setMsg(text, type = '') {
-      const el = document.getElementById('msg');
-      el.textContent = text;
-      el.className = 'msg' + (type ? ' ' + type : '');
-    }
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
 
-    async function handleSubmit() {
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value;
-      const btn = document.getElementById('submit-btn');
+  function showSignin() { showScreen('screen-login'); }
+  function showSignup() { showScreen('screen-signup'); }
+  function showForgot() { showScreen('screen-forgot'); }
 
-      if (!email || !password) { setMsg('Please fill in all fields.', 'error'); return; }
-
-      btn.disabled = true;
-      setMsg('');
-
-      try {
-        const res = await fetch('/' + mode, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password }),
-        });
-
-        const data = await res.json();
-
-        if (mode === 'signup') {
-          setMsg('Account created — sign in now.', 'success');
-          switchTab('login');
-        } else {
-          if (data.token) {
-            localStorage.setItem('bloom_token', data.token);
-            setMsg('Signing you in...', 'success');
-            setTimeout(() => window.location = '/app', 600);
-          } else {
-            setMsg(data.error || 'Invalid credentials.', 'error');
-          }
-        }
-      } catch {
-        setMsg('Something went wrong. Try again.', 'error');
-      } finally {
-        btn.disabled = false;
+  // ── SIGN IN ──
+  async function doLogin() {
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    const btn = document.getElementById('login-btn');
+    if (!email || !password) { setMsg('login-msg', 'Please fill in all fields.', 'error'); return; }
+    btn.disabled = true;
+    setMsg('login-msg', '');
+    try {
+      const res = await fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (data.token) {
+        localStorage.setItem('bloom_token', data.token);
+        setMsg('login-msg', 'Signing you in…', 'success');
+        setTimeout(() => window.location = '/app', 600);
+      } else {
+        setMsg('login-msg', data.error || 'Invalid credentials.', 'error');
       }
+    } catch {
+      setMsg('login-msg', 'Something went wrong. Try again.', 'error');
+    } finally {
+      btn.disabled = false;
     }
-  </script>
+  }
+
+  // ── SEND OTP ──
+  async function sendOTP() {
+    const email = document.getElementById('signup-email').value.trim();
+    const password = document.getElementById('signup-password').value;
+    const password2 = document.getElementById('signup-password2').value;
+    const btn = document.getElementById('otp-send-btn');
+
+    if (!email || !password) { setMsg('signup-msg', 'Please fill in all fields.', 'error'); return; }
+    if (password.length < 8) { setMsg('signup-msg', 'Password must be at least 8 characters.', 'error'); return; }
+    if (password !== password2) { setMsg('signup-msg', 'Passwords do not match.', 'error'); return; }
+
+    signupEmail = email;
+    signupPassword = password;
+    btn.disabled = true;
+    setMsg('signup-msg', 'Sending code…');
+
+    try {
+      const res = await fetch('/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        document.getElementById('otp-email-display').textContent = email;
+        showScreen('screen-otp');
+        setMsg('otp-msg', '');
+      } else {
+        setMsg('signup-msg', data.error || 'Could not send OTP.', 'error');
+      }
+    } catch {
+      setMsg('signup-msg', 'Something went wrong. Try again.', 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  // ── VERIFY OTP ──
+  async function verifyOTP() {
+    const otp = document.getElementById('otp-input').value.trim();
+    const btn = document.getElementById('otp-verify-btn');
+    if (!otp || otp.length !== 6) { setMsg('otp-msg', 'Please enter the 6-digit code.', 'error'); return; }
+    btn.disabled = true;
+    setMsg('otp-msg', 'Verifying…');
+    try {
+      const res = await fetch('/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: signupEmail, otp, password: signupPassword }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setMsg('otp-msg', 'Account created! Signing you in…', 'success');
+        // Auto login
+        setTimeout(async () => {
+          const loginRes = await fetch('/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: signupEmail, password: signupPassword }),
+          });
+          const loginData = await loginRes.json();
+          if (loginData.token) {
+            localStorage.setItem('bloom_token', loginData.token);
+            window.location = '/app';
+          } else {
+            showSignin();
+            setMsg('login-msg', 'Account created! Please sign in.', 'success');
+          }
+        }, 1000);
+      } else {
+        setMsg('otp-msg', data.error || 'Verification failed.', 'error');
+      }
+    } catch {
+      setMsg('otp-msg', 'Something went wrong. Try again.', 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  // ── RESEND OTP ──
+  async function resendOTP() {
+    const btn = document.getElementById('resend-btn');
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+    try {
+      const res = await fetch('/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: signupEmail }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setMsg('otp-msg', 'New code sent! Check your inbox.', 'success');
+      } else {
+        setMsg('otp-msg', data.error || 'Could not resend.', 'error');
+      }
+    } catch {
+      setMsg('otp-msg', 'Something went wrong.', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Didn't receive it? Resend code";
+    }
+  }
+
+  // ── FORGOT PASSWORD ──
+  async function sendReset() {
+    const email = document.getElementById('forgot-email').value.trim();
+    const btn = document.getElementById('forgot-btn');
+    if (!email) { setMsg('forgot-msg', 'Please enter your email.', 'error'); return; }
+    btn.disabled = true;
+    setMsg('forgot-msg', 'Sending reset link…');
+    try {
+      const res = await fetch('/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      setMsg('forgot-msg', data.message || 'Reset link sent!', 'success');
+    } catch {
+      setMsg('forgot-msg', 'Something went wrong. Try again.', 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  }
+</script>
 </body>
 </html>
