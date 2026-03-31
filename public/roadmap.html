@@ -1020,7 +1020,7 @@ function renderAIContent(content,containerId){
   if(content.clinical_note) html+='<div class="clinical-note"><div class="clinical-note-title">⚠ Clinical Note</div><div class="clinical-note-text" style="font-size:19px;line-height:1.85;">'+content.clinical_note+'</div></div>';
   if(content.action_items&&content.action_items.length){
     html+='<div class="action-items"><div class="action-items-title">Action Items</div>';
-    content.action_items.forEach(function(a){var clean=a.replace(/^→\s*/,'');html+='<div class="action-item" style="font-size:18px;line-height:1.8;">→ '+clean+'</div>';});
+    content.action_items.forEach(function(a){var clean=a.replace(/^→\s*/,'');html+='<div class="action-item" style="font-size:18px;line-height:1.8;"> '+clean+'</div>';});
     html+='</div>';
   }
   html+='<div class="ai-source">📚 Evidence-based · Built by a licensed gynaecologist · Personalised to your profile</div></div>';
