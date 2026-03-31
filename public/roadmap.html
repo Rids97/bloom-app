@@ -572,9 +572,10 @@ async function init(){
     userData=await res.json();
     userProfile=userData.profile||{};
 
+    const mainCont=document.getElementById('main-container');
     if(userData.plan !== 'complete'){
-      document.getElementById('main-container').style.display='block';
-      document.getElementById('main-container').innerHTML='<div style="text-align:center;padding:5rem 2rem;"><div style="font-size:52px;margin-bottom:1rem;">🗺️</div><div style="font-family:Cormorant Garamond,serif;font-size:32px;font-weight:600;color:#3d2318;margin-bottom:12px;">My Roadmap</div><p style="color:#9b7b6a;font-size:16px;margin-bottom:8px;line-height:1.7;">Your personalised week-by-week journey — TTC, Pregnancy, and Postpartum — is part of <strong>Bloom Complete</strong>.</p><p style="color:#9b7b6a;font-size:15px;margin-bottom:2rem;">Upgrade to unlock your full roadmap, report analyzer, and supplement protocol.</p><a href="/app" style="display:inline-block;padding:14px 32px;background:#b87355;color:#fff;text-decoration:none;border-radius:50px;font-size:15px;font-weight:500;">Upgrade on Dashboard</a></div>';
+      if(mainCont) mainCont.style.display='block';
+      if(mainCont) mainCont.innerHTML='<div style="text-align:center;padding:5rem 2rem;"><div style="font-size:52px;margin-bottom:1rem;">🗺️</div><div style="font-family:Cormorant Garamond,serif;font-size:32px;font-weight:600;color:#3d2318;margin-bottom:12px;">My Roadmap</div><p style="color:#9b7b6a;font-size:16px;margin-bottom:8px;line-height:1.7;">Your personalised week-by-week journey — TTC, Pregnancy, and Postpartum — is part of <strong>Bloom Complete</strong>.</p><p style="color:#9b7b6a;font-size:15px;margin-bottom:2rem;">Upgrade to unlock your full roadmap, report analyzer, and supplement protocol.</p><a href="/app" style="display:inline-block;padding:14px 32px;background:#b87355;color:#fff;text-decoration:none;border-radius:50px;font-size:15px;font-weight:500;">Upgrade on Dashboard</a></div>';
       return;
     }
 
