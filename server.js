@@ -894,7 +894,7 @@ Return ONLY valid JSON. No markdown. No preamble. No text after the closing }
 ${relevantKnowledge}
 --- END ---`;
 
-      const ppResponse = await groq.chat.completions.create({ model: "llama-3.3-70b-versatile", messages: [{ role: "system", content: ppSystemMsg }, { role: "user", content: ppSectionPrompts[section] || ppSectionPrompts.overview }], max_tokens: 1500, temperature: 0.3 });
+      const ppResponse = await groq.chat.completions.create({ model: "llama-3.3-70b-versatile", messages: [{ role: "system", content: ppSystemMsg }, { role: "user", content: ppSectionPrompts[section] || ppSectionPrompts.overview }], max_tokens: 1800, temperature: 0.3 });
       const ppRaw = ppResponse.choices[0].message.content.trim();
       const ppParsed = safeParseGroqResponse(ppRaw);
       return res.json({ content: ppParsed, journey, section, ppStage });
@@ -1198,7 +1198,7 @@ ${relevantKnowledge}
     const response = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
       messages: [{ role: "system", content: systemMsg }, { role: "user", content: prompt }],
-      max_tokens: 1400,
+      max_tokens: 1800,
       temperature: 0.3,
     });
 
