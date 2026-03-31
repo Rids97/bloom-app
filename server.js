@@ -820,7 +820,7 @@ ${relevantKnowledge}
       } catch(e) {
         ppParsed = { main_content: ppRaw.replace(/```json|```/g,"").trim(), key_points: [], personalised_tip: "", clinical_note: "", action_items: [] };
       }
-      return res.json({ content: ppParsed, journey, section, ppStage });
+      return res.json({ content: typeof ppParsed === 'string' ? JSON.parse(ppParsed.replace(/```json|```/g,'').trim()) : ppParsed, journey, section, ppStage });
     }
 
     const stageDescriptions = {
@@ -1130,7 +1130,7 @@ ${relevantKnowledge}
     } catch(e) {
       parsed = { main_content: rawText.replace(/```json|```/g,"").trim(), key_points: [], personalised_tip: "", clinical_note: "", action_items: [] };
     }
-    res.json({ content: parsed, journey, month, week, section, clinicalStage });
+    return res.json({ content: typeof parsed === 'string' ? JSON.parse(parsed.replace(/```json|```/g,'').trim()) : parsed, journey, section, ppStage });
 
   } catch (err) {
     console.error("Roadmap content error:", err.message);
