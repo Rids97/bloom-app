@@ -179,7 +179,7 @@ input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 <nav class="topbar">
   <div class="topbar-logo">🌸 bloom</div>
   <div class="topbar-right">
-    <span id="planBadge" class="plan-badge">Free</span>
+    <span id="planBadge" class="plan-badge" style="visibility:hidden;">Free</span>
     <a id="upgrade-topbar-btn" href="#" onclick="openPaywall();return false;" style="display:none;font-size:14px;font-weight:600;padding:8px 18px;background:#b87355;color:#fff;border-radius:50px;text-decoration:none;white-space:nowrap;">⬆ Upgrade</a>
     <div class="avatar" id="avatarEl">?</div>
     <button class="logout-btn" onclick="logout()">Sign out</button>
@@ -836,6 +836,9 @@ function renderProfile(){
   const badge=document.getElementById('planBadge');
   badge.textContent=userPlan==='complete'?'Bloom Complete':userPlan==='pro'?'Bloom Pro':'Free';
   badge.className='plan-badge '+(userPlan==='complete'?'complete':userPlan==='pro'?'pro':'');
+  badge.style.visibility='visible';
+  const upgradeBtn=document.getElementById('upgrade-topbar-btn');
+  if(upgradeBtn) upgradeBtn.style.display=userPlan==='complete'?'none':'inline-block';
   // Show upgrade button for non-complete users
   const upgradeBtn=document.getElementById('upgrade-topbar-btn');
   if(upgradeBtn) upgradeBtn.style.display=(userPlan!=='complete'?'inline-block':'none');
