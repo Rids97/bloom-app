@@ -202,8 +202,8 @@ input[type=number] { -moz-appearance: textfield; appearance: textfield; }
       <a class="s-item active" href="#"><span class="s-icon">🏠</span> Dashboard</a>
       <a class="s-item" href="#" onclick="openModal('cycleCalcModal');return false;"><span class="s-icon">📅</span> Cycle Calculator</a>
       <a class="s-item" href="#" onclick="openModal('bmiModal');return false;"><span class="s-icon">⚖️</span> BMI & Fertility</a>
-      <a class="s-item" href="/report"><span class="s-icon">🧪</span> Report Analyzer</a>
-      <a class="s-item" href="/roadmap"><span class="s-icon">🗺️</span> My Roadmap</a>
+      <a class="s-item" href="#" onclick="if(userPlan==='free'){openPaywall();return false;}window.location.href='/report';return false;"><span class="s-icon">🧪</span> Report Analyzer</a>
+      <a class="s-item" href="#" onclick="if(userPlan!=='complete'){openPaywall();return false;}window.location.href='/roadmap';return false;"><span class="s-icon">🗺️</span> My Roadmap</a>
     </div>
     <div id="symptomsSection" style="display:none">
       <div class="s-title">Your Symptoms</div>
