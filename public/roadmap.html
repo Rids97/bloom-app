@@ -1031,7 +1031,12 @@ function renderPPMilestones(stage){
 
 // PATCHED: renderAIContent — definitive JSON fix
 function renderAIContent(content,containerId){
+  console.log('renderAIContent called:', containerId, JSON.stringify(content).substring(0,200));
   if(!content) return;
+  if(typeof content === 'object' && !content.main_content && !content.key_points?.length) {
+    document.getElementById(containerId).innerHTML='<div class="content-error">Content loaded but empty. <button class="retry-btn" onclick="location.reload()">Retry</button></div>';
+    return;
+  }
 
   // Step 1: Aggressively parse JSON from string
   if(typeof content==='string'){
