@@ -609,7 +609,7 @@ app.post('/webhook/razorpay', express.raw({ type: 'application/json' }), async (
 //  ROBUST GROQ JSON PARSER
 // ─────────────────────────────────────────────
 function safeParseGroqResponse(raw) {
-  if (!raw) return { main_content: '', key_points: [], personalised_tip: '', clinical_note: '', action_items: [] };
+  if (!raw) return { main_content: 'Content could not be loaded. Please retry.', key_points: [], personalised_tip: '', clinical_note: '', action_items: [] };
 
   // Step 1: Strip markdown fences
   let cleaned = raw.replace(/```json|```/g, '').trim();
@@ -898,8 +898,10 @@ ${relevantKnowledge}
 
       const ppResponse = await groq.chat.completions.create({ model: "llama-3.3-70b-versatile", messages: [{ role: "system", content: ppSystemMsg }, { role: "user", content: ppSectionPrompts[section] || ppSectionPrompts.overview }], max_tokens: 1800, temperature: 0.3 });
       const ppRaw = ppResponse.choices[0].message.content.trim();
-      const ppParsed = safeParseGroqResponse(ppRaw);
-      return res.json({ content: ppParsed, journey, section, ppStage });
+console.log('PP RAW RESPONSE:', ppRaw.substring(0, 500));
+const ppParsed = safeParseGroqResponse(ppRaw);
+console.log('PP PARSED main_content:', ppParsed.main_content.substring(0, 100));
+return res.json({ content: ppParsed, journey, section, ppStage });
     }
 
     const stageDescriptions = {
