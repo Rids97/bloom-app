@@ -15,7 +15,6 @@ app.use((req, res, next) => {
   if (req.path === '/webhook/razorpay') return next();
   express.json({ limit: '20mb' })(req, res, next);
 });
-// static middleware moved below routes
 
 // -- KNOWLEDGE BASE --
 let knowledgeBase = [];
@@ -212,7 +211,6 @@ app.get("/login", (req, res) => res.sendFile(path.join(__dirname, "public", "log
 app.get("/report", (req, res) => res.sendFile(path.join(__dirname, "public", "report.html")));
 app.get("/roadmap", (req, res) => res.sendFile(path.join(__dirname, "public", "roadmap.html")));
 
-// Static files served AFTER explicit routes so / serves landing.html not index.html
 app.use(express.static(path.join(__dirname, "public")));
 
 app.post("/signup", async (req, res) => {
@@ -498,7 +496,6 @@ app.post("/roadmap-content", auth, async (req, res) => {
       if (p.cycleDay) lines.push(`Cycle day: ${p.cycleDay}`);
       if (p.nextStep) lines.push(`Next step: ${p.nextStep}`);
       if (p.concerns) lines.push(`Concerns: ${p.concerns}`);
-      // Pregnancy ANC
       if (p.pregLmp) lines.push(`Pregnancy LMP: ${p.pregLmp}`);
       if (p.pregEdd) lines.push(`EDD: ${p.pregEdd}`);
       if (p.ancHb1) lines.push(`ANC Hb 1st trim: ${p.ancHb1} g/dL ${p.ancHb1 < 11 ? '(ANAEMIC)' : ''}`);
@@ -607,16 +604,42 @@ Specify which vaccines are due at ${ppStageLabel}. Explain what each protects ag
       ? `\nPATIENT CHECK-IN THIS WEEK: ${checkin.chips.join(', ')}${checkin.notes ? '\nNotes: ' + checkin.notes : ''}`
       : '';
 
+    // ── SECTION PROMPTS ── //
     const sectionPrompts = {
-      overview: `Generate a personalised clinical overview.\nSTAGE: ${stageDescriptions[clinicalStage]}\nTIME: ${journey === 'ttc' ? 'TTC journey' : `Week ${week}`}\n${checkinContext}\nAddress her specific stage, conditions, and results directly. What is the priority right now?`,
+
+      overview: journey === 'pregnancy'
+        ? `Generate a personalised clinical overview for WEEK ${week} of PREGNANCY.
+This is a PREGNANCY journey -- do NOT reference TTC or trying to conceive.
+Trimester: ${week <= 13 ? 'First' : week <= 26 ? 'Second' : 'Third'} trimester.
+${checkinContext}
+Address what is happening at Week ${week} of pregnancy, what the patient should focus on this week, and any personalised notes based on her profile and ANC results.`
+        : `Generate a personalised clinical overview.
+STAGE: ${stageDescriptions[clinicalStage]}
+TIME: TTC journey
+${checkinContext}
+Address her specific stage, conditions, and results directly. What is the priority right now?`,
 
       lifestyle: journey === 'ttc'
-        ? `Generate lifestyle and ovulation timing guidance combined.\nSTAGE: ${stageDescriptions[clinicalStage]}\n${checkinContext}\nSECTION 1 -- LIFESTYLE: Indian-friendly diet for her conditions, exercise (type and frequency), sleep, stress. Specific to her profile.\nSECTION 2 -- TIMING & OPK: Fertile window calculation for ${profile.cycleLength || 28}-day cycle, OPK strip use, intercourse timing, cervical mucus tracking. PCOS irregular cycle advice if relevant. Treatment monitoring tips if on OI/IUI.`
-        : `Generate lifestyle and monitoring guidance combined for Week ${week}.\n${checkinContext}\nSECTION 1 -- LIFESTYLE: Diet, exercise, sleep, stress for this trimester. Indian foods.\nSECTION 2 -- MONITORING: Scans/tests due this week, warning signs, upcoming appointments.`,
+        ? `Generate lifestyle and ovulation timing guidance combined.
+STAGE: ${stageDescriptions[clinicalStage]}
+${checkinContext}
+SECTION 1 -- LIFESTYLE: Indian-friendly diet for her conditions, exercise (type and frequency), sleep, stress. Specific to her profile.
+SECTION 2 -- TIMING & OPK: Fertile window calculation for ${profile.cycleLength || 28}-day cycle, OPK strip use, intercourse timing, cervical mucus tracking. PCOS irregular cycle advice if relevant. Treatment monitoring tips if on OI/IUI.`
+        : `Generate lifestyle and monitoring guidance combined for Week ${week} of PREGNANCY.
+This is a PREGNANCY journey -- do NOT reference TTC or trying to conceive.
+Trimester: ${week <= 13 ? 'First' : week <= 26 ? 'Second' : 'Third'} trimester.
+${checkinContext}
+SECTION 1 -- LIFESTYLE: Diet, exercise, sleep, stress for this trimester. Indian foods.
+SECTION 2 -- MONITORING: Scans/tests due this week, warning signs, upcoming appointments.`,
 
       timing: journey === 'ttc'
-        ? `Generate fertile window and ovulation timing guidance.\nCycle: ${profile.cycleRegularity || 'unknown'}, ${profile.cycleLength || 28} days.\nCover OPK timing, intercourse timing, PCOS irregular cycle advice, OI monitoring if on treatment.`
-        : `Generate pregnancy monitoring guidance for Week ${week}.\n${checkinContext}\nWhat scans/tests are due, what to track, warning signs, upcoming appointments.`,
+        ? `Generate fertile window and ovulation timing guidance.
+Cycle: ${profile.cycleRegularity || 'unknown'}, ${profile.cycleLength || 28} days.
+Cover OPK timing, intercourse timing, PCOS irregular cycle advice, OI monitoring if on treatment.`
+        : `Generate pregnancy monitoring guidance for Week ${week} of PREGNANCY.
+This is a PREGNANCY journey -- do NOT reference TTC or trying to conceive.
+${checkinContext}
+What scans/tests are due, what to track, warning signs, upcoming appointments.`,
 
       hormones: (function(){
         const vals = [];
@@ -634,13 +657,15 @@ Specify which vaccines are due at ${ppStageLabel}. Explain what each protects ag
       })(),
 
       supplements: (function(){
-        let p = 'Generate specific supplement protocol.\nSTAGE: ' + (stageDescriptions[clinicalStage]||clinicalStage) + '\n';
+        let p = journey === 'pregnancy'
+          ? `Generate supplement guidance for WEEK ${week} of PREGNANCY.\nThis is a PREGNANCY journey -- do NOT reference TTC.\nTrimester: ${week <= 13 ? 'First' : week <= 26 ? 'Second' : 'Third'} trimester.\n`
+          : `Generate specific supplement protocol.\nSTAGE: ${stageDescriptions[clinicalStage]||clinicalStage}\n`;
         if(checkinContext) p += 'CHECK-IN SYMPTOMS: ' + (checkin && checkin.chips ? checkin.chips.join(', ') : '') + '\nAddress each symptom with supplement/dietary advice. Flag bleeding/reduced movements/headache/swelling as URGENT first.\n';
         if(journey === 'pregnancy' && (profile.bpReading1 || profile.bpReading2)) {
           p += 'BP READINGS: ' + (profile.bpReading1||'') + (profile.bpReading2 ? ' / '+profile.bpReading2 : '') + '\nIf systolic >= 140 or diastolic >= 90 -- flag pre-eclampsia risk at top. Advise: rest, reduce salt, avoid NSAIDs, contact doctor urgently.\n';
         }
         if(journey === 'pregnancy') {
-          p += 'STRICT PREGNANCY RULES:\n- Folic acid 5mg: weeks 1-12 ONLY\n- Iron 60mg: Week 14+ ONLY\n- Calcium: Week 16+ only\n- Vitamin D: safe throughout\nCurrent week: ' + week;
+          p += 'STRICT PREGNANCY SUPPLEMENT RULES:\n- Folic acid 5mg: weeks 1-12 ONLY\n- Iron 60mg: Week 14+ ONLY\n- Calcium: Week 16+ only\n- Vitamin D: safe throughout\nCurrent week: ' + week;
         } else {
           p += 'TTC SUPPLEMENTS:\n';
           if(syms.includes('pcos_diagnosed')) p += '- PCOS: Myo-inositol 2g + D-chiro 50mg BD, Vitamin D, NAC 600mg, Omega-3\n';
@@ -652,11 +677,29 @@ Specify which vaccines are due at ${ppStageLabel}. Explain what each protects ag
         return p;
       })(),
 
-      pretreatment: `Generate investigation and pre-treatment guidance.\nWORKUP: ${profile.workupStatus || 'not specified'}\nDONE: ${profile.investigationsDone && profile.investigationsDone.length ? profile.investigationsDone.join(', ') : 'none'}\n${!profile.workupStatus || profile.workupStatus === 'no_workup' ? 'No investigations done. Prioritised list of what to get done, cycle day timing, why.' : 'What is still missing? What happens in next 4-8 weeks?'}`,
+      pretreatment: `Generate investigation and pre-treatment guidance.
+WORKUP: ${profile.workupStatus || 'not specified'}
+DONE: ${profile.investigationsDone && profile.investigationsDone.length ? profile.investigationsDone.join(', ') : 'none'}
+${!profile.workupStatus || profile.workupStatus === 'no_workup' ? 'No investigations done. Prioritised list of what to get done, cycle day timing, why.' : 'What is still missing? What happens in next 4-8 weeks?'}`,
 
       immunization: journey === 'pregnancy'
-        ? `Generate pregnancy immunization guidance for Week ${week}.\n\nINDIA PREGNANCY IMMUNIZATION SCHEDULE:\n- TT-1: At first ANC contact (before 26 weeks if unimmunized)\n- TT-2: 4 weeks after TT-1\n- TT Booster: If previously immunized within 3 years\n- Td: Preferred over TT in many centres (tetanus + diphtheria)\n- Flu vaccine: Recommended in all trimesters during flu season\n- COVID booster: Safe in 2nd/3rd trimester\n\nVACCINES TO AVOID in pregnancy: MMR, Varicella, BCG (live vaccines)\n\nSpecify what is due at Week ${week}. Why each vaccine matters. What to plan for post-delivery.`
-        : `Generate pre-conception immunization guidance.\nCheck: rubella immunity, Hepatitis B, Varicella, HPV, flu, COVID. Why pre-conception immunization matters. What CANNOT be given once pregnant.`,
+        ? `Generate pregnancy immunization guidance for Week ${week} of PREGNANCY.
+This is a PREGNANCY journey -- do NOT reference TTC.
+
+INDIA PREGNANCY IMMUNIZATION SCHEDULE:
+- TT-1: At first ANC contact (before 26 weeks if unimmunized)
+- TT-2: 4 weeks after TT-1
+- TT Booster: If previously immunized within 3 years
+- Td: Preferred over TT in many centres (tetanus + diphtheria)
+- Flu vaccine: Recommended in all trimesters during flu season
+- COVID booster: Safe in 2nd/3rd trimester
+
+VACCINES TO AVOID in pregnancy: MMR, Varicella, BCG (live vaccines)
+
+Specify what is due at Week ${week}. Why each vaccine matters. What to plan for post-delivery.`
+        : `Generate pre-conception immunization guidance.
+Check: rubella immunity, Hepatitis B, Varicella, HPV, flu, COVID. Why pre-conception immunization matters. What CANNOT be given once pregnant.`,
+
     };
 
     const prompt = sectionPrompts[section] || sectionPrompts.overview;
@@ -691,7 +734,6 @@ Return ONLY valid JSON. No markdown, no preamble.
       const jsonStr = jsonStart !== -1 && jsonEnd !== -1 ? cleaned.slice(jsonStart, jsonEnd + 1) : cleaned;
       parsed = JSON.parse(jsonStr);
     } catch(e) {
-      // Extract readable text -- strip JSON artifacts
       parsed = { main_content: rawText.replace(/```json|```/g,"").trim(), key_points: [], personalised_tip: "", clinical_note: "", action_items: [] };
     }
     res.json({ content: parsed, journey, month, week, section, clinicalStage });
