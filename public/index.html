@@ -169,6 +169,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 .pf-sep{font-size:14px;font-weight:600;color:#9E5238;text-transform:uppercase;letter-spacing:0.06em;margin:14px 0 8px;padding-top:10px;border-top:1px solid #F0E8E2;}
 @media(max-width:1100px){.layout{grid-template-columns:240px 1fr;}}
 @media(max-width:700px){.layout{grid-template-columns:1fr;}.sidebar{display:none;}.stat-row{grid-template-columns:1fr 1fr;}}
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 </style>
 </head>
 <body>
@@ -176,6 +180,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
   <div class="topbar-logo">🌸 bloom</div>
   <div class="topbar-right">
     <span id="planBadge" class="plan-badge">Free</span>
+    <a id="upgrade-topbar-btn" href="#" onclick="showUpgradeModal();return false;" style="display:none;font-size:14px;font-weight:600;padding:8px 18px;background:#b87355;color:#fff;border-radius:50px;text-decoration:none;white-space:nowrap;">⬆ Upgrade</a>
     <div class="avatar" id="avatarEl">?</div>
     <button class="logout-btn" onclick="logout()">Sign out</button>
   </div>
@@ -831,6 +836,9 @@ function renderProfile(){
   const badge=document.getElementById('planBadge');
   badge.textContent=userPlan==='complete'?'Bloom Complete':userPlan==='pro'?'Bloom Pro':'Free';
   badge.className='plan-badge '+(userPlan==='complete'?'complete':userPlan==='pro'?'pro':'');
+  // Show upgrade button for non-complete users
+  const upgradeBtn=document.getElementById('upgrade-topbar-btn');
+  if(upgradeBtn) upgradeBtn.style.display=(userPlan!=='complete'?'inline-block':'none');
   if(p.cycleLength) document.getElementById('ccCycleLen').value=p.cycleLength;
   if(p.periodLength) document.getElementById('ccPeriodLen').value=p.periodLength;
   const saved=localStorage.getItem('bloom_last_period');
