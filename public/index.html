@@ -644,155 +644,302 @@ input[type=number] { -moz-appearance: textfield; appearance: textfield; }
         <div><label class="pf-label">Concerns for next appointment</label><textarea id="pf-concerns" rows="3" placeholder="e.g. Want to ask about starting Letrozole, concerned about AMH result…" class="pf-input" style="resize:vertical;"></textarea></div>
       </div>
 
-      <!-- TAB: PREGNANCY -->
-      <div id="pf-tab-pregnancy" class="pf-tab-panel" style="display:none;">
-        <div class="pf-section-intro">🤰 Pregnancy history and ANC investigations help Bloom personalise your pregnancy roadmap and supplement advice.</div>
+      <!-- PASTE THIS to REPLACE the entire <div id="pf-tab-pregnancy"> section in roadmap.html -->
+<!-- Find: <div id="pf-tab-pregnancy" class="pf-tab-panel" style="display:none;"> -->
+<!-- Replace everything until the matching </div> with the block below -->
 
-        <div class="pf-sep">📋 Current Pregnancy</div>
-        <div class="pf-grid2" style="margin-bottom:10px;">
-          <div><label class="pf-label">LMP (last menstrual period)</label><input type="date" id="pf-preg-lmp" class="pf-input"/></div>
-          <div><label class="pf-label">EDD (expected due date)</label><input type="date" id="pf-preg-edd" class="pf-input" onchange="calcPregLmpFromEdd()"/></div>
-        </div>
-        <div class="pf-grid2" style="margin-bottom:10px;">
-          <div><label class="pf-label">Booking week</label><input type="number" id="pf-booking-week" placeholder="e.g. 8" min="4" max="40" class="pf-input"/></div>
-          <div><label class="pf-label">How conceived</label>
-            <select id="pf-preg-conception" class="pf-input">
-              <option value="">Select…</option>
-              <option value="natural">Natural conception</option>
-              <option value="iui">IUI</option>
-              <option value="ivf">IVF</option>
-              <option value="icsi">ICSI</option>
-              <option value="fet">FET</option>
-            </select>
-          </div>
-        </div>
-        <div style="margin-bottom:10px;"><label class="pf-label">High risk factors</label>
-          <div class="pf-chip-row" id="pf-high-risk">
-            <div class="pf-chip" data-val="diabetes">Diabetes / GDM</div>
-            <div class="pf-chip" data-val="hypertension">Hypertension</div>
-            <div class="pf-chip" data-val="thyroid">Thyroid disorder</div>
-            <div class="pf-chip" data-val="prev_cs">Previous C-section</div>
-            <div class="pf-chip" data-val="twins">Twins / multiple</div>
-            <div class="pf-chip" data-val="prev_preterm">Previous preterm birth</div>
-            <div class="pf-chip" data-val="placenta_praevia">Placenta praevia</div>
-            <div class="pf-chip" data-val="short_cervix">Short cervix</div>
-          </div>
-        </div>
+<div id="pf-tab-pregnancy" class="pf-tab-panel" style="display:none;">
+  <div class="pf-section-intro">🤰 This tab captures your full obstetric history and ANC investigations — the more you fill, the more personalised your pregnancy roadmap becomes.</div>
 
-        <div class="pf-sep">🩸 ANC Blood Tests</div>
-        <div class="pf-grid3" style="margin-bottom:10px;">
-          <div><label class="pf-label">Blood group</label>
-            <select id="pf-anc-blood-group" class="pf-input pf-input-sm">
-              <option value="">Select…</option>
-              <option value="A+">A+</option><option value="A-">A-</option>
-              <option value="B+">B+</option><option value="B-">B-</option>
-              <option value="O+">O+</option><option value="O-">O-</option>
-              <option value="AB+">AB+</option><option value="AB-">AB-</option>
-            </select>
-          </div>
-          <div><label class="pf-label">Hb 1st trimester (g/dL)</label><input type="number" id="pf-anc-hb1" placeholder="e.g. 11.5" step="0.1" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: &gt;11</div></div>
-          <div><label class="pf-label">Hb 2nd trimester (g/dL)</label><input type="number" id="pf-anc-hb2" placeholder="e.g. 10.8" step="0.1" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: &gt;10.5</div></div>
-          <div><label class="pf-label">Hb 3rd trimester (g/dL)</label><input type="number" id="pf-anc-hb3" placeholder="e.g. 11.0" step="0.1" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: &gt;11</div></div>
-          <div><label class="pf-label">VDRL</label>
-            <select id="pf-anc-vdrl" class="pf-input pf-input-sm">
-              <option value="">Select…</option>
-              <option value="non_reactive">Non-reactive ✓</option>
-              <option value="reactive">Reactive ⚠️</option>
-            </select>
-          </div>
-          <div><label class="pf-label">HIV</label>
-            <select id="pf-anc-hiv" class="pf-input pf-input-sm">
-              <option value="">Select…</option>
-              <option value="non_reactive">Non-reactive ✓</option>
-              <option value="reactive">Reactive ⚠️</option>
-            </select>
-          </div>
-          <div><label class="pf-label">HBsAg</label>
-            <select id="pf-anc-hbsag" class="pf-input pf-input-sm">
-              <option value="">Select…</option>
-              <option value="negative">Negative ✓</option>
-              <option value="positive">Positive ⚠️</option>
-            </select>
-          </div>
-          <div><label class="pf-label">TSH in pregnancy</label><input type="number" id="pf-anc-tsh" placeholder="e.g. 2.1" step="0.01" class="pf-input pf-input-sm"/><div class="pf-ref">Optimal: &lt;2.5</div></div>
-          <div><label class="pf-label">Ferritin (ng/mL)</label><input type="number" id="pf-anc-ferritin" placeholder="e.g. 35" class="pf-input pf-input-sm"/><div class="pf-ref">Optimal: &gt;30</div></div>
-          <div><label class="pf-label">Platelet count (×10³/µL)</label><input type="number" id="pf-anc-platelets" placeholder="e.g. 220" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: 150–400</div></div>
-        </div>
+  <!-- ── OBSTETRIC HISTORY ── -->
+  <div class="pf-sep">📋 Obstetric History (G/P/A/L)</div>
+  <div style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6;background:#F5EDE6;padding:10px 14px;border-radius:8px;border-left:3px solid var(--terra);">
+    G = Gravida (total pregnancies including current) · P = Para (deliveries after 20 weeks) · A = Abortions (spontaneous + induced) · L = Living children
+  </div>
+  <div class="pf-grid3" style="margin-bottom:10px;">
+    <div><label class="pf-label">Gravida (G)</label><input type="number" id="pf-obs-gravida" placeholder="e.g. 2" min="0" max="20" class="pf-input pf-input-sm"/></div>
+    <div><label class="pf-label">Para (P)</label><input type="number" id="pf-obs-para" placeholder="e.g. 1" min="0" max="20" class="pf-input pf-input-sm"/></div>
+    <div><label class="pf-label">Living children (L)</label><input type="number" id="pf-obs-living-preg" placeholder="e.g. 1" min="0" max="20" class="pf-input pf-input-sm"/></div>
+    <div><label class="pf-label">Spontaneous abortions</label><input type="number" id="pf-obs-spontaneous" placeholder="e.g. 1" min="0" max="10" class="pf-input pf-input-sm"/><div class="pf-ref">Miscarriages</div></div>
+    <div><label class="pf-label">Induced abortions (MTP)</label><input type="number" id="pf-obs-induced" placeholder="e.g. 0" min="0" max="10" class="pf-input pf-input-sm"/></div>
+    <div><label class="pf-label">Years ago (last pregnancy)</label><input type="number" id="pf-obs-years-ago" placeholder="e.g. 2" min="0" max="40" class="pf-input pf-input-sm"/></div>
+  </div>
 
-        <div class="pf-sep">🍬 OGTT (Glucose Tolerance Test)</div>
-        <div class="pf-grid3" style="margin-bottom:10px;">
-          <div><label class="pf-label">Fasting (mg/dL)</label><input type="number" id="pf-ogtt-fasting" placeholder="e.g. 88" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: &lt;92</div></div>
-          <div><label class="pf-label">1 hour (mg/dL)</label><input type="number" id="pf-ogtt-1hr" placeholder="e.g. 145" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: &lt;180</div></div>
-          <div><label class="pf-label">2 hour (mg/dL)</label><input type="number" id="pf-ogtt-2hr" placeholder="e.g. 120" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: &lt;153</div></div>
-        </div>
-
-        <div class="pf-sep">🔊 ANC Ultrasound</div>
-        <div class="pf-grid2" style="margin-bottom:10px;">
-          <div><label class="pf-label">Dating scan</label>
-            <select id="pf-dating-scan" class="pf-input pf-input-sm">
-              <option value="">Select…</option>
-              <option value="done_normal">Done — normal</option>
-              <option value="done_abnormal">Done — abnormality noted</option>
-              <option value="pending">Not done yet</option>
-            </select>
-          </div>
-          <div><label class="pf-label">Nuchal translucency NT (mm)</label><input type="number" id="pf-nuchal-nt" placeholder="e.g. 1.4" step="0.1" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: &lt;3.5mm</div></div>
-          <div><label class="pf-label">Nuchal scan result</label>
-            <select id="pf-nuchal-result" class="pf-input pf-input-sm">
-              <option value="">Select…</option>
-              <option value="low_risk">Low risk</option>
-              <option value="high_risk">High risk — further testing advised</option>
-              <option value="pending">Pending</option>
-            </select>
-          </div>
-          <div><label class="pf-label">Anomaly scan (20w)</label>
-            <select id="pf-anomaly-scan" class="pf-input pf-input-sm">
-              <option value="">Select…</option>
-              <option value="normal">Normal ✓</option>
-              <option value="abnormal_minor">Minor finding</option>
-              <option value="abnormal_major">Major finding</option>
-              <option value="pending">Not done yet</option>
-            </select>
-          </div>
-          <div><label class="pf-label">Placenta position</label>
-            <select id="pf-placenta" class="pf-input pf-input-sm">
-              <option value="">Select…</option>
-              <option value="anterior">Anterior</option>
-              <option value="posterior">Posterior</option>
-              <option value="fundal">Fundal</option>
-              <option value="low_lying">Low lying</option>
-              <option value="praevia">Placenta praevia</option>
-            </select>
-          </div>
-          <div><label class="pf-label">Growth scan result</label>
-            <select id="pf-growth-scan" class="pf-input pf-input-sm">
-              <option value="">Select…</option>
-              <option value="normal">Normal growth</option>
-              <option value="iugr">IUGR (small)</option>
-              <option value="lga">Large for dates</option>
-              <option value="pending">Not done yet</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="pf-sep">🩺 Blood Pressure Readings</div>
-        <div style="font-size:12px;color:var(--muted);margin-bottom:8px;line-height:1.5;">Last 2 BP readings — helps Bloom flag pre-eclampsia risk and tailor advice.</div>
-        <div class="pf-grid2" style="margin-bottom:10px;">
-          <div><label class="pf-label">BP reading 1 (mmHg)</label><input type="text" id="pf-bp1" placeholder="e.g. 118/76" class="pf-input pf-input-sm"/></div>
-          <div><label class="pf-label">Date</label><input type="date" id="pf-bp1-date" class="pf-input pf-input-sm"/></div>
-          <div><label class="pf-label">BP reading 2 (mmHg)</label><input type="text" id="pf-bp2" placeholder="e.g. 124/80" class="pf-input pf-input-sm"/></div>
-          <div><label class="pf-label">Date</label><input type="date" id="pf-bp2-date" class="pf-input pf-input-sm"/></div>
-        </div>
-
-        <div class="pf-sep">💉 Immunizations</div>
-        <div class="pf-grid2" style="margin-bottom:4px;">
-          <div><label class="pf-label">TT-1 date</label><input type="date" id="pf-tt1" class="pf-input pf-input-sm"/></div>
-          <div><label class="pf-label">TT-2 / Td date</label><input type="date" id="pf-tt2" class="pf-input pf-input-sm"/></div>
-          <div><label class="pf-label">Flu vaccine date</label><input type="date" id="pf-flu" class="pf-input pf-input-sm"/></div>
-        </div>
-      </div>
-
+  <div style="margin-bottom:10px;"><label class="pf-label">Mode of previous delivery(ies)</label>
+    <div class="pf-chip-row" id="pf-delivery-mode-chips">
+      <div class="pf-chip" data-val="normal_vaginal">Normal vaginal delivery</div>
+      <div class="pf-chip" data-val="lscs">LSCS (C-section)</div>
+      <div class="pf-chip" data-val="instrumental">Instrumental (forceps/vacuum)</div>
+      <div class="pf-chip" data-val="na_no_delivery">No previous deliveries</div>
     </div>
+  </div>
+
+  <div style="margin-bottom:10px;"><label class="pf-label">If LSCS — reason(s)</label>
+    <div class="pf-chip-row" id="pf-lscs-reason-chips">
+      <div class="pf-chip" data-val="fetal_distress">Fetal distress</div>
+      <div class="pf-chip" data-val="cephalopelvic">Cephalopelvic disproportion</div>
+      <div class="pf-chip" data-val="placenta_praevia_cs">Placenta praevia</div>
+      <div class="pf-chip" data-val="prev_cs_repeat">Previous LSCS (repeat)</div>
+      <div class="pf-chip" data-val="breach">Breech presentation</div>
+      <div class="pf-chip" data-val="failed_induction">Failed induction</div>
+      <div class="pf-chip" data-val="preeclampsia_cs">Pre-eclampsia</div>
+      <div class="pf-chip" data-val="twins_cs">Twin/multiple pregnancy</div>
+    </div>
+  </div>
+
+  <div style="margin-bottom:10px;"><label class="pf-label">Previous obstetric complications</label>
+    <div class="pf-chip-row" id="pf-obs-complications">
+      <div class="pf-chip" data-val="pph">PPH (postpartum haemorrhage)</div>
+      <div class="pf-chip" data-val="preeclampsia_hx">Pre-eclampsia</div>
+      <div class="pf-chip" data-val="gdm_hx">Gestational diabetes</div>
+      <div class="pf-chip" data-val="preterm_birth">Preterm birth (&lt;37 weeks)</div>
+      <div class="pf-chip" data-val="iugr_hx">IUGR / small baby</div>
+      <div class="pf-chip" data-val="placental_abruption">Placental abruption</div>
+      <div class="pf-chip" data-val="still_birth">Stillbirth</div>
+      <div class="pf-chip" data-val="neonatal_death">Neonatal death</div>
+      <div class="pf-chip" data-val="no_complications">No complications</div>
+    </div>
+  </div>
+
+  <div style="margin-bottom:10px;"><label class="pf-label">H/o medications in previous pregnancy(ies)</label>
+    <textarea id="pf-obs-prior-meds" rows="2" placeholder="e.g. Heparin for APS, insulin for GDM, progesterone for threatened abortion, iron injections…" class="pf-input" style="resize:vertical;font-size:14px;"></textarea>
+  </div>
+  <div style="margin-bottom:14px;"><label class="pf-label">H/o prior surgeries (gynaec / abdominal)</label>
+    <textarea id="pf-obs-prior-surgeries" rows="2" placeholder="e.g. Appendicectomy 2019, myomectomy 2021, previous LSCS scar…" class="pf-input" style="resize:vertical;font-size:14px;"></textarea>
+  </div>
+
+  <!-- ── CURRENT PREGNANCY ── -->
+  <div class="pf-sep">🌸 Current Pregnancy</div>
+  <div class="pf-grid2" style="margin-bottom:10px;">
+    <div><label class="pf-label">LMP (last menstrual period)</label><input type="date" id="pf-preg-lmp" class="pf-input"/></div>
+    <div><label class="pf-label">EDD (expected due date)</label><input type="date" id="pf-preg-edd" class="pf-input" onchange="calcPregLmpFromEdd()"/></div>
+  </div>
+  <div class="pf-grid2" style="margin-bottom:10px;">
+    <div><label class="pf-label">Booking week</label><input type="number" id="pf-booking-week" placeholder="e.g. 8" min="4" max="40" class="pf-input"/></div>
+    <div><label class="pf-label">How conceived</label>
+      <select id="pf-preg-conception" class="pf-input">
+        <option value="">Select…</option>
+        <option value="natural">Natural conception</option>
+        <option value="iui">IUI</option>
+        <option value="ivf">IVF</option>
+        <option value="icsi">ICSI</option>
+        <option value="fet">FET</option>
+      </select>
+    </div>
+  </div>
+  <div style="margin-bottom:10px;"><label class="pf-label">High risk factors</label>
+    <div class="pf-chip-row" id="pf-high-risk">
+      <div class="pf-chip" data-val="diabetes">Diabetes / GDM</div>
+      <div class="pf-chip" data-val="hypertension">Hypertension</div>
+      <div class="pf-chip" data-val="thyroid">Thyroid disorder</div>
+      <div class="pf-chip" data-val="prev_cs">Previous C-section</div>
+      <div class="pf-chip" data-val="twins">Twins / multiple</div>
+      <div class="pf-chip" data-val="prev_preterm">Previous preterm birth</div>
+      <div class="pf-chip" data-val="placenta_praevia">Placenta praevia</div>
+      <div class="pf-chip" data-val="short_cervix">Short cervix</div>
+      <div class="pf-chip" data-val="apla">Antiphospholipid syndrome</div>
+      <div class="pf-chip" data-val="recurrent_loss">Recurrent pregnancy loss</div>
+    </div>
+  </div>
+
+  <!-- ── ANC BLOOD TESTS — EXTENDED ── -->
+  <div class="pf-sep">🩸 ANC Blood Tests (CBC + Extended)</div>
+  <div class="pf-grid3" style="margin-bottom:10px;">
+    <div><label class="pf-label">Blood group + Rh</label>
+      <select id="pf-anc-blood-group" class="pf-input pf-input-sm">
+        <option value="">Select…</option>
+        <option value="A+">A+</option><option value="A-">A-</option>
+        <option value="B+">B+</option><option value="B-">B-</option>
+        <option value="O+">O+</option><option value="O-">O-</option>
+        <option value="AB+">AB+</option><option value="AB-">AB-</option>
+      </select>
+    </div>
+    <div><label class="pf-label">Hb 1st trimester (g/dL)</label><input type="number" id="pf-anc-hb1" placeholder="e.g. 11.5" step="0.1" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: &gt;11</div></div>
+    <div><label class="pf-label">Hb 2nd trimester (g/dL)</label><input type="number" id="pf-anc-hb2" placeholder="e.g. 10.8" step="0.1" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: &gt;10.5</div></div>
+    <div><label class="pf-label">Hb 3rd trimester (g/dL)</label><input type="number" id="pf-anc-hb3" placeholder="e.g. 11.0" step="0.1" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: &gt;11</div></div>
+    <div><label class="pf-label">TLC (×10³/µL)</label><input type="number" id="pf-anc-tlc" placeholder="e.g. 9.5" step="0.1" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: 4–11</div></div>
+    <div><label class="pf-label">Platelets (×10³/µL)</label><input type="number" id="pf-anc-platelets" placeholder="e.g. 220" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: 150–400</div></div>
+    <div><label class="pf-label">RBS (mg/dL)</label><input type="number" id="pf-anc-rbs" placeholder="e.g. 105" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: &lt;140</div></div>
+    <div><label class="pf-label">SGPT / ALT (U/L)</label><input type="number" id="pf-anc-sgpt" placeholder="e.g. 25" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: &lt;40</div></div>
+    <div><label class="pf-label">SGOT / AST (U/L)</label><input type="number" id="pf-anc-sgot" placeholder="e.g. 22" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: &lt;40</div></div>
+    <div><label class="pf-label">Blood urea (mg/dL)</label><input type="number" id="pf-anc-urea" placeholder="e.g. 28" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: 10–45</div></div>
+    <div><label class="pf-label">Creatinine (mg/dL)</label><input type="number" id="pf-anc-creatinine" placeholder="e.g. 0.7" step="0.01" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: &lt;0.9</div></div>
+    <div><label class="pf-label">Uric acid (mg/dL)</label><input type="number" id="pf-anc-uric-acid" placeholder="e.g. 4.2" step="0.1" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: 2.5–5.5 (in preg)</div></div>
+    <div><label class="pf-label">ANC TSH (mIU/L)</label><input type="number" id="pf-anc-tsh" placeholder="e.g. 2.1" step="0.01" class="pf-input pf-input-sm"/><div class="pf-ref">Optimal: &lt;2.5</div></div>
+    <div><label class="pf-label">Free T4</label><input type="number" id="pf-anc-ft4" placeholder="e.g. 1.2" step="0.01" class="pf-input pf-input-sm"/></div>
+    <div><label class="pf-label">Anti-TPO (IU/mL)</label><input type="number" id="pf-anc-anti-tpo" placeholder="e.g. 15" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: &lt;35</div></div>
+    <div><label class="pf-label">Ferritin (ng/mL)</label><input type="number" id="pf-anc-ferritin" placeholder="e.g. 35" class="pf-input pf-input-sm"/><div class="pf-ref">Optimal: &gt;30</div></div>
+    <div><label class="pf-label">Urine protein</label>
+      <select id="pf-anc-urine-protein" class="pf-input pf-input-sm">
+        <option value="">Select…</option>
+        <option value="nil">Nil / negative ✓</option>
+        <option value="trace">Trace</option>
+        <option value="1plus">1+ (significant)</option>
+        <option value="2plus">2+ (significant ⚠️)</option>
+        <option value="3plus">3+ (pre-eclampsia risk 🚨)</option>
+      </select>
+    </div>
+    <div><label class="pf-label">GBS swab (35-37w)</label>
+      <select id="pf-anc-gbs" class="pf-input pf-input-sm">
+        <option value="">Select…</option>
+        <option value="negative">Negative ✓</option>
+        <option value="positive">Positive — intrapartum antibiotics needed</option>
+        <option value="pending">Not done yet</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- ── INFECTIONS SCREEN ── -->
+  <div class="pf-sep">🦠 Infection Screening</div>
+  <div class="pf-grid3" style="margin-bottom:10px;">
+    <div><label class="pf-label">VDRL</label>
+      <select id="pf-anc-vdrl" class="pf-input pf-input-sm">
+        <option value="">Select…</option>
+        <option value="non_reactive">Non-reactive ✓</option>
+        <option value="reactive">Reactive ⚠️</option>
+      </select>
+    </div>
+    <div><label class="pf-label">HIV</label>
+      <select id="pf-anc-hiv" class="pf-input pf-input-sm">
+        <option value="">Select…</option>
+        <option value="non_reactive">Non-reactive ✓</option>
+        <option value="reactive">Reactive ⚠️</option>
+      </select>
+    </div>
+    <div><label class="pf-label">HBsAg</label>
+      <select id="pf-anc-hbsag" class="pf-input pf-input-sm">
+        <option value="">Select…</option>
+        <option value="negative">Negative ✓</option>
+        <option value="positive">Positive ⚠️</option>
+      </select>
+    </div>
+    <div><label class="pf-label">HCV</label>
+      <select id="pf-anc-hcv" class="pf-input pf-input-sm">
+        <option value="">Select…</option>
+        <option value="negative">Negative ✓</option>
+        <option value="positive">Positive ⚠️</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- ── APLA PROFILE ── -->
+  <div class="pf-sep">🔬 APLA Profile (Antiphospholipid Antibodies)</div>
+  <div style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.6;background:#FFF5F0;padding:10px 14px;border-radius:8px;border-left:3px solid #C4704F;">
+    Indicated in: recurrent miscarriage (2+), prior preeclampsia, IUGR, prior thrombosis, or antiphospholipid syndrome suspected
+  </div>
+  <div class="pf-grid3" style="margin-bottom:10px;">
+    <div><label class="pf-label">Lupus anticoagulant (LA)</label>
+      <select id="pf-anc-apla-lupus" class="pf-input pf-input-sm">
+        <option value="">Not done</option>
+        <option value="negative">Negative ✓</option>
+        <option value="positive">Positive ⚠️</option>
+      </select>
+    </div>
+    <div><label class="pf-label">Anticardiolipin (aCL) IgG/IgM</label>
+      <select id="pf-anc-anticardiolipin" class="pf-input pf-input-sm">
+        <option value="">Not done</option>
+        <option value="negative">Negative ✓</option>
+        <option value="low_positive">Low positive</option>
+        <option value="medium_positive">Medium/high positive ⚠️</option>
+      </select>
+    </div>
+    <div><label class="pf-label">Anti-β2-glycoprotein I</label>
+      <select id="pf-anc-beta2gp1" class="pf-input pf-input-sm">
+        <option value="">Not done</option>
+        <option value="negative">Negative ✓</option>
+        <option value="positive">Positive ⚠️</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- ── OGTT ── -->
+  <div class="pf-sep">🍬 OGTT (75g Glucose Tolerance Test)</div>
+  <div class="pf-grid3" style="margin-bottom:10px;">
+    <div><label class="pf-label">Fasting (mg/dL)</label><input type="number" id="pf-ogtt-fasting" placeholder="e.g. 88" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: &lt;92</div></div>
+    <div><label class="pf-label">1 hour (mg/dL)</label><input type="number" id="pf-ogtt-1hr" placeholder="e.g. 145" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: &lt;180</div></div>
+    <div><label class="pf-label">2 hour (mg/dL)</label><input type="number" id="pf-ogtt-2hr" placeholder="e.g. 120" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: &lt;153</div></div>
+  </div>
+
+  <!-- ── ANC USG ── -->
+  <div class="pf-sep">🔊 ANC Ultrasound</div>
+  <div class="pf-grid2" style="margin-bottom:10px;">
+    <div><label class="pf-label">Dating scan</label>
+      <select id="pf-dating-scan" class="pf-input pf-input-sm">
+        <option value="">Select…</option>
+        <option value="done_normal">Done — normal</option>
+        <option value="done_abnormal">Done — abnormality noted</option>
+        <option value="pending">Not done yet</option>
+      </select>
+    </div>
+    <div><label class="pf-label">Nuchal translucency NT (mm)</label><input type="number" id="pf-nuchal-nt" placeholder="e.g. 1.4" step="0.1" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: &lt;3.5mm</div></div>
+    <div><label class="pf-label">Nuchal scan result</label>
+      <select id="pf-nuchal-result" class="pf-input pf-input-sm">
+        <option value="">Select…</option>
+        <option value="low_risk">Low risk ✓</option>
+        <option value="high_risk">High risk — further testing advised</option>
+        <option value="pending">Pending</option>
+      </select>
+    </div>
+    <div><label class="pf-label">Anomaly scan (18-22w)</label>
+      <select id="pf-anomaly-scan" class="pf-input pf-input-sm">
+        <option value="">Select…</option>
+        <option value="normal">Normal ✓</option>
+        <option value="soft_marker">Soft marker found</option>
+        <option value="abnormal_minor">Minor structural finding</option>
+        <option value="abnormal_major">Major finding</option>
+        <option value="pending">Not done yet</option>
+      </select>
+    </div>
+    <div><label class="pf-label">Placenta position</label>
+      <select id="pf-placenta" class="pf-input pf-input-sm">
+        <option value="">Select…</option>
+        <option value="anterior">Anterior</option>
+        <option value="posterior">Posterior</option>
+        <option value="fundal">Fundal</option>
+        <option value="low_lying">Low lying (&lt;2cm from os)</option>
+        <option value="praevia">Placenta praevia</option>
+      </select>
+    </div>
+    <div><label class="pf-label">Growth scan result</label>
+      <select id="pf-growth-scan" class="pf-input pf-input-sm">
+        <option value="">Select…</option>
+        <option value="normal">Normal growth ✓</option>
+        <option value="iugr">IUGR / small for dates</option>
+        <option value="lga">Large for dates</option>
+        <option value="pending">Not done yet</option>
+      </select>
+    </div>
+    <div><label class="pf-label">Cervical length (mm)</label><input type="number" id="pf-cervix-length" placeholder="e.g. 38" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: &gt;25mm</div></div>
+    <div><label class="pf-label">Doppler study</label>
+      <select id="pf-doppler" class="pf-input pf-input-sm">
+        <option value="">Select…</option>
+        <option value="normal">Normal ✓</option>
+        <option value="abnormal">Abnormal — increased resistance</option>
+        <option value="pending">Not done</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- ── BP READINGS ── -->
+  <div class="pf-sep">🩺 Blood Pressure Readings</div>
+  <div style="font-size:12px;color:var(--muted);margin-bottom:8px;line-height:1.5;">Last 2 BP readings — helps Bloom flag pre-eclampsia risk. Normal in pregnancy: &lt;140/90 mmHg.</div>
+  <div class="pf-grid2" style="margin-bottom:10px;">
+    <div><label class="pf-label">BP reading 1 (mmHg)</label><input type="text" id="pf-bp1" placeholder="e.g. 118/76" class="pf-input pf-input-sm"/></div>
+    <div><label class="pf-label">Date</label><input type="date" id="pf-bp1-date" class="pf-input pf-input-sm"/></div>
+    <div><label class="pf-label">BP reading 2 (mmHg)</label><input type="text" id="pf-bp2" placeholder="e.g. 124/80" class="pf-input pf-input-sm"/></div>
+    <div><label class="pf-label">Date</label><input type="date" id="pf-bp2-date" class="pf-input pf-input-sm"/></div>
+  </div>
+
+  <!-- ── IMMUNIZATIONS ── -->
+  <div class="pf-sep">💉 Immunizations in Pregnancy</div>
+  <div class="pf-grid2" style="margin-bottom:4px;">
+    <div><label class="pf-label">TT-1 date</label><input type="date" id="pf-tt1" class="pf-input pf-input-sm"/></div>
+    <div><label class="pf-label">TT-2 / Td date</label><input type="date" id="pf-tt2" class="pf-input pf-input-sm"/></div>
+    <div><label class="pf-label">Flu vaccine date</label><input type="date" id="pf-flu" class="pf-input pf-input-sm"/></div>
+  </div>
+</div>
+<!-- END pf-tab-pregnancy -->
+     
     <!-- Footer -->
     <div style="padding:1rem 1.75rem;border-top:1px solid #F0E8E2;flex-shrink:0;display:flex;align-items:center;gap:12px;">
       <button onclick="pfSave()" style="flex:1;padding:11px;background:#C4704F;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;">Save Profile 🌸</button>
@@ -1138,7 +1285,7 @@ function pfBuildChips(){
     });
   }
   // Wire up all chip groups
-  document.querySelectorAll('#pf-flow-chips .pf-chip, #pf-pain-chips .pf-chip, #pf-outcome-chips .pf-chip, #pf-fertility-conditions .pf-chip, #pf-surgeries .pf-chip, #pf-sa-chips .pf-chip, #pf-prev-tx-chips .pf-chip, #pf-inv-done-chips .pf-chip, #pf-usg-chips .pf-chip, #pf-doctor-chips .pf-chip, #pf-high-risk .pf-chip').forEach(chip=>{
+  document.querySelectorAll('#pf-flow-chips .pf-chip, #pf-pain-chips .pf-chip, #pf-outcome-chips .pf-chip, #pf-fertility-conditions .pf-chip, #pf-surgeries .pf-chip, #pf-sa-chips .pf-chip, #pf-prev-tx-chips .pf-chip, #pf-inv-done-chips .pf-chip, #pf-usg-chips .pf-chip, #pf-doctor-chips .pf-chip, #pf-high-risk .pf-chip, #pf-delivery-mode-chips .pf-chip, #pf-lscs-reason-chips .pf-chip, #pf-obs-complications .pf-chip').forEach(chip=>{
     if(!chip._wired){
       chip._wired=true;
       chip.onclick=function(){this.classList.toggle('selected');pfUpdateCompletion();};
@@ -1231,6 +1378,27 @@ function pfLoad(){
   set('pf-dating-scan',p.ancDatingScan);set('pf-nuchal-nt',p.ancNuchalNt);
   set('pf-nuchal-result',p.ancNuchalResult);set('pf-anomaly-scan',p.ancAnomalyScan);
   set('pf-placenta',p.ancPlacentaPos);set('pf-growth-scan',p.ancGrowthScan);
+  // Obstetric history
+  set('pf-obs-gravida',p.obsGravida);set('pf-obs-para',p.obsPara);
+  set('pf-obs-living-preg',p.obsLiving);set('pf-obs-spontaneous',p.obsSpontaneous);
+  set('pf-obs-induced',p.obsInduced);
+  set('pf-obs-years-ago',p.obsYearsAgo&&p.obsYearsAgo.length?p.obsYearsAgo[0]:'');
+  setChipVals('pf-delivery-mode-chips',p.obsDeliveryModes);
+  setChipVals('pf-lscs-reason-chips',p.obsLscsReasons);
+  setChipVals('pf-obs-complications',p.obsComplications);
+  set('pf-obs-prior-meds',p.obsPriorMedications);
+  set('pf-obs-prior-surgeries',p.obsPriorSurgeries);
+  // Extended ANC
+  set('pf-anc-tlc',p.ancTlc);set('pf-anc-rbs',p.ancRbs);
+  set('pf-anc-sgpt',p.ancSgpt);set('pf-anc-sgot',p.ancSgot);
+  set('pf-anc-urea',p.ancUrea);set('pf-anc-creatinine',p.ancCreatinine);
+  set('pf-anc-uric-acid',p.ancUricAcid);set('pf-anc-hcv',p.ancHcv);
+  set('pf-anc-ft4',p.ancFt4);set('pf-anc-anti-tpo',p.ancAntiTpo);
+  set('pf-anc-urine-protein',p.ancUrineProtein);set('pf-anc-gbs',p.ancGbs);
+  set('pf-anc-apla-lupus',p.ancAplaLupus);
+  set('pf-anc-anticardiolipin',p.ancAnticardiolipin);
+  set('pf-anc-beta2gp1',p.ancBeta2Gp1);
+  set('pf-cervix-length',p.ancCervixLength);set('pf-doppler',p.ancDoppler);
   set('pf-tt1',p.immTt1Date);set('pf-tt2',p.immTt2Date||p.immTdDate);set('pf-flu',p.immFluDate);
   set('pf-bp1',p.bpReading1);set('pf-bp1-date',p.bpReading1Date);
   set('pf-bp2',p.bpReading2);set('pf-bp2-date',p.bpReading2Date);
@@ -1267,6 +1435,25 @@ async function pfSave(){
     workupStatus:g('pf-workup-status'),txPhase:g('pf-tx-phase'),
     cycleDay:gi('pf-cycle-day'),nextStep:g('pf-next-step'),concerns:g('pf-concerns'),
     doctorInvolved:getChipVals('pf-doctor-chips'),
+    obsGravida:gi('pf-obs-gravida'),obsPara:gi('pf-obs-para'),
+    obsLiving:gi('pf-obs-living-preg'),obsSpontaneous:gi('pf-obs-spontaneous'),
+    obsInduced:gi('pf-obs-induced'),
+    obsAbortions:(gi('pf-obs-spontaneous')||0)+(gi('pf-obs-induced')||0),
+    obsYearsAgo:gi('pf-obs-years-ago')?[gi('pf-obs-years-ago')]:[],
+    obsDeliveryModes:getChipVals('pf-delivery-mode-chips'),
+    obsLscsReasons:getChipVals('pf-lscs-reason-chips'),
+    obsComplications:getChipVals('pf-obs-complications'),
+    obsPriorMedications:g('pf-obs-prior-meds'),
+    obsPriorSurgeries:g('pf-obs-prior-surgeries'),
+    ancTlc:gn('pf-anc-tlc'),ancRbs:gn('pf-anc-rbs'),
+    ancSgpt:gn('pf-anc-sgpt'),ancSgot:gn('pf-anc-sgot'),
+    ancUrea:gn('pf-anc-urea'),ancCreatinine:gn('pf-anc-creatinine'),
+    ancUricAcid:gn('pf-anc-uric-acid'),ancHcv:g('pf-anc-hcv'),
+    ancFt4:gn('pf-anc-ft4'),ancAntiTpo:gn('pf-anc-anti-tpo'),
+    ancUrineProtein:g('pf-anc-urine-protein'),ancGbs:g('pf-anc-gbs'),
+    ancAplaLupus:g('pf-anc-apla-lupus'),ancAnticardiolipin:g('pf-anc-anticardiolipin'),
+    ancBeta2Gp1:g('pf-anc-beta2gp1'),
+    ancCervixLength:gn('pf-cervix-length'),ancDoppler:g('pf-doppler'),
     pregLmp:g('pf-preg-lmp'),pregEdd:g('pf-preg-edd'),
     pregBookingWeek:gi('pf-booking-week'),pregConception:g('pf-preg-conception'),
     pregHighRisk:getChipVals('pf-high-risk'),
