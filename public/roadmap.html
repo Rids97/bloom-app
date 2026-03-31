@@ -767,7 +767,6 @@ async function loadPregSection(section,btn){
   }catch(e){delete contentCache[key+'_loading'];handleContentError('preg-ai-content',{error:e.message},section,'pregnancy');}
 }
 
-let currentPregSection='overview';
 function initPregnancy(){
   const saved=localStorage.getItem('bloom_preg_lmp');
   if(saved) computeAndRenderPreg(saved);
