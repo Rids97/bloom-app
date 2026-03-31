@@ -174,6 +174,7 @@ input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 </style>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
 <body>
 <nav class="topbar">
@@ -281,12 +282,12 @@ input[type=number] { -moz-appearance: textfield; appearance: textfield; }
     <div class="paywall-title">You've used your free messages</div>
     <div class="paywall-sub">Upgrade to keep chatting with Bloom — plus unlock fertile window tracking, report analysis, and more.</div>
     <div class="paywall-plans">
-      <a href="/login.html#pricing" class="paywall-plan featured" onclick="closePaywall()">
+      <a href="#" class="paywall-plan featured" onclick="closePaywall();startPayment('pro');return false;">
         <div class="paywall-plan-name">Bloom Pro</div>
         <div class="paywall-plan-price">₹149<span style="font-size:12px;opacity:0.7;">/mo</span></div>
         <div class="paywall-plan-features">✓ Unlimited chat<br/>✓ Fertile window<br/>✓ 3 reports/month</div>
       </a>
-      <a href="/login.html#pricing" class="paywall-plan" onclick="closePaywall()">
+      <a href="#" class="paywall-plan" onclick="closePaywall();startPayment('complete');return false;">
         <div class="paywall-plan-name" style="color:var(--text)">Bloom Complete</div>
         <div class="paywall-plan-price">₹449<span style="font-size:12px;color:var(--muted);">/mo</span></div>
         <div class="paywall-plan-features">✓ Everything in Pro<br/>✓ Unlimited reports<br/>✓ Personalised roadmap</div>
@@ -958,6 +959,35 @@ function updateMsgLimit(){
 
 function openPaywall(){document.getElementById('paywallOverlay').classList.add('open');}
 function closePaywall(){document.getElementById('paywallOverlay').classList.remove('open');}
+
+async function startPayment(plan){
+  try{
+    const res=await fetch('/create-order',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+TOKEN},body:JSON.stringify({plan})});
+    const order=await res.json();
+    if(!order.orderId){alert('Could not create order. Please try again.');return;}
+    const options={
+      key: 'rzp_live_GVnxWbGFbZNs8Q',
+      amount: order.amount,
+      currency: 'INR',
+      name: 'Bloom',
+      description: order.planLabel,
+      order_id: order.orderId,
+      handler: async function(response){
+        const vRes=await fetch('/verify-payment',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+TOKEN},body:JSON.stringify({razorpay_order_id:response.razorpay_order_id,razorpay_payment_id:response.razorpay_payment_id,razorpay_signature:response.razorpay_signature,plan})});
+        const vData=await vRes.json();
+        if(vData.success){
+          localStorage.setItem('bloom_token',vData.token);
+          alert('Payment successful! Welcome to '+order.planLabel);
+          window.location.reload();
+        }
+      },
+      prefill:{email:userData.email||''},
+      theme:{color:'#C4704F'}
+    };
+    const rzp=new Razorpay(options);
+    rzp.open();
+  }catch(e){console.error('Payment error:',e);alert('Payment failed. Please try again.');}
+}
 function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}}
 function sendSug(el){document.getElementById('chatInput').value=el.textContent;sendChat();}
 
