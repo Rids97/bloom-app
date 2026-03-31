@@ -659,16 +659,41 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 
       <!-- TAB: PREGNANCY -->
       <div id="pf-tab-pregnancy" class="pf-tab-panel" style="display:none;">
-        <div class="pf-section-intro">🤰 This tab captures your full obstetric history and ANC investigations — the more you fill, the more personalised your pregnancy roadmap becomes.</div>
+        <div class="pf-section-intro">🤰 This tab captures your current pregnancy details, obstetric history, and ANC investigations — the more you fill, the more personalised your pregnancy roadmap becomes.</div>
 
-        <!-- MENSTRUAL in PREGNANCY context -->
-        <div class="pf-sep">📅 Menstrual History (for reference)</div>
+        <!-- CURRENT PREGNANCY FIRST -->
+        <div class="pf-sep">🌸 Current Pregnancy</div>
         <div class="pf-grid2" style="margin-bottom:10px;">
-          <div><label class="pf-label">Last menstrual period (LMP)</label><input type="date" id="pf-preg-lmp-ref" class="pf-input" onchange="document.getElementById('pf-preg-lmp').value=this.value;calcPregLmpFromEdd()"/><div class="pf-ref">Also updates Pregnancy LMP below</div></div>
-          <div><label class="pf-label">Cycle length before pregnancy</label><input type="number" id="pf-preg-cycle-len" placeholder="e.g. 28" min="21" max="60" class="pf-input"/></div>
+          <div><label class="pf-label">LMP (last menstrual period)</label><input type="date" id="pf-preg-lmp" class="pf-input"/></div>
+          <div><label class="pf-label">EDD (expected due date)</label><input type="date" id="pf-preg-edd" class="pf-input" onchange="calcPregLmpFromEdd()"/></div>
+        </div>
+        <div class="pf-grid2" style="margin-bottom:10px;">
+          <div><label class="pf-label">Booking week</label><input type="number" id="pf-booking-week" placeholder="e.g. 8" min="4" max="40" class="pf-input"/></div>
+          <div><label class="pf-label">How conceived</label>
+            <select id="pf-preg-conception" class="pf-input">
+              <option value="">Select…</option>
+              <option value="natural">Natural conception</option>
+              <option value="iui">IUI</option><option value="ivf">IVF</option>
+              <option value="icsi">ICSI</option><option value="fet">FET</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-bottom:14px;"><label class="pf-label">High risk factors</label>
+          <div class="pf-chip-row" id="pf-high-risk">
+            <div class="pf-chip" data-val="diabetes">Diabetes / GDM</div>
+            <div class="pf-chip" data-val="hypertension">Hypertension</div>
+            <div class="pf-chip" data-val="thyroid">Thyroid disorder</div>
+            <div class="pf-chip" data-val="prev_cs">Previous C-section</div>
+            <div class="pf-chip" data-val="twins">Twins / multiple</div>
+            <div class="pf-chip" data-val="prev_preterm">Previous preterm birth</div>
+            <div class="pf-chip" data-val="placenta_praevia">Placenta praevia</div>
+            <div class="pf-chip" data-val="short_cervix">Short cervix</div>
+            <div class="pf-chip" data-val="apla">Antiphospholipid syndrome</div>
+            <div class="pf-chip" data-val="recurrent_loss">Recurrent pregnancy loss</div>
+          </div>
         </div>
 
-        <!-- OBSTETRIC HISTORY -->
+        <!-- OBSTETRIC HISTORY SECOND -->
         <div class="pf-sep">📋 Obstetric History (G/P/A/L)</div>
         <div style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6;background:#F5EDE6;padding:10px 14px;border-radius:8px;border-left:3px solid var(--terra);">
           G = Gravida (total pregnancies) · P = Para (deliveries after 20 weeks) · A = Abortions (spontaneous + induced) · L = Living children
@@ -719,38 +744,6 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
         </div>
         <div style="margin-bottom:14px;"><label class="pf-label">H/o prior surgeries (gynaec / abdominal)</label>
           <textarea id="pf-obs-prior-surgeries" rows="2" placeholder="e.g. Appendicectomy 2019, myomectomy 2021, previous LSCS scar…" class="pf-input" style="resize:vertical;font-size:14px;"></textarea>
-        </div>
-
-        <!-- CURRENT PREGNANCY -->
-        <div class="pf-sep">🌸 Current Pregnancy</div>
-        <div class="pf-grid2" style="margin-bottom:10px;">
-          <div><label class="pf-label">LMP (last menstrual period)</label><input type="date" id="pf-preg-lmp" class="pf-input"/></div>
-          <div><label class="pf-label">EDD (expected due date)</label><input type="date" id="pf-preg-edd" class="pf-input" onchange="calcPregLmpFromEdd()"/></div>
-        </div>
-        <div class="pf-grid2" style="margin-bottom:10px;">
-          <div><label class="pf-label">Booking week</label><input type="number" id="pf-booking-week" placeholder="e.g. 8" min="4" max="40" class="pf-input"/></div>
-          <div><label class="pf-label">How conceived</label>
-            <select id="pf-preg-conception" class="pf-input">
-              <option value="">Select…</option>
-              <option value="natural">Natural conception</option>
-              <option value="iui">IUI</option><option value="ivf">IVF</option>
-              <option value="icsi">ICSI</option><option value="fet">FET</option>
-            </select>
-          </div>
-        </div>
-        <div style="margin-bottom:10px;"><label class="pf-label">High risk factors</label>
-          <div class="pf-chip-row" id="pf-high-risk">
-            <div class="pf-chip" data-val="diabetes">Diabetes / GDM</div>
-            <div class="pf-chip" data-val="hypertension">Hypertension</div>
-            <div class="pf-chip" data-val="thyroid">Thyroid disorder</div>
-            <div class="pf-chip" data-val="prev_cs">Previous C-section</div>
-            <div class="pf-chip" data-val="twins">Twins / multiple</div>
-            <div class="pf-chip" data-val="prev_preterm">Previous preterm birth</div>
-            <div class="pf-chip" data-val="placenta_praevia">Placenta praevia</div>
-            <div class="pf-chip" data-val="short_cervix">Short cervix</div>
-            <div class="pf-chip" data-val="apla">Antiphospholipid syndrome</div>
-            <div class="pf-chip" data-val="recurrent_loss">Recurrent pregnancy loss</div>
-          </div>
         </div>
 
         <!-- ANC EXTENDED -->
