@@ -1049,22 +1049,67 @@ STAGE: ${stageDescriptions[clinicalStage]||clinicalStage}
           p += `BP READINGS: ${bp1}${profile.bpReading2 ? ' / '+profile.bpReading2 : ''}\n`;
           if (sys >= 140 || dia >= 90) p += 'ALERT: BP is above 140/90 — flag pre-eclampsia risk prominently. Advise: rest, reduce salt, avoid NSAIDs, contact doctor urgently.\n';
         }
-        if(journey === 'pregnancy') {
-          p += `STRICT PREGNANCY SUPPLEMENT RULES:
-→ Folic acid 5mg: Weeks 1-12 ONLY (neural tube protection)
-→ Iron 60mg: Week 14+ (elemental iron, take with Vitamin C on empty stomach)
-→ Calcium 500mg BD: Week 16+
-→ Vitamin D 1000 IU: Safe throughout
-→ DHA 200mg: Week 16+ (brain development)
-→ Aspirin 75-150mg: only if pre-eclampsia risk factors present, from 12-16 weeks
+       if(journey === 'pregnancy') {
+          const nrHighRisk = [];
+          if(syms.includes('prev_ntd_baby')) nrHighRisk.push('previous NTD baby');
+          if(syms.includes('epilepsy')||syms.includes('on_valproate')||syms.includes('on_carbamazepine')||syms.includes('on_phenytoin')) nrHighRisk.push('anti-epileptic medication');
+          if(syms.includes('diabetes_preexisting')) nrHighRisk.push('pre-existing diabetes');
+          if(profile.bmi && profile.bmi >= 35) nrHighRisk.push('BMI >= 35');
+          if(syms.includes('thalassemia_trait')||syms.includes('sickle_cell_trait')) nrHighRisk.push('haemoglobinopathy');
+          if(syms.includes('mthfr_mutation')) nrHighRisk.push('MTHFR mutation');
+          if(syms.includes('malabsorption')) nrHighRisk.push('malabsorption (coeliac/IBD)');
+          if(syms.includes('family_ntd')) nrHighRisk.push('family history NTD');
+          const isNtdHighRisk = nrHighRisk.length > 0;
+          const hasMTHFR = syms.includes('mthfr_mutation');
+          let folicLine = '';
+          if(week <= 12) {
+            if(isNtdHighRisk) {
+              folicLine = '→ Folic Acid 5mg: Once daily with food — HIGH-RISK DOSE because: ' + nrHighRisk.join(', ') + '. Brand: Folvite 5mg (Abbott). Continue until Week 12, then step down to 500mcg as IFA tablet.';
+            } else {
+              folicLine = '→ Folic Acid 400-500mcg (0.4-0.5mg): Once daily with food — standard dose for neural tube protection. Brand: Folvite 0.5mg. Continue until Week 12, then switch to IFA tablet (Iron 60mg + Folic Acid 500mcg).';
+            }
+          } else if(week <= 14) {
+            folicLine = '→ Folic Acid 500mcg: NOW as part of IFA tablet (Iron 60mg + Folic Acid 500mcg). Neural tube period complete but folate still needed for DNA synthesis, RBC production, placental growth. ' + (isNtdHighRisk ? 'Step down from 5mg to 500mcg now.' : 'Switch from standalone folic acid to IFA combination.');
+          } else {
+            folicLine = '→ Folic Acid 500mcg: Continued as part of daily IFA tablet throughout pregnancy. GOI protocol: Iron 60mg + Folic Acid 500mcg from 2nd trimester till 6 weeks postpartum. Brands: Autrin, Hemifer-XT, Livogen.';
+          }
+          if(hasMTHFR) folicLine += ' MTHFR mutation: consider L-methylfolate — Folsafe Plus, Meconerv Plus.';
+          if(week >= 36) folicLine += ' Continue IFA for 6 weeks postpartum especially if breastfeeding.';
+          p += `STRICT PREGNANCY SUPPLEMENT RULES (PERSONALISED):
+FOLIC ACID (personalised to this patient):
+${folicLine}
+${profile.hb ? 'Patient Hb: ' + profile.hb + ' g/dL' + (profile.hb < 11 ? ' — ANAEMIC, emphasise iron compliance and take with Vitamin C' : '') : ''}
+OTHER SUPPLEMENTS BY WEEK:
+→ Iron 60mg: Week 14+ ONLY as IFA tablet (do NOT give in first trimester unless Hb<9). Take on empty stomach with Vitamin C. Avoid tea/coffee/calcium within 2 hours.
+→ Calcium 500mg BD: Week 16+ (morning and night, NOT with iron). Brands: Shelcal 500, Calcimax, Cipcal.
+→ Vitamin D 1000 IU: Safe throughout. ${profile.vitaminD ? 'Patient level: ' + profile.vitaminD + ' ng/mL' + (profile.vitaminD < 20 ? ' — DEFICIENT: 60,000 IU weekly x 8 weeks loading' : profile.vitaminD < 30 ? ' — INSUFFICIENT: 60,000 IU weekly x 4 weeks' : ' — adequate') : ''}
+→ DHA 200mg: Week 16+ (fetal brain and eye development). Brands: DHA from Merck, USV.
+→ Aspirin 75-150mg: ONLY if pre-eclampsia risk factors, from Week 12-16. ${profile.pregHighRisk && profile.pregHighRisk.includes('prev_preeclampsia') ? 'PREVIOUS PRE-ECLAMPSIA — Aspirin 150mg RECOMMENDED.' : ''}
 Current week: ${week}
-If Hb is low — emphasise iron-rich Indian foods (green leafy vegetables, til, jaggery, meat) and iron supplement timing.`;
+If Hb is low — emphasise iron-rich Indian foods (green leafy vegetables, til, jaggery, meat) and iron supplement timing.
+${week >= 36 ? 'Remind: Continue IFA for 6 weeks postpartum.' : ''}`;
         } else {
-          p += 'TTC SUPPLEMENTS:\n';
-          if(syms.includes('pcos_diagnosed')) p += '→ PCOS: Myo-inositol 2g + D-chiro-inositol 50mg BD, Vitamin D, NAC 600mg, Omega-3\n';
-          if(profile.amh && profile.amh < 1.5) p += '→ Low AMH: CoQ10 ubiquinol 400-600mg, DHEA 25mg (doctor supervised), Vitamin D\n';
-          if(profile.vitaminD && profile.vitaminD < 30) p += `→ Vitamin D ${profile.vitaminD} ng/mL (deficient): 60,000 IU weekly x 8 weeks\n`;
-          p += '→ Universal TTC: Folic acid 5mg, Vitamin D 1000 IU, Omega-3 1g';
+          const ttcNrHighRisk = [];
+          if(syms.includes('prev_ntd_baby')) ttcNrHighRisk.push('previous NTD baby');
+          if(syms.includes('epilepsy')||syms.includes('on_valproate')||syms.includes('on_carbamazepine')) ttcNrHighRisk.push('anti-epileptic medication');
+          if(syms.includes('diabetes_preexisting')) ttcNrHighRisk.push('pre-existing diabetes');
+          if(profile.bmi && profile.bmi >= 35) ttcNrHighRisk.push('BMI >= 35');
+          if(syms.includes('thalassemia_trait')) ttcNrHighRisk.push('thalassemia trait');
+          if(syms.includes('mthfr_mutation')) ttcNrHighRisk.push('MTHFR mutation');
+          if(syms.includes('malabsorption')) ttcNrHighRisk.push('malabsorption');
+          if(syms.includes('family_ntd')) ttcNrHighRisk.push('family history NTD');
+          const ttcHighRisk = ttcNrHighRisk.length > 0;
+          p += 'TTC SUPPLEMENTS (PERSONALISED):\n\n';
+          if(ttcHighRisk) {
+            p += '→ Folic Acid 5mg daily — HIGH-RISK because: ' + ttcNrHighRisk.join(', ') + '. Start 3 months before conception. Brand: Folvite 5mg.\n';
+          } else {
+            p += '→ Folic Acid 400-800mcg daily — standard pre-conception dose. Start NOW, ideally 3 months before. Neural tube closes Day 28. Brand: Folvite 0.5mg.\n';
+          }
+          if(syms.includes('mthfr_mutation')) p += '→ MTHFR mutation: consider L-methylfolate — Folsafe Plus, Meconerv Plus.\n';
+          if(syms.includes('pcos_diagnosed')) p += '→ PCOS: Myo-inositol 2g + D-chiro-inositol 50mg BD (Oosure/Fertisure), NAC 600mg, Omega-3 1g\n';
+          if(profile.amh && profile.amh < 1.5) p += '→ Low AMH (' + profile.amh + '): CoQ10 ubiquinol 400-600mg, DHEA 25mg TDS (doctor supervised), Melatonin 3mg bedtime\n';
+          if(profile.vitaminD && profile.vitaminD < 30) p += '→ Vitamin D ' + profile.vitaminD + ' ng/mL (' + (profile.vitaminD < 20 ? 'DEFICIENT' : 'INSUFFICIENT') + '): 60,000 IU weekly x ' + (profile.vitaminD < 20 ? '8' : '4') + ' weeks, then 1000 IU daily. Brands: D-Rise 60K, Calcirol.\n';
+          p += '→ Universal TTC: Vitamin D 1000 IU, Omega-3 1g, Vitamin E 400 IU, Zinc 15mg';
         }
         p += '\nInclude Indian brand names. Format: → Supplement — Dose — Timing — Why';
         return p;
