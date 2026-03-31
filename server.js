@@ -888,7 +888,9 @@ CRITICAL JSON RULES:
 Format response as EXACTLY this structure:
 {"main_content":"intro sentence.\\n\\n→ Point one\\n\\n→ Point two","key_points":["Point 1","Point 2","Point 3","Point 4"],"personalised_tip":"1-2 sentences specific to this patient","clinical_note":"important warning sign or urgent flag","action_items":["→ Action 1","→ Action 2","→ Action 3"]}
 
+IMPORTANT: main_content field MUST have at least 3-4 sentences of actual content. Never leave main_content empty or as an empty string.
 Return ONLY valid JSON. No markdown. No preamble. No text after the closing }
+
 
 --- CLINICAL KNOWLEDGE ---
 ${relevantKnowledge}
@@ -1189,7 +1191,9 @@ CRITICAL JSON RULES:
 Format as EXACTLY this structure:
 {"main_content":"intro sentence.\\n\\n→ Point one\\n\\n→ Point two\\n\\n→ Point three","key_points":["→ Point 1","→ Point 2","→ Point 3","→ Point 4","→ Point 5"],"personalised_tip":"Specific to THIS patient based on her actual results and history","clinical_note":"One important warning or urgent clinical note","action_items":["→ Action 1","→ Action 2","→ Action 3"]}
 
+IMPORTANT: main_content field MUST have at least 3-4 sentences of actual content. Never leave main_content empty or as an empty string.
 Return ONLY valid JSON. No markdown. No preamble. No text after the closing }
+
 
 --- CLINICAL KNOWLEDGE ---
 ${relevantKnowledge}
