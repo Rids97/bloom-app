@@ -581,8 +581,10 @@ async function init(){
 
     document.getElementById('main-container').style.display='block';
     document.getElementById('page-loader').style.display='none';
+    if(mainCont) mainCont.style.display='block';
     renderPersonaTags();
-    switchJourney('ttc',document.querySelector('.jtab'));
+    const firstJtab=document.querySelector('.jtab');
+    if(firstJtab) switchJourney('ttc',firstJtab);
   }catch(e){console.error('Init error:',e);}
 }
 
