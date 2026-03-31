@@ -673,12 +673,10 @@ function safeParseGroqResponse(raw) {
     };
   } catch(e2) {}
 
-  // Step 5: Last resort — return as plain text, strip any JSON artifacts
+  // Step 5: Last resort — return raw text as main_content directly
   const plainText = raw
     .replace(/```json|```/g, '')
-    .replace(/^\s*\{/, '')
-    .replace(/\}\s*$/, '')
-    .replace(/"(main_content|key_points|personalised_tip|clinical_note|action_items)"\s*:/g, '')
+    .replace(/\*\*/g, '')
     .trim();
   return { main_content: plainText, key_points: [], personalised_tip: '', clinical_note: '', action_items: [] };
 }
