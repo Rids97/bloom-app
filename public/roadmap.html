@@ -91,19 +91,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 .checklist-item:last-child{border:none;}
 .checklist-item input[type="checkbox"]{flex-shrink:0;margin-top:2px;accent-color:var(--terra);}
 .profile-summary-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem 1.25rem;}
-.checkin-card{background:var(--terra-l);border:1px solid #E2C4B4;border-radius:var(--radius);padding:1.1rem 1.25rem;}
-.checkin-title{font-size:12px;font-weight:600;color:var(--terra-d);margin-bottom:4px;}
-.checkin-sub{font-size:12px;color:var(--terra-d);opacity:0.8;margin-bottom:10px;line-height:1.5;}
-.checkin-btn{width:100%;padding:8px;background:var(--terra);color:#fff;border:none;border-radius:8px;font-size:12.5px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;}
-.preg-setup{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1rem;text-align:center;}
-.preg-setup-title{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;margin-bottom:1rem;}
-.setup-row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;justify-content:center;}
-.setup-field{display:flex;flex-direction:column;gap:4px;}
-.setup-label{font-size:12px;color:var(--muted);}
-.setup-input{padding:8px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);outline:none;}
-.setup-input:focus{border-color:var(--terra);}
-.setup-btn{padding:9px 20px;background:var(--terra);color:#fff;border:none;border-radius:8px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;}
-.persona-tag{font-size:12px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:4px 12px;color:var(--text);}
 .checkin-panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem;}
 .checkin-panel-title{font-size:16px;font-weight:600;color:var(--text);margin-bottom:6px;}
 .checkin-panel-sub{font-size:15px;color:var(--muted);margin-bottom:14px;line-height:1.6;}
@@ -133,7 +120,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 .inv-card-title{font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;}
 .inv-input-sm{width:100%;padding:8px 11px;border:1.5px solid var(--border);border-radius:7px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);outline:none;box-sizing:border-box;}
 .inv-save-btn{width:100%;padding:8px;background:var(--sage);color:#fff;border:none;border-radius:8px;font-size:12.5px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:8px;}
-/* Profile modal chip styles */
 .pf-chip{font-size:15px;padding:8px 16px;border-radius:20px;background:#FAF6F1;color:#8C7468;border:1.5px solid #E8DDD5;cursor:pointer;user-select:none;transition:all 0.15s;display:inline-block;margin:2px;}
 .pf-chip:hover{border-color:#E2C4B4;}
 .pf-chip.selected{background:#F2E4DA;color:#9E5238;border-color:#E2C4B4;}
@@ -151,6 +137,16 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 .pf-grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
 .pf-sep{font-size:14px;font-weight:600;color:#9E5238;text-transform:uppercase;letter-spacing:0.06em;margin:18px 0 10px;padding-top:12px;border-top:1px solid #F0E8E2;}
 .pf-tab-panel{display:block;}
+.preg-setup{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1rem;text-align:center;}
+.preg-setup-title{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;margin-bottom:1rem;}
+.setup-row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;justify-content:center;}
+.setup-field{display:flex;flex-direction:column;gap:4px;}
+.setup-label{font-size:12px;color:var(--muted);}
+.setup-input{padding:8px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);outline:none;}
+.setup-input:focus{border-color:var(--terra);}
+.setup-btn{padding:9px 20px;background:var(--terra);color:#fff;border:none;border-radius:8px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.persona-tag{font-size:12px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:4px 12px;color:var(--text);}
+.preg-progress-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1rem;}
 </style>
 </head>
 <body>
@@ -166,13 +162,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
   <div class="jtab" onclick="switchJourney('pregnancy',this)">🤰 Pregnancy</div>
   <div class="jtab" onclick="switchJourney('postpartum',this)">👶 Postpartum</div>
 </div>
-
 <div class="container" id="main-container" style="display:none;">
   <div id="persona-row" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:1rem;font-size:12px;color:var(--muted);">
     <span>🌸 Personalised for:</span>
     <div id="persona-tags" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
   </div>
-
   <!-- TTC SECTION -->
   <div id="section-ttc" class="section active">
     <div class="grid">
@@ -251,7 +245,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
       </div>
     </div>
   </div>
-
   <!-- PREGNANCY SECTION -->
   <div id="section-pregnancy" class="section">
     <div class="preg-setup" id="preg-setup">
@@ -296,7 +289,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
           </div>
           <div style="display:flex;align-items:center;gap:6px;margin-bottom:1rem;">
             <button onclick="scrollWeekNav(-200)" style="flex-shrink:0;width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);background:var(--card);cursor:pointer;font-size:13px;color:var(--muted);">‹</button>
-            <div class="week-nav" id="week-nav" style="flex:1;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;"></div>
+            <div class="week-nav" id="week-nav" style="flex:1;overflow-x:auto;scrollbar-width:none;"></div>
             <button onclick="scrollWeekNav(200)" style="flex-shrink:0;width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);background:var(--card);cursor:pointer;font-size:13px;color:var(--muted);">›</button>
           </div>
           <div class="checkin-panel" id="preg-checkin-panel">
@@ -372,7 +365,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
       </div>
     </div>
   </div>
-
   <!-- POSTPARTUM SECTION -->
   <div id="section-postpartum" class="section">
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.25rem;" id="pp-stage-tabs">
@@ -435,7 +427,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
           <div id="baby-inv-saved" style="display:none;font-size:12px;color:var(--sage-d);text-align:center;margin-top:6px;">✓ Saved</div>
           <div id="baby-inv-log" style="margin-top:10px;"></div>
         </div>
-        <!-- Mother update -->
         <div class="inv-card">
           <div class="inv-card-title" style="color:var(--terra-d);">👩 Mother Update</div>
           <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">How are you feeling?</div>
@@ -448,7 +439,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
             <div class="pp-log-chip pp-log-alert" data-val="fever" onclick="this.classList.toggle('selected')">Fever</div>
           </div>
           <div class="inv-card-title" style="color:var(--sage-d);margin-top:4px;">👶 Baby Update</div>
-          <!-- PATCHED: expanded baby chips -->
           <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;" id="pp-baby-chips">
             <div class="pp-log-chip" data-val="feeding_well" onclick="this.classList.toggle('selected')">Feeding well</div>
             <div class="pp-log-chip" data-val="good_weight" onclick="this.classList.toggle('selected')">Good weight gain</div>
@@ -482,11 +472,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
     </div>
   </div>
 </div>
-
 <script>
 const TOKEN=localStorage.getItem('bloom_token');
 if(!TOKEN) window.location.href='/login';
 let userData={},userProfile={},contentCache={},currentTTCStage='early_ttc',currentPregWeekIdx=0,currentPPStage='day1_3';
+let currentTTCSection='overview',currentPregSection='overview',currentPPSection='overview';
 
 const PREG_WEEKS=[
   {week:4,title:'Implantation Complete',sub:'Your pregnancy journey begins at the cellular level.'},
@@ -516,29 +506,26 @@ const PREG_WEEKS=[
   {week:39,title:'Optimal Birth Week',sub:'The safest and most common time to give birth.'},
   {week:40,title:'Due Date',sub:'Your estimated due date has arrived.'},
 ];
-
 const PP_STAGES={
   day1_3:{title:'Hospital Recovery',sub:'Your first days after birth — recovery, feeding, and bonding.',tip:'Colostrum — your first milk — is golden. It is packed with antibodies and is exactly what your newborn needs in the first 72 hours.'},
   week1_2:{title:'Coming Home',sub:'Milk coming in, healing begins, learning your baby.',tip:'Your uterus contracts back to its original size over 6 weeks. Afterpains are normal, especially when breastfeeding — they mean it is working.'},
-  week3_6:{title:'Finding Your Rhythm',sub:'The intense newborn phase settles into a pattern.',tip:'Baby blues — tearfulness and overwhelm in the first 2 weeks — is common and hormonal. If low mood persists beyond 2 weeks, please tell your doctor. Postpartum depression is treatable.'},
+  week3_6:{title:'Finding Your Rhythm',sub:'The intense newborn phase settles into a pattern.',tip:'Baby blues in the first 2 weeks is common and hormonal. If low mood persists beyond 2 weeks, please tell your doctor. Postpartum depression is treatable.'},
   '6week_check':{title:'6-Week Postnatal Check',sub:'Your doctor will assess your physical and mental recovery.',tip:'At your 6-week check: wound healing, blood pressure, anaemia check, contraception discussion, and emotional wellbeing screening using the Edinburgh Postnatal Depression Scale.'},
   month3:{title:'3 Months Postpartum',sub:'Most mothers feel significantly better by now.',tip:'If you have not had a period yet, you are not necessarily protected from pregnancy. Breastfeeding is not a reliable contraceptive — discuss your options with your doctor.'},
   month6:{title:'6 Months Postpartum',sub:'Returning to yourself — body, mind, and hormones.',tip:'At 6 months, many women feel like themselves again hormonally. If you are planning another pregnancy, now is a good time to start preconception supplements again.'},
 };
-
 const TTC_TIPS={
   early_ttc:'During early TTC, focus on cycle awareness, preconception nutrition, and both partners taking supplements. Folic acid 5mg/day is essential from now.',
-  needs_workup:'After 6 months TTC (or 3 months if you have PCOS, irregular cycles, or are over 35), investigations should begin. A basic fertility workup typically takes 4–6 weeks.',
+  needs_workup:'After 6 months TTC (or 3 months if you have PCOS, irregular cycles, or are over 35), investigations should begin. A basic fertility workup typically takes 4-6 weeks.',
   needs_urgent_workup:'After 12 months TTC without success, a complete fertility workup is recommended by all major guidelines (NICE, ESHRE, ASRM). Both partners should be investigated simultaneously.',
   workup_partial:'Having partial results is useful — act on what you have. Do not wait for all tests before taking the next step.',
   workup_complete:'A complete workup gives your doctor the full picture to plan the most appropriate treatment. Ask for a clear timeline for next steps.',
-  oi_active:'During ovulation induction, follicle monitoring scans are essential to track response and time trigger/intercourse correctly. Avoid intercourse on the day of trigger injection.',
+  oi_active:'During ovulation induction, follicle monitoring scans are essential to track response and time trigger/intercourse correctly.',
   monitoring:'Regular monitoring scans guide your clinical team. Keep all scan appointments and report new symptoms promptly.',
-  iui_active:'IUI success rates per cycle are approximately 10–20% for unexplained infertility. Most clinics recommend 3–4 attempts before progressing.',
+  iui_active:'IUI success rates per cycle are approximately 10-20% for unexplained infertility. Most clinics recommend 3-4 attempts before progressing.',
   pre_ivf:'IVF preparation is an opportunity to optimise egg and embryo quality. CoQ10, vitamin D, and stress reduction have the strongest evidence.',
   ivf_active:'During IVF stimulation, stay hydrated, avoid strenuous exercise, and report abdominal bloating or pain immediately — these can be signs of OHSS.',
 };
-
 const STAGE_CONFIG=[
   {key:'early_ttc',label:'Trying',emoji:'🌱'},
   {key:'needs_workup',label:'Investigate',emoji:'🧪'},
@@ -547,30 +534,39 @@ const STAGE_CONFIG=[
   {key:'iui_active',label:'IUI',emoji:'🔬'},
   {key:'ivf_active',label:'IVF',emoji:'⭐'},
 ];
+const STAGE_TITLES={
+  early_ttc:{title:'Starting Your Journey',sub:'Early TTC — focus on cycle awareness, preconception nutrition, and timing.'},
+  needs_workup:{title:'Time for Investigations',sub:'6+ months TTC or PCOS diagnosis — a fertility workup is the important next step.'},
+  needs_urgent_workup:{title:'Specialist Referral Advised',sub:'12+ months TTC — comprehensive investigations and fertility specialist review needed.'},
+  workup_partial:{title:'Investigations Underway',sub:'Some results are in. Complete your workup to get a clear clinical picture.'},
+  workup_complete:{title:'Workup Complete',sub:'Full picture available — your doctor can now recommend the most appropriate next step.'},
+  oi_active:{title:'Ovulation Induction Cycle',sub:'You are on OI treatment. Follicle monitoring and timing are key this cycle.'},
+  monitoring:{title:'Follicle Monitoring',sub:'Regular scans guide timing and help assess treatment response.'},
+  iui_active:{title:'IUI Cycle',sub:'IUI gives sperm the best chance to reach the egg. Timing is everything.'},
+  pre_ivf:{title:'IVF Preparation',sub:'Pre-IVF optimisation is your current focus — egg quality and readiness matter.'},
+  ivf_active:{title:'Active IVF Cycle',sub:'You are in your IVF cycle. Follow all instructions and attend every appointment.'},
+};
 
 async function init(){
   try{
     const token=TOKEN.startsWith('Bearer ')?TOKEN:'Bearer '+TOKEN;
     const res=await fetch('/me',{headers:{Authorization:token}});
-    if(!res.ok) console.log('Me failed:',res.status);
     userData=await res.json();
     userProfile=userData.profile||{};
     const mainCont=document.getElementById('main-container');
     if(userData.plan!=='complete'){
-      if(mainCont) mainCont.style.display='block';
-      if(mainCont) mainCont.innerHTML='<div style="text-align:center;padding:5rem 2rem;"><div style="font-size:52px;margin-bottom:1rem;">🗺️</div><div style="font-family:Cormorant Garamond,serif;font-size:32px;font-weight:600;color:#3d2318;margin-bottom:12px;">My Roadmap</div><p style="color:#9b7b6a;font-size:16px;margin-bottom:8px;line-height:1.7;">Your personalised week-by-week journey — TTC, Pregnancy, and Postpartum — is part of <strong>Bloom Complete</strong>.</p><p style="color:#9b7b6a;font-size:15px;margin-bottom:2rem;">Upgrade to unlock your full roadmap, report analyzer, and supplement protocol.</p><a href="/app" style="display:inline-block;padding:14px 32px;background:#b87355;color:#fff;text-decoration:none;border-radius:50px;font-size:15px;font-weight:500;">Upgrade on Dashboard</a></div>';
+      mainCont.style.display='block';
+      mainCont.innerHTML='<div style="text-align:center;padding:5rem 2rem;"><div style="font-size:52px;margin-bottom:1rem;">🗺️</div><div style="font-family:Cormorant Garamond,serif;font-size:32px;font-weight:600;color:#3d2318;margin-bottom:12px;">My Roadmap</div><p style="color:#9b7b6a;font-size:16px;margin-bottom:8px;line-height:1.7;">Your personalised week-by-week journey is part of <strong>Bloom Complete</strong>.</p><a href="/app" style="display:inline-block;padding:14px 32px;background:#b87355;color:#fff;text-decoration:none;border-radius:50px;font-size:15px;font-weight:500;">Upgrade on Dashboard</a></div>';
       return;
     }
-    if(mainCont) mainCont.style.display='block';
+    mainCont.style.display='block';
     renderPersonaTags();
-    const firstJtab=document.querySelector('.jtab');
-    if(firstJtab) switchJourney('ttc',firstJtab);
+    switchJourney('ttc',document.querySelector('.jtab'));
   }catch(e){console.error('Init error:',e);}
 }
 
 function renderPersonaTags(){
-  const p=userProfile;
-  const tags=[];
+  const p=userProfile;const tags=[];
   if(p.symptoms&&p.symptoms.includes('pcos_diagnosed')) tags.push('🌿 PCOS');
   if(p.amh&&p.amh<1.5) tags.push('📊 Low AMH');
   if(p.tsh&&p.tsh>2.5) tags.push('🦋 Thyroid');
@@ -578,7 +574,7 @@ function renderPersonaTags(){
   if(p.medications&&p.medications.includes('Metformin')) tags.push('💊 on Metformin');
   if(p.fertilityConditions&&p.fertilityConditions.includes('endometriosis')) tags.push('🌸 Endometriosis');
   if(!tags.length&&p.name) tags.push('🌸 '+p.name);
-  document.getElementById('persona-tags').innerHTML=tags.map(t=>`<span class="persona-tag">${t}</span>`).join('');
+  document.getElementById('persona-tags').innerHTML=tags.map(t=>'<span class="persona-tag">'+t+'</span>').join('');
   document.getElementById('persona-row').style.display=tags.length?'flex':'none';
 }
 
@@ -618,31 +614,15 @@ function detectStage(){
 function renderStagePath(){
   const stageOrder=['early_ttc','needs_workup','workup_complete','oi_active','iui_active','ivf_active'];
   const currentIdx=stageOrder.indexOf(currentTTCStage);
-  const container=document.getElementById('stage-path');
-  container.innerHTML='';
+  const container=document.getElementById('stage-path');container.innerHTML='';
   STAGE_CONFIG.forEach((s,i)=>{
     const isDone=i<currentIdx,isCurrent=i===currentIdx;
     const step=document.createElement('div');step.className='sp-step';
-    step.innerHTML=`<div class="sp-dot ${isDone?'done':''} ${isCurrent?'current':''}">${isDone?'✓':s.emoji}</div><div class="sp-label ${isCurrent?'current':''}">${s.label}</div>`;
+    step.innerHTML='<div class="sp-dot '+(isDone?'done ':''+(isCurrent?'current':''))+'">'+(isDone?'✓':s.emoji)+'</div><div class="sp-label '+(isCurrent?'current':'')+'">'+s.label+'</div>';
     container.appendChild(step);
-    if(i<STAGE_CONFIG.length-1){
-      const line=document.createElement('div');line.className='sp-line'+(isDone?' done':'');container.appendChild(line);
-    }
+    if(i<STAGE_CONFIG.length-1){const line=document.createElement('div');line.className='sp-line'+(isDone?' done':'');container.appendChild(line);}
   });
 }
-
-const STAGE_TITLES={
-  early_ttc:{title:'Starting Your Journey',sub:'Early TTC — focus on cycle awareness, preconception nutrition, and timing.'},
-  needs_workup:{title:'Time for Investigations',sub:'6+ months TTC or PCOS diagnosis — a fertility workup is the important next step.'},
-  needs_urgent_workup:{title:'Specialist Referral Advised',sub:'12+ months TTC — comprehensive investigations and fertility specialist review needed.'},
-  workup_partial:{title:'Investigations Underway',sub:'Some results are in. Complete your workup to get a clear clinical picture.'},
-  workup_complete:{title:'Workup Complete',sub:'Full picture available — your doctor can now recommend the most appropriate next step.'},
-  oi_active:{title:'Ovulation Induction Cycle',sub:'You are on OI treatment. Follicle monitoring and timing are key this cycle.'},
-  monitoring:{title:'Follicle Monitoring',sub:'Regular scans guide timing and help assess treatment response.'},
-  iui_active:{title:'IUI Cycle',sub:'IUI gives sperm the best chance to reach the egg. Timing is everything.'},
-  pre_ivf:{title:'IVF Preparation',sub:'Pre-IVF optimisation is your current focus — egg quality and readiness matter.'},
-  ivf_active:{title:'Active IVF Cycle',sub:'You are in your IVF cycle. Follow all instructions and attend every appointment.'},
-};
 
 function initTTC(){
   currentTTCStage=detectStage();
@@ -651,8 +631,7 @@ function initTTC(){
   document.getElementById('stage-title').textContent=info.title;
   document.getElementById('stage-sub').textContent=info.sub;
   document.getElementById('ttc-tip').textContent=TTC_TIPS[currentTTCStage]||TTC_TIPS.early_ttc;
-  renderTTCChecklist();
-  renderProfileSummary();
+  renderTTCChecklist();renderProfileSummary();
   const saved=localStorage.getItem('bloom_ttc_trying_since');
   if(saved){document.getElementById('ttc-trying-since').value=saved;updateTTCDuration(saved);}
   loadTTCSection('overview',document.querySelector('#ttc-sec-tabs .stab'));
@@ -660,8 +639,7 @@ function initTTC(){
 
 function saveTTCTryingSince(val){localStorage.setItem('bloom_ttc_trying_since',val);updateTTCDuration(val);}
 function updateTTCDuration(dateStr){
-  const el=document.getElementById('ttc-trying-duration');
-  if(!dateStr||!el) return;
+  const el=document.getElementById('ttc-trying-duration');if(!dateStr||!el) return;
   const start=new Date(dateStr);start.setHours(0,0,0,0);
   const today=new Date();today.setHours(0,0,0,0);
   const days=Math.floor((today-start)/86400000);
@@ -705,13 +683,11 @@ function renderTTCChecklist(){
     ivf_active:['Attend every monitoring scan','Inject stimulation medication at exact same time daily','Stay hydrated (2L water/day)','Report severe abdominal pain or bloating immediately (OHSS)'],
   };
   const list=items[currentTTCStage]||items.early_ttc;
-  document.getElementById('ttc-checklist').innerHTML=list.map(i=>`<div class="checklist-item"><input type="checkbox"/><span>${i}</span></div>`).join('');
+  document.getElementById('ttc-checklist').innerHTML=list.map(i=>'<div class="checklist-item"><input type="checkbox"/><span>'+i+'</span></div>').join('');
 }
 
 function renderProfileSummary(){
-  const p=userProfile;
-  const card=document.getElementById('profile-summary-card');
-  if(!card) return;
+  const p=userProfile;const card=document.getElementById('profile-summary-card');if(!card) return;
   const rows=[];
   if(p.name) rows.push(['Name',p.name]);
   if(p.age) rows.push(['Age',p.age]);
@@ -722,10 +698,9 @@ function renderProfileSummary(){
   if(p.vitaminD) rows.push(['Vitamin D',p.vitaminD+' ng/mL']);
   if(!rows.length){card.style.display='none';return;}
   card.innerHTML='<div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Your Key Values</div>'+
-    rows.map(([k,v])=>`<div style="display:flex;justify-content:space-between;font-size:12.5px;padding:4px 0;border-bottom:1px solid var(--border-l);"><span style="color:var(--muted);">${k}</span><span style="font-weight:500;">${v}</span></div>`).join('');
+    rows.map(function(r){return '<div style="display:flex;justify-content:space-between;font-size:12.5px;padding:4px 0;border-bottom:1px solid var(--border-l);"><span style="color:var(--muted);">'+r[0]+'</span><span style="font-weight:500;">'+r[1]+'</span></div>';}).join('');
 }
-  
-let currentTTCSection='overview';
+
 async function loadTTCSection(section,btn){
   currentTTCSection=section;
   document.querySelectorAll('#ttc-sec-tabs .stab').forEach(b=>b.classList.remove('active'));
@@ -739,32 +714,9 @@ async function loadTTCSection(section,btn){
     const res=await fetch('/roadmap-content',{method:'POST',headers:{'Content-Type':'application/json',Authorization:TOKEN},body:JSON.stringify({journey:'ttc',section,clinicalStage:currentTTCStage})});
     if(!res.ok){const err=await res.json();delete contentCache[key+'_loading'];handleContentError('ttc-ai-content',err,section,'ttc');return;}
     const data=await res.json();
-    contentCache[key]=data.content;
-    delete contentCache[key+'_loading'];
+    contentCache[key]=data.content;delete contentCache[key+'_loading'];
     renderAIContent(data.content,'ttc-ai-content');
   }catch(e){delete contentCache[key+'_loading'];handleContentError('ttc-ai-content',{error:e.message},section,'ttc');}
-}
-let currentPregSection='overview';
-async function loadPregSection(section,btn){
-  currentPregSection=section;
-  document.querySelectorAll('#preg-sec-tabs .stab').forEach(b=>b.classList.remove('active'));
-  if(btn) btn.classList.add('active');
-  const week=PREG_WEEKS[currentPregWeekIdx].week;
-  const checkin=getCheckinData();
-  const key='preg_'+section+'_w'+week+(checkin&&checkin.chips.length?'_ci':'');
-  if(contentCache[key]){renderAIContent(contentCache[key],'preg-ai-content');renderPregInvLog();return;}
-  if(contentCache[key+'_loading']) return;
-  contentCache[key+'_loading']=true;
-  document.getElementById('preg-ai-content').innerHTML='<div class="loading-dots"><span></span><span></span><span></span></div>';
-  try{
-    const res=await fetch('/roadmap-content',{method:'POST',headers:{'Content-Type':'application/json',Authorization:TOKEN},body:JSON.stringify({journey:'pregnancy',week,section,checkin})});
-    if(!res.ok){const err=await res.json();delete contentCache[key+'_loading'];handleContentError('preg-ai-content',err,section,'pregnancy');return;}
-    const data=await res.json();
-    contentCache[key]=data.content;
-    delete contentCache[key+'_loading'];
-    renderAIContent(data.content,'preg-ai-content');
-    renderPregInvLog();
-  }catch(e){delete contentCache[key+'_loading'];handleContentError('preg-ai-content',{error:e.message},section,'pregnancy');}
 }
 
 function initPregnancy(){
@@ -778,24 +730,19 @@ function savePregDate(){
   let lmpStr=lmp;
   if(!lmpStr&&due){const d=new Date(due);d.setDate(d.getDate()-280);lmpStr=d.toISOString().split('T')[0];}
   if(!lmpStr){alert('Please enter your LMP or due date.');return;}
-  localStorage.setItem('bloom_preg_lmp',lmpStr);
-  computeAndRenderPreg(lmpStr);
+  localStorage.setItem('bloom_preg_lmp',lmpStr);computeAndRenderPreg(lmpStr);
 }
 
 function updatePregDates(){
-  const val=document.getElementById('preg-lmp-edit').value;
-  if(!val) return;
-  localStorage.setItem('bloom_preg_lmp',val);
-  contentCache={};computeAndRenderPreg(val);
+  const val=document.getElementById('preg-lmp-edit').value;if(!val) return;
+  localStorage.setItem('bloom_preg_lmp',val);contentCache={};computeAndRenderPreg(val);
 }
 function updatePregFromEDD(){
-  const edd=document.getElementById('preg-edd-edit').value;
-  if(!edd) return;
+  const edd=document.getElementById('preg-edd-edit').value;if(!edd) return;
   const d=new Date(edd);d.setDate(d.getDate()-280);
   const lmp=d.toISOString().split('T')[0];
   document.getElementById('preg-lmp-edit').value=lmp;
-  localStorage.setItem('bloom_preg_lmp',lmp);
-  contentCache={};computeAndRenderPreg(lmp);
+  localStorage.setItem('bloom_preg_lmp',lmp);contentCache={};computeAndRenderPreg(lmp);
 }
 
 function computeAndRenderPreg(lmpStr){
@@ -805,16 +752,14 @@ function computeAndRenderPreg(lmpStr){
   const weeksPreg=Math.max(0,Math.floor(daysPreg/7));
   const daysRem=Math.max(0,daysPreg%7);
   const dueDate=new Date(lmp);dueDate.setDate(dueDate.getDate()+280);
-  let bestIdx=0;let bestDiff=Infinity;
+  let bestIdx=0,bestDiff=Infinity;
   PREG_WEEKS.forEach((w,i)=>{const d=Math.abs(w.week-weeksPreg);if(d<bestDiff){bestDiff=d;bestIdx=i;}});
   currentPregWeekIdx=bestIdx;
   const wk=PREG_WEEKS[bestIdx];
   document.getElementById('preg-setup').style.display='none';
   document.getElementById('preg-main').style.display='block';
-  const strip=document.getElementById('preg-date-strip');
-  if(strip) strip.style.display='block';
-  const lmpEdit=document.getElementById('preg-lmp-edit');
-  const eddEdit=document.getElementById('preg-edd-edit');
+  const strip=document.getElementById('preg-date-strip');if(strip) strip.style.display='block';
+  const lmpEdit=document.getElementById('preg-lmp-edit');const eddEdit=document.getElementById('preg-edd-edit');
   if(lmpEdit) lmpEdit.value=lmpStr;
   if(eddEdit) eddEdit.value=dueDate.toISOString().split('T')[0];
   const weekDisplay=weeksPreg<4?'4':weeksPreg;
@@ -822,15 +767,11 @@ function computeAndRenderPreg(lmpStr){
   document.getElementById('week-title').textContent=wk.title;
   document.getElementById('week-sub').textContent=wk.sub;
   document.getElementById('preg-week-label').textContent='Week '+weeksPreg;
-  const pct=Math.min((weeksPreg/40)*100,100);
-  document.getElementById('preg-progress-fill').style.width=pct+'%';
+  document.getElementById('preg-progress-fill').style.width=Math.min((weeksPreg/40)*100,100)+'%';
   const trimester=weeksPreg<=13?'First trimester':weeksPreg<=26?'Second trimester':'Third trimester';
   document.getElementById('preg-trimester-label').textContent=trimester;
   document.getElementById('preg-due-label').textContent=dueDate.toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
-  buildWeekNav(weeksPreg);
-  renderPregMilestones(weeksPreg);
-  renderPregChecklist(weeksPreg);
-  renderPregInvLog();
+  buildWeekNav(weeksPreg);renderPregMilestones(weeksPreg);renderPregChecklist(weeksPreg);renderPregInvLog();
   loadPregSection('overview',document.querySelector('#preg-sec-tabs .stab'));
   document.getElementById('preg-tip').textContent=getPregTip(weeksPreg);
 }
@@ -841,14 +782,13 @@ function buildWeekNav(currentWeek){
     const btn=document.createElement('button');
     btn.className='wk-btn'+(i===currentPregWeekIdx?' active':'');
     btn.textContent='Wk '+w.week;
-    btn.onclick=()=>{
+    btn.onclick=function(){
       currentPregWeekIdx=i;
       document.querySelectorAll('.wk-btn').forEach(b=>b.classList.remove('active'));
       btn.classList.add('active');
       document.getElementById('week-badge').textContent='Week '+w.week;
       document.getElementById('week-title').textContent=w.title;
       document.getElementById('week-sub').textContent=w.sub;
-      contentCache['preg_overview_'+i]=null;
       loadPregSection(currentPregSection,document.querySelector('#preg-sec-tabs .stab.active'));
     };
     nav.appendChild(btn);
@@ -860,14 +800,14 @@ function getPregTip(w){
   if(w<=12) return 'The first trimester is the period of greatest organ development. Avoid teratogens: alcohol, vitamin A supplements, and unprescribed medications.';
   if(w<=14) return 'Iron supplementation begins at Week 14. Take on an empty stomach with vitamin C for best absorption. Avoid tea and coffee with iron.';
   if(w<=20) return 'The anomaly scan at 18-20 weeks checks all major structures. Report any findings to your doctor — most are reassuring.';
-  if(w<=26) return 'OGTT (oral glucose tolerance test) screens for gestational diabetes at 24-28 weeks. A fasting blood test followed by a glucose drink.';
-  if(w<=32) return 'In the third trimester, fetal movements are reassuring. If you notice a change in pattern — less active than usual — contact your doctor or hospital today.';
+  if(w<=26) return 'OGTT screens for gestational diabetes at 24-28 weeks. A fasting blood test followed by a glucose drink.';
+  if(w<=32) return 'In the third trimester, fetal movements are reassuring. If you notice a change in pattern, contact your doctor or hospital today.';
   return 'Rest when you can. Your body is doing extraordinary work. Full term is Week 37 onwards.';
 }
 
 function renderPregMilestones(w){
   const items=[{week:12,text:'NT scan (nuchal translucency)'},{week:16,text:'Blood tests: Hb, ferritin, TSH'},{week:20,text:'Anomaly scan (18-22w)'},{week:24,text:'Viability reached'},{week:26,text:'OGTT (gestational diabetes test)'},{week:28,text:'Third trimester begins'},{week:32,text:'Growth scan + Doppler'},{week:36,text:'Group B Strep swab'},{week:40,text:'Due date'}];
-  document.getElementById('preg-milestones').innerHTML=items.map(m=>`<div class="milestone-item"><div class="m-dot ${w>=m.week?'done':''} ${w===m.week?'current':''}"></div><div><span style="font-size:11px;color:var(--muted);">W${m.week}</span> ${m.text}</div></div>`).join('');
+  document.getElementById('preg-milestones').innerHTML=items.map(m=>'<div class="milestone-item"><div class="m-dot '+(w>=m.week?'done ':''+(w===m.week?'current':''))+'"></div><div><span style="font-size:11px;color:var(--muted);">W'+m.week+'</span> '+m.text+'</div></div>').join('');
 }
 
 function renderPregChecklist(w){
@@ -876,7 +816,7 @@ function renderPregChecklist(w){
   else if(w<=20) items=['Start iron 60mg daily (from Week 14)','Book anomaly scan for 18-20 weeks','Get TSH, Hb, ferritin checked','Start calcium 500mg BD from Week 16','Attend all scheduled appointments'];
   else if(w<=28) items=['Attend anomaly scan if not done','Book OGTT test (24-28 weeks)','Start DHA 200mg if not already taking','Monitor fetal movements — report changes','Attend all ANC checkups'];
   else items=['Monitor fetal movements daily','Attend growth scan (32w)','Prepare hospital bag from 36 weeks','Discuss birth plan with doctor','Complete all blood tests as scheduled'];
-  document.getElementById('preg-checklist').innerHTML=items.map(i=>`<div class="checklist-item"><input type="checkbox"/><span>${i}</span></div>`).join('');
+  document.getElementById('preg-checklist').innerHTML=items.map(i=>'<div class="checklist-item"><input type="checkbox"/><span>'+i+'</span></div>').join('');
 }
 
 async function loadPregSection(section,btn){
@@ -894,36 +834,14 @@ async function loadPregSection(section,btn){
     const res=await fetch('/roadmap-content',{method:'POST',headers:{'Content-Type':'application/json',Authorization:TOKEN},body:JSON.stringify({journey:'pregnancy',week,section,checkin})});
     if(!res.ok){const err=await res.json();delete contentCache[key+'_loading'];handleContentError('preg-ai-content',err,section,'pregnancy');return;}
     const data=await res.json();
-    contentCache[key]=data.content;
-    delete contentCache[key+'_loading'];
-    renderAIContent(data.content,'preg-ai-content');
-    renderPregInvLog();
+    contentCache[key]=data.content;delete contentCache[key+'_loading'];
+    renderAIContent(data.content,'preg-ai-content');renderPregInvLog();
   }catch(e){delete contentCache[key+'_loading'];handleContentError('preg-ai-content',{error:e.message},section,'pregnancy');}
-}
-```
-
-async function loadPPSection(section,btn){
-  currentPPSection=section;
-  document.querySelectorAll('#pp-sec-tabs .stab').forEach(b=>b.classList.remove('active'));
-  if(btn) btn.classList.add('active');
-  const key='pp_'+currentPPStage+'_'+section;
-  if(contentCache[key]){renderAIContent(contentCache[key],'pp-ai-content');return;}
-  if(contentCache[key+'_loading']) return;
-  contentCache[key+'_loading']=true;
-  document.getElementById('pp-ai-content').innerHTML='<div class="loading-dots"><span></span><span></span><span></span></div>';
-  try{
-    const res=await fetch('/roadmap-content',{method:'POST',headers:{'Content-Type':'application/json',Authorization:TOKEN},body:JSON.stringify({journey:'postpartum',section,ppStage:currentPPStage})});
-    if(!res.ok){const err=await res.json();delete contentCache[key+'_loading'];handleContentError('pp-ai-content',err,section,'postpartum');return;}
-    const data=await res.json();
-    contentCache[key]=data.content;
-    delete contentCache[key+'_loading'];
-    renderAIContent(data.content,'pp-ai-content');
-  }catch(e){delete contentCache[key+'_loading'];handleContentError('pp-ai-content',{error:e.message},section,'postpartum');}
 }
 
 function getCheckinData(){
   const chips=[...document.querySelectorAll('.cc-chip.selected')].map(c=>c.dataset.val);
-  const notes=document.getElementById('preg-checkin-notes')?.value||'';
+  const notes=document.getElementById('preg-checkin-notes')?document.getElementById('preg-checkin-notes').value:'';
   return{chips,notes};
 }
 
@@ -932,29 +850,29 @@ function showCheckinAlert(alerts){
   const modal=document.createElement('div');
   modal.id='checkin-alert-modal';
   modal.style.cssText='position:fixed;inset:0;z-index:400;background:rgba(44,36,32,0.6);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
-  const alertsHtml=alerts.map(a=>`<div style="background:${a.urgent?'#FFF5F5':'#FFFBF0'};border:1.5px solid ${a.urgent?'#E8A8A8':'#E8D5A8'};border-radius:12px;padding:1rem 1.25rem;margin-bottom:12px;"><div style="font-size:15px;font-weight:600;color:#9E2020;margin-bottom:6px;">${a.title}</div><div style="font-size:13px;color:#2C2420;line-height:1.7;margin-bottom:8px;"><strong>Why this matters:</strong> ${a.why}</div><div style="font-size:13px;color:#9E2020;font-weight:500;line-height:1.6;">🏥 ${a.action}</div></div>`).join('');
-  modal.innerHTML=`<div style="background:#fff;border-radius:18px;width:520px;max-width:95vw;max-height:90vh;overflow-y:auto;padding:1.75rem;border:1px solid #E8DDD5;"><div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:#2C2420;margin-bottom:4px;">Important Symptoms Noted</div><p style="font-size:13px;color:#8C7468;margin-bottom:1.25rem;">You have reported symptoms that need medical attention.</p>${alertsHtml}<div style="display:flex;gap:10px;margin-top:1rem;"><button onclick="document.getElementById('checkin-alert-modal').remove();contentCache={};loadPregSection('supplements',document.querySelector('#preg-sec-tabs .stab'));" style="flex:1;padding:11px;background:#C4704F;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;">I understand — show me guidance</button><button onclick="document.getElementById('checkin-alert-modal').remove();" style="padding:11px 18px;background:none;border:1.5px solid #E8DDD5;border-radius:10px;font-size:13px;color:#8C7468;cursor:pointer;font-family:'DM Sans',sans-serif;">Close</button></div></div>`;
+  const alertDetails={
+    bleeding:{title:'⚠️ Bleeding / Spotting',why:'Bleeding during pregnancy can indicate subchorionic haematoma, placenta praevia, or threatened miscarriage or placental abruption.',action:'Do not wait. Contact your doctor or go to hospital today.',urgent:true},
+    reduced_movements:{title:'🚨 Reduced Fetal Movements',why:'Reduced movements can be a sign of fetal distress, umbilical cord compression, or placental insufficiency.',action:'Go to hospital or maternity unit within 2 hours. Do not use a home doppler to reassure yourself.',urgent:true},
+    headache:{title:'⚠️ Headache with Visual Changes',why:'Persistent headache with visual changes is a warning sign of pre-eclampsia — a serious complication involving high blood pressure.',action:'Check your blood pressure immediately. If BP above 140/90 — go to hospital now.',urgent:true},
+    swelling:{title:'⚠️ Sudden Swelling',why:'Sudden swelling of the face, hands, or feet can indicate pre-eclampsia or deep vein thrombosis (DVT).',action:'If swelling is sudden, facial, or with headache and visual changes — seek medical assessment today.',urgent:true},
+  };
+  const alertsHtml=alerts.map(function(a){const d=alertDetails[a];if(!d) return '';return '<div style="background:'+(d.urgent?'#FFF5F5':'#FFFBF0')+';border:1.5px solid '+(d.urgent?'#E8A8A8':'#E8D5A8')+';border-radius:12px;padding:1rem 1.25rem;margin-bottom:12px;"><div style="font-size:15px;font-weight:600;color:#9E2020;margin-bottom:6px;">'+d.title+'</div><div style="font-size:13px;color:#2C2420;line-height:1.7;margin-bottom:8px;"><strong>Why this matters:</strong> '+d.why+'</div><div style="font-size:13px;color:#9E2020;font-weight:500;line-height:1.6;">🏥 '+d.action+'</div></div>';}).join('');
+  modal.innerHTML='<div style="background:#fff;border-radius:18px;width:520px;max-width:95vw;max-height:90vh;overflow-y:auto;padding:1.75rem;border:1px solid #E8DDD5;"><div style="font-family:Cormorant Garamond,serif;font-size:22px;font-weight:600;color:#2C2420;margin-bottom:4px;">Important Symptoms Noted</div><p style="font-size:13px;color:#8C7468;margin-bottom:1.25rem;">You have reported symptoms that need medical attention.</p>'+alertsHtml+'<div style="display:flex;gap:10px;margin-top:1rem;"><button onclick="document.getElementById(\'checkin-alert-modal\').remove();contentCache={};loadPregSection(currentPregSection,document.querySelector(\'#preg-sec-tabs .stab\'));" style="flex:1;padding:11px;background:#C4704F;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;font-family:DM Sans,sans-serif;">I understand — show me guidance</button><button onclick="document.getElementById(\'checkin-alert-modal\').remove();" style="padding:11px 18px;background:none;border:1.5px solid #E8DDD5;border-radius:10px;font-size:13px;color:#8C7468;cursor:pointer;font-family:DM Sans,sans-serif;">Close</button></div></div>';
   document.body.appendChild(modal);
 }
 
 function saveCheckin(){
   const chips=[...document.querySelectorAll('.cc-chip.selected')].map(c=>c.dataset.val);
-  const alertDetails={
-    bleeding:{title:'⚠️ Bleeding / Spotting',why:'Bleeding during pregnancy can indicate subchorionic haematoma, placenta praevia, or in serious cases — threatened miscarriage or placental abruption.',action:'Do not wait. Contact your doctor or go to hospital today.',urgent:true},
-    reduced_movements:{title:'🚨 Reduced Fetal Movements',why:'Reduced movements can be a sign of fetal distress, umbilical cord compression, or placental insufficiency.',action:'Go to hospital or maternity unit within 2 hours. Do not use a home doppler to reassure yourself.',urgent:true},
-    headache:{title:'⚠️ Headache with Visual Changes',why:'Persistent headache with visual changes (flashing lights, blurred vision) is a warning sign of pre-eclampsia — a serious complication involving high blood pressure.',action:'Check your blood pressure immediately. If BP above 140/90 or cannot check — go to hospital now.',urgent:true},
-    swelling:{title:'⚠️ Sudden Swelling',why:'Sudden swelling of the face, hands, or feet can indicate pre-eclampsia or deep vein thrombosis (DVT).',action:'If swelling is sudden, facial, or with headache and visual changes — seek medical assessment today.',urgent:true},
-  };
   const alertChips=['bleeding','reduced_movements','headache','swelling'];
   const triggered=chips.filter(c=>alertChips.includes(c));
   if(triggered.length>0){
-    showCheckinAlert(triggered.map(c=>alertDetails[c]).filter(Boolean));
+    showCheckinAlert(triggered);
   } else {
     contentCache={};
     const activeTab=document.querySelector('#preg-sec-tabs .stab.active');
     loadPregSection(currentPregSection||'overview',activeTab);
     const btn=document.querySelector('.checkin-save-btn');
-    if(btn){btn.textContent='Saved ✓';setTimeout(()=>{btn.textContent='Save Check-in ✓';},2000);}
+    if(btn){btn.textContent='Saved ✓';setTimeout(function(){btn.textContent='Save Check-in ✓';},2000);}
   }
 }
 
@@ -964,27 +882,23 @@ function savePregInvestigation(){
   const notes=document.getElementById('preg-log-notes').value;
   if(!test) return;
   const week=PREG_WEEKS[currentPregWeekIdx].week;
-  const key='bloom_preg_inv_log';
-  const log=JSON.parse(localStorage.getItem(key)||'[]');
+  const log=JSON.parse(localStorage.getItem('bloom_preg_inv_log')||'[]');
   log.unshift({test,result,notes,week,date:new Date().toLocaleDateString('en-IN')});
-  localStorage.setItem(key,JSON.stringify(log.slice(0,20)));
+  localStorage.setItem('bloom_preg_inv_log',JSON.stringify(log.slice(0,20)));
   document.getElementById('preg-inv-saved').style.display='block';
-  setTimeout(()=>document.getElementById('preg-inv-saved').style.display='none',2000);
-  renderPregInvLog();
-  contentCache={};
+  setTimeout(function(){document.getElementById('preg-inv-saved').style.display='none';},2000);
+  renderPregInvLog();contentCache={};
   loadPregSection(currentPregSection,document.querySelector('#preg-sec-tabs .stab.active'));
 }
 
 function renderPregInvLog(){
   const log=JSON.parse(localStorage.getItem('bloom_preg_inv_log')||'[]');
-  const el=document.getElementById('preg-inv-log');
-  if(!el||!log.length) return;
+  const el=document.getElementById('preg-inv-log');if(!el||!log.length) return;
   const statusColors={normal:'var(--sage-d)',borderline:'#9A7340',abnormal:'#9E2020',pending:'var(--muted)'};
   el.innerHTML='<div style="font-size:11px;color:var(--muted);font-weight:500;margin-bottom:6px;">Recent Results</div>'+
-    log.slice(0,3).map(l=>`<div style="font-size:12px;padding:5px 0;border-bottom:1px solid var(--border-l);display:flex;justify-content:space-between;"><span>${l.test.replace(/_/g,' ')} (W${l.week})</span><span style="color:${statusColors[l.result]||'var(--muted)'};font-weight:500;">${l.result||'—'}</span></div>`).join('');
+    log.slice(0,3).map(function(l){return '<div style="font-size:12px;padding:5px 0;border-bottom:1px solid var(--border-l);display:flex;justify-content:space-between;"><span>'+l.test.replace(/_/g,' ')+' (W'+l.week+')</span><span style="color:'+(statusColors[l.result]||'var(--muted)')+';font-weight:500;">'+(l.result||'—')+'</span></div>';}).join('');
 }
 
-let currentPPSection='overview';
 function initPostpartum(){switchPPStage('day1_3',document.querySelector('.pp-tab'));}
 
 function switchPPStage(stage,btn){
@@ -1014,53 +928,27 @@ async function loadPPSection(section,btn){
     const res=await fetch('/roadmap-content',{method:'POST',headers:{'Content-Type':'application/json',Authorization:TOKEN},body:JSON.stringify({journey:'postpartum',section,ppStage:currentPPStage})});
     if(!res.ok){const err=await res.json();delete contentCache[key+'_loading'];handleContentError('pp-ai-content',err,section,'postpartum');return;}
     const data=await res.json();
-    contentCache[key]=data.content;
-    delete contentCache[key+'_loading'];
+    contentCache[key]=data.content;delete contentCache[key+'_loading'];
     renderAIContent(data.content,'pp-ai-content');
   }catch(e){delete contentCache[key+'_loading'];handleContentError('pp-ai-content',{error:e.message},section,'postpartum');}
 }
-```
 
-**Plus tab rename — find:**
-```
-🌱 TTC Journey
-```
-**Replace with:**
-```
-🌱 Conception Journey
-}
-
-// PATCHED: expanded alert symptoms + messages
 function savePPUpdate(){
   const motherChips=[...document.querySelectorAll('#pp-mother-chips .pp-log-chip.selected')].map(c=>c.dataset.val);
   const babyChips=[...document.querySelectorAll('#pp-baby-chips .pp-log-chip.selected')].map(c=>c.dataset.val);
   const alertSymptoms=['wound_pain','heavy_bleeding','fever','not_feeding','baby_fever','jaundice','mood_low','excessive_crying','not_passing_urine','projectile_vomiting','blood_in_stool','breathing_difficulty','blue_lips'];
-  const ppAlerts={
-    wound_pain:'Signs of wound infection (increasing pain, redness, discharge, opening) — see your doctor today.',
-    heavy_bleeding:'Heavy postpartum bleeding (soaking more than 1 pad per hour) is a medical emergency — go to hospital now.',
-    fever:'Fever after delivery can indicate uterine infection, wound infection, or mastitis — see your doctor today.',
-    mood_low:'Persistent low mood lasting more than 2 weeks may be postpartum depression — very common and very treatable. Please tell your doctor.',
-    not_feeding:'If your baby is not feeding after 4 hours, has less than 6 wet nappies/day — contact your paediatrician today.',
-    baby_fever:'Any fever in a newborn under 3 months is a medical emergency — go to hospital immediately.',
-    jaundice:'Worsening jaundice, jaundice in the first 24 hours, or jaundice persisting beyond 14 days needs urgent paediatric assessment.',
-    excessive_crying:'Inconsolable high-pitched crying can be a sign of pain or a neurological issue — see your paediatrician today.',
-    not_passing_urine:'Less than 6 wet nappies per day after Day 5 means your baby may not be getting enough milk — see a doctor or lactation consultant today.',
-    projectile_vomiting:'Forceful projectile vomiting after every feed can indicate pyloric stenosis — see your paediatrician today.',
-    blood_in_stool:'Blood in the stool always needs medical evaluation — call your paediatrician today.',
-    breathing_difficulty:'Fast, grunting, or noisy breathing is a respiratory emergency — go to hospital now.',
-    blue_lips:'Blue or purple lips/tongue (cyanosis) is a cardiac/respiratory emergency — call an ambulance or go to hospital immediately 🚨',
-  };
+  const ppAlerts={wound_pain:'Signs of wound infection — see your doctor today.',heavy_bleeding:'Heavy postpartum bleeding (soaking more than 1 pad per hour) is a medical emergency — go to hospital now.',fever:'Fever after delivery can indicate uterine infection, wound infection, or mastitis — see your doctor today.',mood_low:'Persistent low mood lasting more than 2 weeks may be postpartum depression — very common and very treatable. Please tell your doctor.',not_feeding:'If your baby is not feeding after 4 hours, has less than 6 wet nappies/day — contact your paediatrician today.',baby_fever:'Any fever in a newborn under 3 months is a medical emergency — go to hospital immediately.',jaundice:'Worsening jaundice in the first 24 hours, or jaundice persisting beyond 14 days needs urgent paediatric assessment.',excessive_crying:'Inconsolable high-pitched crying can be a sign of pain — see your paediatrician today.',not_passing_urine:'Less than 6 wet nappies per day after Day 5 — see a doctor or lactation consultant today.',projectile_vomiting:'Forceful projectile vomiting after every feed can indicate pyloric stenosis — see your paediatrician today.',blood_in_stool:'Blood in the stool always needs medical evaluation — call your paediatrician today.',breathing_difficulty:'Fast, grunting, or noisy breathing is a respiratory emergency — go to hospital now.',blue_lips:'Blue or purple lips/tongue (cyanosis) is a cardiac/respiratory emergency — call an ambulance or go to hospital immediately 🚨'};
   localStorage.setItem('bloom_pp_update_'+currentPPStage,JSON.stringify({motherChips,babyChips,date:new Date().toISOString()}));
   const triggered=[...motherChips,...babyChips].filter(c=>alertSymptoms.includes(c));
   if(triggered.length>0){
-    const alertHtml=triggered.map(t=>ppAlerts[t]?`<div style="padding:8px 0;border-bottom:1px solid #F0E8E2;font-size:13px;color:#9E2020;line-height:1.6;">⚠️ ${ppAlerts[t]}</div>`:'').join('');
+    const alertHtml=triggered.map(function(t){return ppAlerts[t]?'<div style="padding:8px 0;border-bottom:1px solid #F0E8E2;font-size:13px;color:#9E2020;line-height:1.6;">⚠️ '+ppAlerts[t]+'</div>':'';}).join('');
     const modal=document.createElement('div');
     modal.style.cssText='position:fixed;inset:0;z-index:400;background:rgba(44,36,32,0.6);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
-    modal.innerHTML=`<div style="background:#fff;border-radius:18px;width:480px;max-width:95vw;max-height:90vh;overflow-y:auto;padding:1.75rem;border:1px solid #E8DDD5;"><div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:#2C2420;margin-bottom:4px;">Symptoms Needing Attention</div><p style="font-size:13px;color:#8C7468;margin-bottom:1rem;">Please read carefully.</p>${alertHtml}<button onclick="this.closest('div[style]').remove();contentCache={};loadPPSection('recovery',document.querySelector('#pp-sec-tabs .stab'));" style="width:100%;margin-top:1rem;padding:11px;background:#C4704F;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;">I understand — show recovery guidance</button></div>`;
+    modal.innerHTML='<div style="background:#fff;border-radius:18px;width:480px;max-width:95vw;max-height:90vh;overflow-y:auto;padding:1.75rem;border:1px solid #E8DDD5;"><div style="font-family:Cormorant Garamond,serif;font-size:22px;font-weight:600;color:#2C2420;margin-bottom:4px;">Symptoms Needing Attention</div><p style="font-size:13px;color:#8C7468;margin-bottom:1rem;">Please read carefully.</p>'+alertHtml+'<button onclick="this.closest(\'div[style]\').remove();contentCache={};loadPPSection(\'recovery\',document.querySelector(\'#pp-sec-tabs .stab\'));" style="width:100%;margin-top:1rem;padding:11px;background:#C4704F;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;font-family:DM Sans,sans-serif;">I understand — show recovery guidance</button></div>';
     document.body.appendChild(modal);
   } else {
     document.getElementById('pp-update-saved').style.display='block';
-    setTimeout(()=>document.getElementById('pp-update-saved').style.display='none',2000);
+    setTimeout(function(){document.getElementById('pp-update-saved').style.display='none';},2000);
     contentCache={};loadPPSection('overview',document.querySelector('#pp-sec-tabs .stab'));
   }
 }
@@ -1070,11 +958,11 @@ function renderPPChecklist(stage){
     day1_3:['First latch within 1 hour of birth','Skin-to-skin contact','Colostrum feeding established','Vitamin K injection for baby','Paediatrician check of baby','BCG and Hepatitis B vaccines for baby'],
     week1_2:['Breast/formula feeding going well','Umbilical cord drying (keep dry, no spirit)','6+ wet nappies per day confirms adequate feeding','Physiological jaundice monitored','Your wound healing checked','Emotional support in place'],
     week3_6:['Baby weight gain being tracked','Baby vaccines due at 6 weeks (DTwP, IPV, Hib, HepB, PCV, Rotavirus)','Your bleeding settled to light discharge','Return to gentle walking started','Talk to someone if mood is low'],
-    '6week_check':['Book 6-week postnatal check with doctor','Edinburgh depression screening','Contraception discussion with doctor','Wound / scar check','Baby\'s development assessment','Return to exercise guidance'],
+    '6week_check':['Book 6-week postnatal check with doctor','Edinburgh depression screening','Contraception discussion with doctor','Wound / scar check','Baby development assessment','Return to exercise guidance'],
     month3:['Baby vaccinations up to date (10w, 14w doses)','Contraception confirmed','Sleep improving (hopefully)','Review iron and vitamin D levels','Return to normal activities'],
     month6:['Baby starting solid foods (around 6 months)','6-month vaccinations (OPV, Influenza)','Review your own hormone levels if feeling unwell','Consider returning to preconception supplements if planning another pregnancy'],
   };
-  document.getElementById('pp-checklist').innerHTML=(items[stage]||[]).map(i=>`<div class="checklist-item"><input type="checkbox"/><span>${i}</span></div>`).join('');
+  document.getElementById('pp-checklist').innerHTML=(items[stage]||[]).map(i=>'<div class="checklist-item"><input type="checkbox"/><span>'+i+'</span></div>').join('');
 }
 
 function renderPPMilestones(stage){
@@ -1086,224 +974,140 @@ function renderPPMilestones(stage){
     month3:['Holding head steady','Tracking objects','Cooing and vocalising','10w and 14w vaccines done'],
     month6:['Sitting with support','Starting solids','Babbling','6-month vaccinations due'],
   };
-  document.getElementById('pp-milestones').innerHTML=(items[stage]||[]).map(m=>`<div class="milestone-item"><div class="m-dot done"></div>${m}</div>`).join('');
+  document.getElementById('pp-milestones').innerHTML=(items[stage]||[]).map(m=>'<div class="milestone-item"><div class="m-dot done"></div>'+m+'</div>').join('');
 }
 
-// PATCHED: renderAIContent — definitive JSON fix
 function formatContent(text){
   if(!text) return '';
-  return text.split('\n').map(line=>{
+  return text.split('\n').map(function(line){
     line=line.trim();
     if(!line) return '<div style="height:14px;"></div>';
-    if(line.startsWith('→')){
-      const txt=line.replace(/^→\s*/,'');
-      return `<div style="display:flex;gap:12px;padding:10px 14px;border-left:3px solid var(--terra-l);margin:8px 0;background:rgba(196,112,79,0.04);border-radius:0 8px 8px 0;"><span style="color:var(--terra);font-weight:700;flex-shrink:0;font-size:18px;margin-top:1px;">→</span><span style="line-height:1.9;font-size:19px;">${txt}</span></div><div style="height:6px;"></div>`;
-    }
-    if(line.startsWith('•')||line.startsWith('* ')||line.startsWith('- ')){
-      const txt=line.replace(/^[•\*\-]\s*/,'');
-      return `<div style="display:flex;gap:12px;padding:10px 14px;border-left:3px solid var(--terra-l);margin:8px 0;background:rgba(196,112,79,0.04);border-radius:0 8px 8px 0;"><span style="color:var(--terra);font-weight:700;flex-shrink:0;font-size:18px;margin-top:1px;">→</span><span style="line-height:1.9;font-size:19px;">${txt}</span></div><div style="height:6px;"></div>`;
-    }
-    if(line.match(/^[A-Z][^.!?]{0,60}:$/)&&line.length<70) return `<div style="font-weight:700;color:var(--terra-d);margin-top:20px;margin-bottom:8px;font-size:17px;padding-bottom:4px;border-bottom:2px solid var(--terra-l);">${line}</div>`;
-    return `<div style="padding:5px 0;line-height:1.9;font-size:19px;">${line}</div>`;
+    if(line.startsWith('→')){const txt=line.replace(/^→\s*/,'');return '<div style="display:flex;gap:12px;padding:10px 14px;border-left:3px solid var(--terra-l);margin:8px 0;background:rgba(196,112,79,0.04);border-radius:0 8px 8px 0;"><span style="color:var(--terra);font-weight:700;flex-shrink:0;font-size:18px;margin-top:1px;">→</span><span style="line-height:1.9;font-size:19px;">'+txt+'</span></div><div style="height:6px;"></div>';}
+    if(line.startsWith('•')||line.startsWith('* ')||line.startsWith('- ')){const txt=line.replace(/^[•\*\-]\s*/,'');return '<div style="display:flex;gap:12px;padding:10px 14px;border-left:3px solid var(--terra-l);margin:8px 0;background:rgba(196,112,79,0.04);border-radius:0 8px 8px 0;"><span style="color:var(--terra);font-weight:700;flex-shrink:0;font-size:18px;margin-top:1px;">→</span><span style="line-height:1.9;font-size:19px;">'+txt+'</span></div><div style="height:6px;"></div>';}
+    if(line.match(/^[A-Z][^.!?]{0,60}:$/)&&line.length<70) return '<div style="font-weight:700;color:var(--terra-d);margin-top:20px;margin-bottom:8px;font-size:17px;padding-bottom:4px;border-bottom:2px solid var(--terra-l);">'+line+'</div>';
+    return '<div style="padding:5px 0;line-height:1.9;font-size:19px;">'+line+'</div>';
   }).join('');
 }
 
 function renderAIContent(content,containerId){
   if(!content) return;
-  if(typeof content === 'object' && !content.main_content && !content.key_points?.length) {
-    document.getElementById(containerId).innerHTML='<div class="content-error">Content loaded but empty. <button class="retry-btn" onclick="location.reload()">Retry</button></div>';
-    return;
+  if(typeof content==='object'&&!content.main_content&&!(content.key_points&&content.key_points.length)){
+    document.getElementById(containerId).innerHTML='<div class="content-error">Content loaded but empty. <button class="retry-btn" onclick="location.reload()">Retry</button></div>';return;
   }
-
-  // Step 1: Aggressively parse JSON from string
   if(typeof content==='string'){
     let cleaned=content.replace(/```json|```/g,'').trim();
-    const first=cleaned.indexOf('{');
-    const last=cleaned.lastIndexOf('}');
+    const first=cleaned.indexOf('{');const last=cleaned.lastIndexOf('}');
     if(first!==-1&&last!==-1&&last>first){
-      try{
-        content=JSON.parse(cleaned.slice(first,last+1));
-      }catch(parseErr){
-        // Field-by-field extraction fallback
+      try{content=JSON.parse(cleaned.slice(first,last+1));}
+      catch(e){
         try{
-          const extractStr=(key)=>{const rx=new RegExp('"'+key+'"\\s*:\\s*"((?:[^"\\\\]|\\\\.)*)\"');const m=cleaned.match(rx);return m?m[1].replace(/\\n/g,'\n').replace(/\\"/g,'"'):'';}
-          const extractArr=(key)=>{const rx=new RegExp('"'+key+'"\\s*:\\s*\\[([^\\]]+)\\]');const m=cleaned.match(rx);if(!m) return [];return m[1].match(/"((?:[^"\\]|\\.)*)"/g)?.map(s=>s.slice(1,-1).replace(/\\n/g,'\n'))||[];}
+          var extractStr=function(key){var rx=new RegExp('"'+key+'"\\s*:\\s*"((?:[^"\\\\]|\\\\.)*)\"');var m=cleaned.match(rx);return m?m[1].replace(/\\n/g,'\n').replace(/\\"/g,'"'):'';}
+          var extractArr=function(key){var rx=new RegExp('"'+key+'"\\s*:\\s*\\[([^\\]]+)\\]');var m=cleaned.match(rx);if(!m) return [];return(m[1].match(/"((?:[^"\\]|\\.)*)"/g)||[]).map(function(s){return s.slice(1,-1).replace(/\\n/g,'\n');});}
           content={main_content:extractStr('main_content'),key_points:extractArr('key_points'),personalised_tip:extractStr('personalised_tip'),clinical_note:extractStr('clinical_note'),action_items:extractArr('action_items')};
-        }catch(e2){
-          document.getElementById(containerId).innerHTML=`<div class="ai-content fade-up"><div class="ai-main">${formatContent(cleaned)}</div></div>`;return;
-        }
+        }catch(e2){document.getElementById(containerId).innerHTML='<div class="ai-content fade-up"><div class="ai-main">'+formatContent(cleaned)+'</div></div>';return;}
       }
-    } else {
-      document.getElementById(containerId).innerHTML=`<div class="ai-content fade-up"><div class="ai-main">${formatContent(cleaned)}</div></div>`;return;
-    }
+    } else {document.getElementById(containerId).innerHTML='<div class="ai-content fade-up"><div class="ai-main">'+formatContent(cleaned)+'</div></div>';return;}
   }
-
-  if(!content||typeof content!=='object'){
-    document.getElementById(containerId).innerHTML=`<div class="ai-content fade-up"><div class="ai-main">Could not load content. <button class="retry-btn" onclick="location.reload()">Retry</button></div></div>`;return;
-  }
-
-  function formatContent(text){
-    if(!text) return '';
-    return text.split('\n').map(line=>{
-      line=line.trim();
-      if(!line) return '<div style="height:14px;"></div>';
-      if(line.startsWith('→')){
-        const txt=line.replace(/^→\s*/,'');
-        return `<div style="display:flex;gap:12px;padding:10px 14px;border-left:3px solid var(--terra-l);margin:8px 0;background:rgba(196,112,79,0.04);border-radius:0 8px 8px 0;"><span style="color:var(--terra);font-weight:700;flex-shrink:0;font-size:18px;margin-top:1px;">→</span><span style="line-height:1.9;font-size:19px;">${txt}</span></div><div style="height:6px;"></div>`;
-      }
-      if(line.startsWith('•')||line.startsWith('* ')||line.startsWith('- ')){
-        const txt=line.replace(/^[•\*\-]\s*/,'');
-        return `<div style="display:flex;gap:12px;padding:10px 14px;border-left:3px solid var(--terra-l);margin:8px 0;background:rgba(196,112,79,0.04);border-radius:0 8px 8px 0;"><span style="color:var(--terra);font-weight:700;flex-shrink:0;font-size:18px;margin-top:1px;">→</span><span style="line-height:1.9;font-size:19px;">${txt}</span></div><div style="height:6px;"></div>`;
-      }
-      if(line.match(/^[A-Z][^.!?]{0,60}:$/)&&line.length<70) return `<div style="font-weight:700;color:var(--terra-d);margin-top:20px;margin-bottom:8px;font-size:17px;padding-bottom:4px;border-bottom:2px solid var(--terra-l);">${line}</div>`;
-      return `<div style="padding:5px 0;line-height:1.9;font-size:19px;">${line}</div>`;
-    }).join('');
-  }
-
-  let html=`<div class="ai-content fade-up">`;
-  if(content.main_content) html+=`<div class="ai-main" style="line-height:1.9;margin-bottom:1.5rem;">${formatContent(content.main_content)}</div>`;
+  if(!content||typeof content!=='object'){document.getElementById(containerId).innerHTML='<div class="ai-content fade-up"><div class="ai-main">Could not load content. <button class="retry-btn" onclick="location.reload()">Retry</button></div></div>';return;}
+  var html='<div class="ai-content fade-up">';
+  if(content.main_content) html+='<div class="ai-main" style="line-height:1.9;margin-bottom:1.5rem;">'+formatContent(content.main_content)+'</div>';
   if(content.key_points&&content.key_points.length){
-    html+=`<div class="key-points"><div class="key-points-title">Key Clinical Points</div>`;
-    content.key_points.forEach(pt=>{
-      const clean=pt.replace(/^→\s*/,'');
-      html+=`<div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border-l);"><span style="color:var(--terra);font-weight:700;flex-shrink:0;font-size:18px;margin-top:2px;">→</span><span style="font-size:19px;line-height:1.85;">${clean}</span></div>`;
-    });
-    html+=`</div>`;
+    html+='<div class="key-points"><div class="key-points-title">Key Clinical Points</div>';
+    content.key_points.forEach(function(pt){var clean=pt.replace(/^→\s*/,'');html+='<div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border-l);"><span style="color:var(--terra);font-weight:700;flex-shrink:0;font-size:18px;margin-top:2px;">→</span><span style="font-size:19px;line-height:1.85;">'+clean+'</span></div>';});
+    html+='</div>';
   }
-  if(content.personalised_tip) html+=`<div class="persona-tip"><span class="persona-tip-icon">💡</span><div class="persona-tip-text" style="font-size:19px;line-height:1.85;"><strong>For you:</strong> ${content.personalised_tip}</div></div>`;
-  if(content.clinical_note) html+=`<div class="clinical-note"><div class="clinical-note-title">⚠ Clinical Note</div><div class="clinical-note-text" style="font-size:19px;line-height:1.85;">${content.clinical_note}</div></div>`;
+  if(content.personalised_tip) html+='<div class="persona-tip"><span class="persona-tip-icon">💡</span><div class="persona-tip-text" style="font-size:19px;line-height:1.85;"><strong>For you:</strong> '+content.personalised_tip+'</div></div>';
+  if(content.clinical_note) html+='<div class="clinical-note"><div class="clinical-note-title">⚠ Clinical Note</div><div class="clinical-note-text" style="font-size:19px;line-height:1.85;">'+content.clinical_note+'</div></div>';
   if(content.action_items&&content.action_items.length){
-    html+=`<div class="action-items"><div class="action-items-title">Action Items</div>`;
-    content.action_items.forEach(a=>{
-      const clean=a.replace(/^→\s*/,'');
-      html+=`<div class="action-item" style="font-size:18px;line-height:1.8;">→ ${clean}</div>`;
-    });
-    html+=`</div>`;
+    html+='<div class="action-items"><div class="action-items-title">Action Items</div>';
+    content.action_items.forEach(function(a){var clean=a.replace(/^→\s*/,'');html+='<div class="action-item" style="font-size:18px;line-height:1.8;">→ '+clean+'</div>';});
+    html+='</div>';
   }
-  html+=`<div class="ai-source">📚 Evidence-based · Built by a licensed gynaecologist · Personalised to your profile</div></div>`;
+  html+='<div class="ai-source">📚 Evidence-based · Built by a licensed gynaecologist · Personalised to your profile</div></div>';
   document.getElementById(containerId).innerHTML=html;
 }
 
 function handleContentError(containerId,err,section,journey){
-  if(err&&err.error==='upgrade_required'){
-    document.getElementById(containerId).innerHTML='<div style="padding:2rem;text-align:center;"><div style="font-size:32px;margin-bottom:8px;">🔒</div><div style="font-family:Cormorant Garamond,serif;font-size:20px;font-weight:600;margin-bottom:8px;">Bloom Complete Feature</div><p style="color:var(--muted);font-size:13px;">Upgrade to Bloom Complete to access your full personalised roadmap.</p></div>';
-    return;
-  }
-  document.getElementById(containerId).innerHTML=`<div class="content-error">⚠ Could not load content. <button class="retry-btn" onclick="${journey==='ttc'?`loadTTCSection('${section}',null)`:journey==='pregnancy'?`loadPregSection('${section}',null)`:`loadPPSection('${section}',null)`}">Retry</button></div>`;
+  if(err&&err.error==='upgrade_required'){document.getElementById(containerId).innerHTML='<div style="padding:2rem;text-align:center;"><div style="font-size:32px;margin-bottom:8px;">🔒</div><div style="font-family:Cormorant Garamond,serif;font-size:20px;font-weight:600;margin-bottom:8px;">Bloom Complete Feature</div><p style="color:var(--muted);font-size:13px;">Upgrade to Bloom Complete to access your full personalised roadmap.</p></div>';return;}
+  var retryFn=journey==='ttc'?'loadTTCSection(\''+section+'\',null)':journey==='pregnancy'?'loadPregSection(\''+section+'\',null)':'loadPPSection(\''+section+'\',null)';
+  document.getElementById(containerId).innerHTML='<div class="content-error">⚠ Could not load content. <button class="retry-btn" onclick="'+retryFn+'">Retry</button></div>';
 }
 
-function scrollWeekNav(amount){
-  const nav=document.getElementById('week-nav');
-  if(nav) nav.scrollBy({left:amount,behavior:'smooth'});
-}
+function scrollWeekNav(amount){var nav=document.getElementById('week-nav');if(nav) nav.scrollBy({left:amount,behavior:'smooth'});}
 
 function openRoadmapProfile(){
-  const modal=document.getElementById('profileModal');
-  if(!modal) return;
-  const grids=['pf-sym-grid','pf-med-grid'];
-  grids.forEach(id=>{const el=document.getElementById(id);if(el) el.innerHTML='';});
+  var modal=document.getElementById('profileModal');if(!modal) return;
+  ['pf-sym-grid','pf-med-grid'].forEach(function(id){var el=document.getElementById(id);if(el) el.innerHTML='';});
   if(typeof pfBuildChips==='function') pfBuildChips();
-  setTimeout(()=>{if(typeof pfLoad==='function') pfLoad();modal.style.display='flex';},100);
+  setTimeout(function(){if(typeof pfLoad==='function') pfLoad();modal.style.display='flex';},100);
 }
 
 function saveBabyInvestigation(){
-  const test=document.getElementById('baby-log-test').value;
-  const result=document.getElementById('baby-log-result').value;
-  const notes=document.getElementById('baby-log-notes').value;
+  var test=document.getElementById('baby-log-test').value;
+  var result=document.getElementById('baby-log-result').value;
+  var notes=document.getElementById('baby-log-notes').value;
   if(!test) return;
-  const log=JSON.parse(localStorage.getItem('bloom_baby_inv_log')||'[]');
+  var log=JSON.parse(localStorage.getItem('bloom_baby_inv_log')||'[]');
   log.unshift({test,result,notes,stage:currentPPStage,date:new Date().toLocaleDateString('en-IN')});
   localStorage.setItem('bloom_baby_inv_log',JSON.stringify(log.slice(0,20)));
   document.getElementById('baby-inv-saved').style.display='block';
-  setTimeout(()=>document.getElementById('baby-inv-saved').style.display='none',2000);
-  renderBabyInvLog();
-  contentCache={};
+  setTimeout(function(){document.getElementById('baby-inv-saved').style.display='none';},2000);
+  renderBabyInvLog();contentCache={};
   loadPPSection('baby_care',document.querySelector('#pp-sec-tabs .stab.active')||document.querySelector('#pp-sec-tabs .stab'));
 }
 
 function renderBabyInvLog(){
-  const log=JSON.parse(localStorage.getItem('bloom_baby_inv_log')||'[]');
-  const el=document.getElementById('baby-inv-log');
-  if(!el||!log.length) return;
-  const statusColors={normal:'var(--sage-d)',borderline:'#9A7340',abnormal:'#9E2020',pending:'var(--muted)'};
+  var log=JSON.parse(localStorage.getItem('bloom_baby_inv_log')||'[]');
+  var el=document.getElementById('baby-inv-log');if(!el||!log.length) return;
+  var statusColors={normal:'var(--sage-d)',borderline:'#9A7340',abnormal:'#9E2020',pending:'var(--muted)'};
   el.innerHTML='<div style="font-size:11px;color:var(--muted);font-weight:500;margin-bottom:6px;">Recent</div>'+
-    log.slice(0,3).map(l=>`<div style="font-size:12px;padding:5px 0;border-bottom:1px solid var(--border-l);display:flex;justify-content:space-between;"><span>${l.test.replace(/_/g,' ')}</span><span style="color:${statusColors[l.result]||'var(--muted)'};font-weight:500;">${l.result||'—'}</span></div>`).join('');
+    log.slice(0,3).map(function(l){return '<div style="font-size:12px;padding:5px 0;border-bottom:1px solid var(--border-l);display:flex;justify-content:space-between;"><span>'+l.test.replace(/_/g,' ')+'</span><span style="color:'+(statusColors[l.result]||'var(--muted)')+';font-weight:500;">'+(l.result||'—')+'</span></div>';}).join('');
 }
 
 init();
 
-const SYM_OPTIONS=['pcos_diagnosed','irregular_periods','acne','excess_hair','hair_loss','painful_periods','endometriosis_diagnosed','fibroids_diagnosed','thyroid_disorder','low_libido','mood_changes','bloating','breast_tenderness','spotting_between_periods','heavy_bleeding','night_sweats','hot_flushes'];
-const SYM_LABELS={'pcos_diagnosed':'PCOS diagnosed','irregular_periods':'Irregular periods','acne':'Acne / oily skin','excess_hair':'Excess hair (hirsutism)','hair_loss':'Hair thinning','painful_periods':'Painful periods','endometriosis_diagnosed':'Endometriosis','fibroids_diagnosed':'Fibroids','thyroid_disorder':'Thyroid disorder','low_libido':'Low libido','mood_changes':'Mood changes / anxiety','bloating':'Bloating','breast_tenderness':'Breast tenderness','spotting_between_periods':'Spotting between periods','heavy_bleeding':'Heavy periods','night_sweats':'Night sweats','hot_flushes':'Hot flushes'};
-const MED_OPTIONS=['Metformin','Letrozole','Clomiphene','Progesterone','Inositol','CoQ10','Folic acid','Iron','Vitamin D','Omega-3','Levothyroxine','Cabergoline','DHEA','Aspirin low-dose','Heparin/Clexane','Estrogen','Provera'];
+// PROFILE MODAL FUNCTIONS
+var SYM_OPTIONS=['pcos_diagnosed','irregular_periods','acne','excess_hair','hair_loss','painful_periods','endometriosis_diagnosed','fibroids_diagnosed','thyroid_disorder','low_libido','mood_changes','bloating','breast_tenderness','spotting_between_periods','heavy_bleeding','night_sweats','hot_flushes'];
+var SYM_LABELS={'pcos_diagnosed':'PCOS diagnosed','irregular_periods':'Irregular periods','acne':'Acne / oily skin','excess_hair':'Excess hair (hirsutism)','hair_loss':'Hair thinning','painful_periods':'Painful periods','endometriosis_diagnosed':'Endometriosis','fibroids_diagnosed':'Fibroids','thyroid_disorder':'Thyroid disorder','low_libido':'Low libido','mood_changes':'Mood changes / anxiety','bloating':'Bloating','breast_tenderness':'Breast tenderness','spotting_between_periods':'Spotting between periods','heavy_bleeding':'Heavy periods','night_sweats':'Night sweats','hot_flushes':'Hot flushes'};
+var MED_OPTIONS=['Metformin','Letrozole','Clomiphene','Progesterone','Inositol','CoQ10','Folic acid','Iron','Vitamin D','Omega-3','Levothyroxine','Cabergoline','DHEA','Aspirin low-dose','Heparin/Clexane','Estrogen','Provera'];
 
 function pfBuildChips(){
-  const symGrid=document.getElementById('pf-sym-grid');
-  if(symGrid&&!symGrid.children.length){
-    SYM_OPTIONS.forEach(v=>{
-      const d=document.createElement('div');
-      d.className='pf-chip';d.dataset.val=v;d.textContent=SYM_LABELS[v]||v;
-      d.onclick=function(){this.classList.toggle('selected');pfUpdateCompletion();};
-      symGrid.appendChild(d);
-    });
-  }
-  const medGrid=document.getElementById('pf-med-grid');
-  if(medGrid&&!medGrid.children.length){
-    MED_OPTIONS.forEach(v=>{
-      const d=document.createElement('div');
-      d.className='pf-chip';d.dataset.val=v;d.textContent=v;
-      d.onclick=function(){this.classList.toggle('selected');pfUpdateCompletion();};
-      medGrid.appendChild(d);
-    });
-  }
-  // PATCHED: added new chip groups
-  document.querySelectorAll('#pf-flow-chips .pf-chip, #pf-pain-chips .pf-chip, #pf-outcome-chips .pf-chip, #pf-fertility-conditions .pf-chip, #pf-surgeries .pf-chip, #pf-sa-chips .pf-chip, #pf-prev-tx-chips .pf-chip, #pf-inv-done-chips .pf-chip, #pf-usg-chips .pf-chip, #pf-doctor-chips .pf-chip, #pf-high-risk .pf-chip, #pf-delivery-mode-chips .pf-chip, #pf-lscs-reason-chips .pf-chip, #pf-obs-complications .pf-chip, #pf-intermenstrual-chips .pf-chip, #pf-pms-chips .pf-chip').forEach(chip=>{
-    if(!chip._wired){
-      chip._wired=true;
-      chip.onclick=function(){this.classList.toggle('selected');pfUpdateCompletion();};
-    }
-  });
+  var symGrid=document.getElementById('pf-sym-grid');
+  if(symGrid&&!symGrid.children.length){SYM_OPTIONS.forEach(function(v){var d=document.createElement('div');d.className='pf-chip';d.dataset.val=v;d.textContent=SYM_LABELS[v]||v;d.onclick=function(){this.classList.toggle('selected');pfUpdateCompletion();};symGrid.appendChild(d);});}
+  var medGrid=document.getElementById('pf-med-grid');
+  if(medGrid&&!medGrid.children.length){MED_OPTIONS.forEach(function(v){var d=document.createElement('div');d.className='pf-chip';d.dataset.val=v;d.textContent=v;d.onclick=function(){this.classList.toggle('selected');pfUpdateCompletion();};medGrid.appendChild(d);});}
+  document.querySelectorAll('#pf-flow-chips .pf-chip,#pf-pain-chips .pf-chip,#pf-outcome-chips .pf-chip,#pf-fertility-conditions .pf-chip,#pf-surgeries .pf-chip,#pf-sa-chips .pf-chip,#pf-prev-tx-chips .pf-chip,#pf-inv-done-chips .pf-chip,#pf-usg-chips .pf-chip,#pf-doctor-chips .pf-chip,#pf-high-risk .pf-chip,#pf-delivery-mode-chips .pf-chip,#pf-lscs-reason-chips .pf-chip,#pf-obs-complications .pf-chip').forEach(function(chip){if(!chip._wired){chip._wired=true;chip.onclick=function(){this.classList.toggle('selected');pfUpdateCompletion();};}});
 }
 
 function pfSwitchTab(name,btn){
-  document.querySelectorAll('.pf-tab-panel').forEach(p=>p.style.display='none');
-  document.querySelectorAll('.pf-tab').forEach(b=>b.classList.remove('active'));
-  document.getElementById('pf-tab-'+name).style.display='block';
-  btn.classList.add('active');
+  document.querySelectorAll('.pf-tab-panel').forEach(function(p){p.style.display='none';});
+  document.querySelectorAll('.pf-tab').forEach(function(b){b.classList.remove('active');});
+  document.getElementById('pf-tab-'+name).style.display='block';btn.classList.add('active');
 }
 
 function pfUpdateCompletion(){
-  const fields=['pf-name','pf-age','pf-journey','pf-cycle','pf-lmp','pf-amh','pf-fsh','pf-tsh','pf-hb','pf-vitamin-d','pf-workup-status','pf-preg-lmp'];
-  let filled=0;
-  fields.forEach(id=>{const el=document.getElementById(id);if(el&&el.value) filled++;});
-  ['pf-sym-grid','pf-flow-chips','pf-fertility-conditions'].forEach(id=>{
-    if(document.querySelectorAll('#'+id+' .pf-chip.selected').length) filled++;
-  });
-  const pct=Math.round((filled/(fields.length+3))*100);
-  const bar=document.getElementById('pf-pct-bar');
-  const lbl=document.getElementById('pf-pct-label');
-  if(bar) bar.style.width=Math.min(pct,100)+'%';
-  if(lbl) lbl.textContent=Math.min(pct,100)+'%';
+  var fields=['pf-name','pf-age','pf-journey','pf-cycle','pf-lmp','pf-amh','pf-fsh','pf-tsh','pf-hb','pf-vitamin-d','pf-workup-status','pf-preg-lmp'];
+  var filled=0;
+  fields.forEach(function(id){var el=document.getElementById(id);if(el&&el.value) filled++;});
+  ['pf-sym-grid','pf-flow-chips','pf-fertility-conditions'].forEach(function(id){if(document.querySelectorAll('#'+id+' .pf-chip.selected').length) filled++;});
+  var pct=Math.round((filled/(fields.length+3))*100);
+  var bar=document.getElementById('pf-pct-bar');var lbl=document.getElementById('pf-pct-label');
+  if(bar) bar.style.width=Math.min(pct,100)+'%';if(lbl) lbl.textContent=Math.min(pct,100)+'%';
 }
 
-function getChipVals(containerId){
-  return[...document.querySelectorAll('#'+containerId+' .pf-chip.selected')].map(c=>c.dataset.val);
-}
+function getChipVals(containerId){return[...document.querySelectorAll('#'+containerId+' .pf-chip.selected')].map(function(c){return c.dataset.val;});}
 
 function setChipVals(containerId,vals){
   if(!vals||!vals.length) return;
-  document.querySelectorAll('#'+containerId+' .pf-chip').forEach(c=>{
-    c.classList.toggle('selected',vals.includes(c.dataset.val));
-  });
+  document.querySelectorAll('#'+containerId+' .pf-chip').forEach(function(c){c.classList.toggle('selected',vals.includes(c.dataset.val));});
 }
 
-// PATCHED: pfLoad with new obs + extended ANC fields
 function pfLoad(){
-  const p=userData.profile||{};
-  const set=(id,val)=>{const el=document.getElementById(id);if(el&&val!==undefined&&val!==null) el.value=val;};
+  var p=userData.profile||{};
+  var set=function(id,val){var el=document.getElementById(id);if(el&&val!==undefined&&val!==null) el.value=val;};
   set('pf-name',p.name);set('pf-age',p.age);set('pf-journey',p.journeyStage);
   set('pf-cycle',p.cycleLength);set('pf-period',p.periodLength);set('pf-notes',p.notes);
-  setChipVals('pf-sym-grid',p.symptoms);
-  setChipVals('pf-med-grid',p.medications);
+  setChipVals('pf-sym-grid',p.symptoms);setChipVals('pf-med-grid',p.medications);
   set('pf-lmp',p.lmp);set('pf-cycle-regularity',p.cycleRegularity);set('pf-menarche',p.menarche);
   setChipVals('pf-flow-chips',p.flowHeaviness);setChipVals('pf-pain-chips',p.painLevel);
   set('pf-ttc-duration',p.ttcDuration);set('pf-gravida',p.gravida);
@@ -1323,7 +1127,6 @@ function pfLoad(){
   set('pf-workup-status',p.workupStatus);set('pf-tx-phase',p.txPhase);
   set('pf-cycle-day',p.cycleDay);set('pf-next-step',p.nextStep);set('pf-concerns',p.concerns);
   setChipVals('pf-doctor-chips',p.doctorInvolved);
-  // PATCHED: Obstetric history
   set('pf-obs-gravida',p.obsGravida);set('pf-obs-para',p.obsPara);
   set('pf-obs-living-preg',p.obsLiving);set('pf-obs-spontaneous',p.obsSpontaneous);
   set('pf-obs-induced',p.obsInduced);
@@ -1331,31 +1134,22 @@ function pfLoad(){
   setChipVals('pf-delivery-mode-chips',p.obsDeliveryModes);
   setChipVals('pf-lscs-reason-chips',p.obsLscsReasons);
   setChipVals('pf-obs-complications',p.obsComplications);
-  set('pf-obs-prior-meds',p.obsPriorMedications);
-  set('pf-obs-prior-surgeries',p.obsPriorSurgeries);
-  // Current pregnancy
+  set('pf-obs-prior-meds',p.obsPriorMedications);set('pf-obs-prior-surgeries',p.obsPriorSurgeries);
   set('pf-preg-lmp',p.pregLmp);set('pf-preg-edd',p.pregEdd);
   set('pf-booking-week',p.pregBookingWeek);set('pf-preg-conception',p.pregConception);
   setChipVals('pf-high-risk',p.pregHighRisk);
-  // PATCHED: Extended ANC
   set('pf-anc-blood-group',p.ancBloodGroup);
   set('pf-anc-hb1',p.ancHb1);set('pf-anc-hb2',p.ancHb2);set('pf-anc-hb3',p.ancHb3);
   set('pf-anc-tlc',p.ancTlc);set('pf-anc-platelets',p.ancPlateletCount);
   set('pf-anc-rbs',p.ancRbs);set('pf-anc-sgpt',p.ancSgpt);set('pf-anc-sgot',p.ancSgot);
-  set('pf-anc-urea',p.ancUrea);set('pf-anc-creatinine',p.ancCreatinine);
-  set('pf-anc-uric-acid',p.ancUricAcid);
-  set('pf-anc-vdrl',p.ancVdrl);set('pf-anc-hiv',p.ancHiv);set('pf-anc-hbsag',p.ancHbsag);
-  set('pf-anc-hcv',p.ancHcv);
-  set('pf-anc-apla-lupus',p.ancAplaLupus);
-  set('pf-anc-anticardiolipin',p.ancAnticardiolipin);
-  set('pf-anc-beta2gp1',p.ancBeta2Gp1);
-  set('pf-anc-tsh',p.ancTsh);set('pf-anc-ft4',p.ancFt4);set('pf-anc-anti-tpo',p.ancAntiTpo);
-  set('pf-anc-ferritin',p.ancFerritin);
+  set('pf-anc-urea',p.ancUrea);set('pf-anc-creatinine',p.ancCreatinine);set('pf-anc-uric-acid',p.ancUricAcid);
+  set('pf-anc-vdrl',p.ancVdrl);set('pf-anc-hiv',p.ancHiv);set('pf-anc-hbsag',p.ancHbsag);set('pf-anc-hcv',p.ancHcv);
+  set('pf-anc-apla-lupus',p.ancAplaLupus);set('pf-anc-anticardiolipin',p.ancAnticardiolipin);set('pf-anc-beta2gp1',p.ancBeta2Gp1);
+  set('pf-anc-tsh',p.ancTsh);set('pf-anc-ft4',p.ancFt4);set('pf-anc-anti-tpo',p.ancAntiTpo);set('pf-anc-ferritin',p.ancFerritin);
   set('pf-anc-urine-protein',p.ancUrineProtein);set('pf-anc-gbs',p.ancGbs);
   set('pf-ogtt-fasting',p.ancOgttFasting);set('pf-ogtt-1hr',p.ancOgtt1hr);set('pf-ogtt-2hr',p.ancOgtt2hr);
-  set('pf-dating-scan',p.ancDatingScan);set('pf-nuchal-nt',p.ancNuchalNt);
-  set('pf-nuchal-result',p.ancNuchalResult);set('pf-anomaly-scan',p.ancAnomalyScan);
-  set('pf-placenta',p.ancPlacentaPos);set('pf-growth-scan',p.ancGrowthScan);
+  set('pf-dating-scan',p.ancDatingScan);set('pf-nuchal-nt',p.ancNuchalNt);set('pf-nuchal-result',p.ancNuchalResult);
+  set('pf-anomaly-scan',p.ancAnomalyScan);set('pf-placenta',p.ancPlacentaPos);set('pf-growth-scan',p.ancGrowthScan);
   set('pf-cervix-length',p.ancCervixLength);set('pf-doppler',p.ancDoppler);
   set('pf-tt1',p.immTt1Date);set('pf-tt2',p.immTt2Date||p.immTdDate);set('pf-flu',p.immFluDate);
   set('pf-bp1',p.bpReading1);set('pf-bp1-date',p.bpReading1Date);
@@ -1363,28 +1157,24 @@ function pfLoad(){
   pfUpdateCompletion();
 }
 
-// PATCHED: pfSave with new obs + extended ANC fields
 async function pfSave(){
-  const g=(id)=>{const el=document.getElementById(id);return el?el.value:'';};
-  const gn=(id)=>{const v=parseFloat(g(id));return isNaN(v)?null:v;};
-  const gi=(id)=>{const v=parseInt(g(id));return isNaN(v)?null:v;};
-  const profile={
+  var g=function(id){var el=document.getElementById(id);return el?el.value:'';};
+  var gn=function(id){var v=parseFloat(g(id));return isNaN(v)?null:v;};
+  var gi=function(id){var v=parseInt(g(id));return isNaN(v)?null:v;};
+  var profile={
     name:g('pf-name'),age:gi('pf-age'),journeyStage:g('pf-journey'),
     cycleLength:gi('pf-cycle'),periodLength:gi('pf-period'),notes:g('pf-notes'),
     symptoms:getChipVals('pf-sym-grid'),medications:getChipVals('pf-med-grid'),
     lmp:g('pf-lmp'),cycleRegularity:g('pf-cycle-regularity'),menarche:gi('pf-menarche'),
     flowHeaviness:getChipVals('pf-flow-chips'),painLevel:getChipVals('pf-pain-chips'),
     ttcDuration:g('pf-ttc-duration'),gravida:g('pf-gravida'),obsLiving:gi('pf-obs-living'),
-    txCycles:gi('pf-tx-cycles'),
-    pregnancyOutcomes:getChipVals('pf-outcome-chips'),
-    fertilityConditions:getChipVals('pf-fertility-conditions'),
-    previousSurgeries:getChipVals('pf-surgeries'),
-    semenAnalysis:getChipVals('pf-sa-chips'),
-    prevTreatments:getChipVals('pf-prev-tx-chips'),
+    txCycles:gi('pf-tx-cycles'),pregnancyOutcomes:getChipVals('pf-outcome-chips'),
+    fertilityConditions:getChipVals('pf-fertility-conditions'),previousSurgeries:getChipVals('pf-surgeries'),
+    semenAnalysis:getChipVals('pf-sa-chips'),prevTreatments:getChipVals('pf-prev-tx-chips'),
     investigationsDone:getChipVals('pf-inv-done-chips'),
     amh:gn('pf-amh'),fsh:gn('pf-fsh'),lh:gn('pf-lh'),tsh:gn('pf-tsh'),
-    prolactin:gn('pf-prolactin'),testosterone:gn('pf-testosterone'),
-    dheas:gn('pf-dheas'),estradiol:gn('pf-estradiol'),progesterone:gn('pf-progesterone'),
+    prolactin:gn('pf-prolactin'),testosterone:gn('pf-testosterone'),dheas:gn('pf-dheas'),
+    estradiol:gn('pf-estradiol'),progesterone:gn('pf-progesterone'),
     hb:gn('pf-hb'),ferritin:gn('pf-ferritin'),fastingGlucose:gn('pf-fasting-glucose'),
     hba1c:gn('pf-hba1c'),fastingInsulin:gn('pf-fasting-insulin'),
     vitaminD:gn('pf-vitamin-d'),vitaminB12:gn('pf-b12'),
@@ -1394,24 +1184,15 @@ async function pfSave(){
     workupStatus:g('pf-workup-status'),txPhase:g('pf-tx-phase'),
     cycleDay:gi('pf-cycle-day'),nextStep:g('pf-next-step'),concerns:g('pf-concerns'),
     doctorInvolved:getChipVals('pf-doctor-chips'),
-    // PATCHED: Obstetric history
-    obsGravida:gi('pf-obs-gravida'),
-    obsPara:gi('pf-obs-para'),
-    obsLiving:gi('pf-obs-living-preg'),
-    obsSpontaneous:gi('pf-obs-spontaneous'),
-    obsInduced:gi('pf-obs-induced'),
+    obsGravida:gi('pf-obs-gravida'),obsPara:gi('pf-obs-para'),obsLiving:gi('pf-obs-living-preg'),
+    obsSpontaneous:gi('pf-obs-spontaneous'),obsInduced:gi('pf-obs-induced'),
     obsAbortions:(gi('pf-obs-spontaneous')||0)+(gi('pf-obs-induced')||0),
     obsYearsAgo:gi('pf-obs-years-ago')?[gi('pf-obs-years-ago')]:[],
-    obsDeliveryModes:getChipVals('pf-delivery-mode-chips'),
-    obsLscsReasons:getChipVals('pf-lscs-reason-chips'),
+    obsDeliveryModes:getChipVals('pf-delivery-mode-chips'),obsLscsReasons:getChipVals('pf-lscs-reason-chips'),
     obsComplications:getChipVals('pf-obs-complications'),
-    obsPriorMedications:g('pf-obs-prior-meds'),
-    obsPriorSurgeries:g('pf-obs-prior-surgeries'),
-    // Current pregnancy
-    pregLmp:g('pf-preg-lmp'),pregEdd:g('pf-preg-edd'),
-    pregBookingWeek:gi('pf-booking-week'),pregConception:g('pf-preg-conception'),
-    pregHighRisk:getChipVals('pf-high-risk'),
-    // PATCHED: Extended ANC
+    obsPriorMedications:g('pf-obs-prior-meds'),obsPriorSurgeries:g('pf-obs-prior-surgeries'),
+    pregLmp:g('pf-preg-lmp'),pregEdd:g('pf-preg-edd'),pregBookingWeek:gi('pf-booking-week'),
+    pregConception:g('pf-preg-conception'),pregHighRisk:getChipVals('pf-high-risk'),
     ancBloodGroup:g('pf-anc-blood-group'),
     ancHb1:gn('pf-anc-hb1'),ancHb2:gn('pf-anc-hb2'),ancHb3:gn('pf-anc-hb3'),
     ancTlc:gn('pf-anc-tlc'),ancPlateletCount:gi('pf-anc-platelets'),
@@ -1419,8 +1200,7 @@ async function pfSave(){
     ancUrea:gn('pf-anc-urea'),ancCreatinine:gn('pf-anc-creatinine'),ancUricAcid:gn('pf-anc-uric-acid'),
     ancVdrl:g('pf-anc-vdrl'),ancHiv:g('pf-anc-hiv'),ancHbsag:g('pf-anc-hbsag'),ancHcv:g('pf-anc-hcv'),
     ancAplaLupus:g('pf-anc-apla-lupus'),ancAnticardiolipin:g('pf-anc-anticardiolipin'),ancBeta2Gp1:g('pf-anc-beta2gp1'),
-    ancTsh:gn('pf-anc-tsh'),ancFt4:gn('pf-anc-ft4'),ancAntiTpo:gn('pf-anc-anti-tpo'),
-    ancFerritin:gn('pf-anc-ferritin'),
+    ancTsh:gn('pf-anc-tsh'),ancFt4:gn('pf-anc-ft4'),ancAntiTpo:gn('pf-anc-anti-tpo'),ancFerritin:gn('pf-anc-ferritin'),
     ancUrineProtein:g('pf-anc-urine-protein'),ancGbs:g('pf-anc-gbs'),
     ancOgttFasting:gn('pf-ogtt-fasting'),ancOgtt1hr:gn('pf-ogtt-1hr'),ancOgtt2hr:gn('pf-ogtt-2hr'),
     ancDatingScan:g('pf-dating-scan'),ancNuchalNt:gn('pf-nuchal-nt'),ancNuchalResult:g('pf-nuchal-result'),
@@ -1431,20 +1211,17 @@ async function pfSave(){
     bpReading2:g('pf-bp2'),bpReading2Date:g('pf-bp2-date'),
   };
   try{
-    const res=await fetch('/profile',{method:'PUT',headers:{'Content-Type':'application/json',Authorization:TOKEN},body:JSON.stringify(profile)});
+    var res=await fetch('/profile',{method:'PUT',headers:{'Content-Type':'application/json',Authorization:TOKEN},body:JSON.stringify(profile)});
     if(res.ok){
       userData=await res.json();
-      const msg=document.getElementById('pf-saved-msg');
-      if(msg) msg.style.display='block';
-      userProfile=userData.profile||{};
-      contentCache={};
-      setTimeout(()=>{
+      var msg=document.getElementById('pf-saved-msg');if(msg) msg.style.display='block';
+      userProfile=userData.profile||{};contentCache={};
+      setTimeout(function(){
         if(msg) msg.style.display='none';
-        const modal=document.getElementById('profileModal');
-        if(modal) modal.style.display='none';
+        var modal=document.getElementById('profileModal');if(modal) modal.style.display='none';
         if(typeof renderPersonaTags==='function') renderPersonaTags();
-        const activeJtab=document.querySelector('.jtab.active');
-        const activeName=activeJtab?activeJtab.textContent.trim():'';
+        var activeJtab=document.querySelector('.jtab.active');
+        var activeName=activeJtab?activeJtab.textContent.trim():'';
         if(activeName.includes('Pregnancy')&&typeof initPregnancy==='function') initPregnancy();
         else if(activeName.includes('Postpartum')&&typeof initPostpartum==='function') initPostpartum();
         else if(typeof initTTC==='function') initTTC();
@@ -1454,23 +1231,20 @@ async function pfSave(){
 }
 
 function calcPregLmpFromEdd(){
-  const edd=document.getElementById('pf-preg-edd').value;
-  if(!edd) return;
-  const d=new Date(edd);d.setDate(d.getDate()-280);
+  var edd=document.getElementById('pf-preg-edd').value;if(!edd) return;
+  var d=new Date(edd);d.setDate(d.getDate()-280);
   document.getElementById('pf-preg-lmp').value=d.toISOString().split('T')[0];
 }
-
 function openProfileModal(){pfBuildChips();pfLoad();document.getElementById('profileModal').style.display='flex';}
 function buildRoadmapProfileModal(){pfBuildChips();pfLoad();document.getElementById('profileModal').style.display='flex';}
 </script>
-
 <!-- PROFILE MODAL -->
 <div id="profileModal" style="position:fixed;inset:0;z-index:300;background:rgba(44,36,32,0.52);display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);">
   <div style="background:#fff;border-radius:18px;width:820px;max-width:97vw;max-height:96vh;overflow:hidden;position:relative;border:1px solid #E8DDD5;display:flex;flex-direction:column;box-shadow:0 24px 60px rgba(44,36,32,0.18);">
     <div style="padding:1.25rem 1.75rem 1rem;border-bottom:1px solid #F0E8E2;flex-shrink:0;">
       <button onclick="document.getElementById('profileModal').style.display='none'" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:18px;color:#8C7468;cursor:pointer;">✕</button>
       <div style="font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:600;color:#2C2420;margin-bottom:4px;">My Profile</div>
-      <p style="font-size:15px;color:#8C7468;margin-bottom:1rem;">The more you share, the more personalised your roadmap, chat, and advice becomes.</p>
+      <p style="font-size:15px;color:#8C7468;margin-bottom:1rem;">The more you share, the more personalised your roadmap becomes.</p>
       <div style="background:#F5EDE6;border-radius:8px;padding:8px 14px;display:flex;align-items:center;gap:12px;margin-bottom:12px;">
         <div style="flex:1;">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
@@ -1482,16 +1256,15 @@ function buildRoadmapProfileModal(){pfBuildChips();pfLoad();document.getElementB
           </div>
         </div>
       </div>
-      <div style="display:flex;gap:4px;flex-wrap:wrap;" id="pf-tabs">
-        <button class="pf-tab active" data-tab="basic" onclick="pfSwitchTab('basic',this)">🌸 Basic</button>
-        <button class="pf-tab" data-tab="menstrual" onclick="pfSwitchTab('menstrual',this)">📅 Menstrual</button>
-        <button class="pf-tab" data-tab="fertility" onclick="pfSwitchTab('fertility',this)">🌱 Fertility &amp; Tests</button>
-        <button class="pf-tab" data-tab="pregnancy" onclick="pfSwitchTab('pregnancy',this)">🤰 Pregnancy</button>
+      <div style="display:flex;gap:4px;flex-wrap:wrap;">
+        <button class="pf-tab active" onclick="pfSwitchTab('basic',this)">🌸 Basic</button>
+        <button class="pf-tab" onclick="pfSwitchTab('menstrual',this)">📅 Menstrual</button>
+        <button class="pf-tab" onclick="pfSwitchTab('fertility',this)">🌱 Fertility &amp; Tests</button>
+        <button class="pf-tab" onclick="pfSwitchTab('pregnancy',this)">🤰 Pregnancy</button>
       </div>
     </div>
-    <div style="flex:1;overflow-y:auto;padding:1.25rem 1.75rem;" id="pf-body">
-
-      <!-- TAB: BASIC -->
+    <div style="flex:1;overflow-y:auto;padding:1.25rem 1.75rem;">
+      <!-- BASIC TAB -->
       <div id="pf-tab-basic" class="pf-tab-panel">
         <div class="pf-grid2" style="margin-bottom:10px;">
           <div><label class="pf-label">Your name</label><input type="text" id="pf-name" placeholder="e.g. Priya" class="pf-input"/></div>
@@ -1518,10 +1291,9 @@ function buildRoadmapProfileModal(){pfBuildChips();pfLoad();document.getElementB
         <div style="margin-bottom:10px;"><label class="pf-label">Medications / supplements</label><div id="pf-med-grid" style="display:flex;flex-wrap:wrap;gap:5px;margin-top:4px;"></div></div>
         <div><label class="pf-label">Anything else Bloom should know?</label><textarea id="pf-notes" rows="3" placeholder="e.g. Diagnosed with PCOS in 2022, had a miscarriage last year…" class="pf-input" style="resize:vertical;"></textarea></div>
       </div>
-
-      <!-- TAB: MENSTRUAL -->
+      <!-- MENSTRUAL TAB -->
       <div id="pf-tab-menstrual" class="pf-tab-panel" style="display:none;">
-        <div class="pf-section-intro">📅 Menstrual history helps Bloom understand your cycle patterns and flag irregularities.</div>
+        <div class="pf-section-intro">📅 Menstrual history helps Bloom understand your cycle patterns.</div>
         <div style="margin-bottom:10px;"><label class="pf-label">Last menstrual period (LMP)</label><input type="date" id="pf-lmp" class="pf-input"/></div>
         <div style="margin-bottom:10px;"><label class="pf-label">Cycle regularity</label>
           <select id="pf-cycle-regularity" class="pf-input">
@@ -1537,7 +1309,7 @@ function buildRoadmapProfileModal(){pfBuildChips();pfLoad();document.getElementB
             <div class="pf-chip" data-val="light">Light</div>
             <div class="pf-chip" data-val="normal">Normal</div>
             <div class="pf-chip" data-val="heavy">Heavy</div>
-            <div class="pf-chip" data-val="very_heavy">Very heavy (soaks pad &lt;2hrs)</div>
+            <div class="pf-chip" data-val="very_heavy">Very heavy</div>
           </div>
         </div>
         <div style="margin-bottom:10px;"><label class="pf-label">Menstrual pain</label>
@@ -1550,10 +1322,9 @@ function buildRoadmapProfileModal(){pfBuildChips();pfLoad();document.getElementB
         </div>
         <div class="pf-grid2"><div><label class="pf-label">Age at first period</label><input type="number" id="pf-menarche" placeholder="e.g. 13" min="8" max="20" class="pf-input"/></div></div>
       </div>
-
-      <!-- TAB: FERTILITY -->
+      <!-- FERTILITY TAB -->
       <div id="pf-tab-fertility" class="pf-tab-panel" style="display:none;">
-        <div class="pf-section-intro">🌱 Fertility history helps Bloom understand where you are in your journey and what guidance is most relevant.</div>
+        <div class="pf-section-intro">🌱 Fertility history helps Bloom understand where you are in your journey.</div>
         <div style="margin-bottom:10px;"><label class="pf-label">How long trying to conceive?</label>
           <select id="pf-ttc-duration" class="pf-input">
             <option value="">Select…</option>
@@ -1620,15 +1391,13 @@ function buildRoadmapProfileModal(){pfBuildChips();pfLoad();document.getElementB
         <div style="margin-bottom:10px;"><label class="pf-label">Previous fertility treatments</label>
           <div class="pf-chip-row" id="pf-prev-tx-chips">
             <div class="pf-chip" data-val="none">None yet</div>
-            <div class="pf-chip" data-val="oi">Ovulation induction (tablets)</div>
+            <div class="pf-chip" data-val="oi">Ovulation induction</div>
             <div class="pf-chip" data-val="iui">IUI</div>
             <div class="pf-chip" data-val="ivf">IVF</div>
             <div class="pf-chip" data-val="icsi">ICSI</div>
           </div>
         </div>
-        <div><label class="pf-label">Number of treatment cycles done</label><input type="number" id="pf-tx-cycles" placeholder="e.g. 2" min="0" max="20" class="pf-input" style="width:100px;"/></div>
-
-        <!-- TREATMENT STATUS merged into Fertility tab -->
+        <div style="margin-bottom:10px;"><label class="pf-label">Number of treatment cycles done</label><input type="number" id="pf-tx-cycles" placeholder="e.g. 2" min="0" max="20" class="pf-input" style="width:100px;"/></div>
         <div class="pf-sep">💊 Current Treatment Status</div>
         <div style="margin-bottom:10px;"><label class="pf-label">Where are you in your workup?</label>
           <select id="pf-workup-status" class="pf-input">
@@ -1679,9 +1448,7 @@ function buildRoadmapProfileModal(){pfBuildChips();pfLoad();document.getElementB
             <option value="test_result">Awaiting test result</option>
           </select>
         </div>
-        <div style="margin-bottom:14px;"><label class="pf-label">Concerns for next appointment</label><textarea id="pf-concerns" rows="2" placeholder="e.g. Want to ask about starting Letrozole, concerned about AMH result…" class="pf-input" style="resize:vertical;"></textarea></div>
-
-        <!-- TESTS merged into Fertility tab -->
+        <div style="margin-bottom:14px;"><label class="pf-label">Concerns for next appointment</label><textarea id="pf-concerns" rows="2" placeholder="e.g. Want to ask about starting Letrozole…" class="pf-input" style="resize:vertical;"></textarea></div>
         <div class="pf-sep">🧪 Investigations Done</div>
         <div style="margin-bottom:10px;">
           <div class="pf-chip-row" id="pf-inv-done-chips">
@@ -1706,19 +1473,19 @@ function buildRoadmapProfileModal(){pfBuildChips();pfLoad();document.getElementB
           <div><label class="pf-label">TSH (mIU/L)</label><input type="number" id="pf-tsh" placeholder="e.g. 2.1" step="0.01" class="pf-input pf-input-sm"/><div class="pf-ref">Optimal TTC: &lt;2.5</div></div>
           <div><label class="pf-label">Prolactin (ng/mL)</label><input type="number" id="pf-prolactin" placeholder="e.g. 12" step="0.1" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: &lt;25</div></div>
           <div><label class="pf-label">Testosterone (ng/dL)</label><input type="number" id="pf-testosterone" placeholder="e.g. 45" step="0.1" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: 15–70</div></div>
-          <div><label class="pf-label">DHEA-S (µg/dL)</label><input type="number" id="pf-dheas" placeholder="e.g. 180" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: 35–430</div></div>
-          <div><label class="pf-label">Estradiol E2 (pg/mL)</label><input type="number" id="pf-estradiol" placeholder="e.g. 45" class="pf-input pf-input-sm"/><div class="pf-ref">Day 2/3: 25–75</div></div>
+          <div><label class="pf-label">DHEA-S (µg/dL)</label><input type="number" id="pf-dheas" placeholder="e.g. 180" class="pf-input pf-input-sm"/></div>
+          <div><label class="pf-label">Estradiol E2 (pg/mL)</label><input type="number" id="pf-estradiol" placeholder="e.g. 45" class="pf-input pf-input-sm"/></div>
           <div><label class="pf-label">Progesterone Day 21</label><input type="number" id="pf-progesterone" placeholder="e.g. 12" step="0.1" class="pf-input pf-input-sm"/><div class="pf-ref">Ovulatory: &gt;5 ng/mL</div></div>
         </div>
         <div class="pf-sep">🩸 Blood Tests</div>
         <div class="pf-grid3" style="margin-bottom:10px;">
-          <div><label class="pf-label">Haemoglobin (g/dL)</label><input type="number" id="pf-hb" placeholder="e.g. 12.5" step="0.1" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: &gt;12 (women)</div></div>
+          <div><label class="pf-label">Haemoglobin (g/dL)</label><input type="number" id="pf-hb" placeholder="e.g. 12.5" step="0.1" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: &gt;12</div></div>
           <div><label class="pf-label">Ferritin (ng/mL)</label><input type="number" id="pf-ferritin" placeholder="e.g. 35" class="pf-input pf-input-sm"/><div class="pf-ref">Optimal: &gt;30</div></div>
           <div><label class="pf-label">Fasting glucose (mg/dL)</label><input type="number" id="pf-fasting-glucose" placeholder="e.g. 90" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: &lt;100</div></div>
-          <div><label class="pf-label">HbA1c (%)</label><input type="number" id="pf-hba1c" placeholder="e.g. 5.4" step="0.1" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: &lt;5.7%</div></div>
-          <div><label class="pf-label">Fasting insulin (µIU/mL)</label><input type="number" id="pf-fasting-insulin" placeholder="e.g. 8" step="0.1" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: &lt;15</div></div>
+          <div><label class="pf-label">HbA1c (%)</label><input type="number" id="pf-hba1c" placeholder="e.g. 5.4" step="0.1" class="pf-input pf-input-sm"/></div>
+          <div><label class="pf-label">Fasting insulin (µIU/mL)</label><input type="number" id="pf-fasting-insulin" placeholder="e.g. 8" step="0.1" class="pf-input pf-input-sm"/></div>
           <div><label class="pf-label">Vitamin D (ng/mL)</label><input type="number" id="pf-vitamin-d" placeholder="e.g. 22" class="pf-input pf-input-sm"/><div class="pf-ref">Optimal: &gt;30</div></div>
-          <div><label class="pf-label">Vitamin B12 (pg/mL)</label><input type="number" id="pf-b12" placeholder="e.g. 380" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: 200–900</div></div>
+          <div><label class="pf-label">Vitamin B12 (pg/mL)</label><input type="number" id="pf-b12" placeholder="e.g. 380" class="pf-input pf-input-sm"/></div>
           <div><label class="pf-label">Blood group</label>
             <select id="pf-blood-group" class="pf-input pf-input-sm">
               <option value="">Select…</option>
@@ -1738,7 +1505,7 @@ function buildRoadmapProfileModal(){pfBuildChips();pfLoad();document.getElementB
         </div>
         <div class="pf-sep">🔊 Ultrasound</div>
         <div class="pf-grid3" style="margin-bottom:10px;">
-          <div><label class="pf-label">AFC (antral follicle count)</label><input type="number" id="pf-afc" placeholder="e.g. 8" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: 10–20 total</div></div>
+          <div><label class="pf-label">AFC</label><input type="number" id="pf-afc" placeholder="e.g. 8" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: 10–20 total</div></div>
           <div><label class="pf-label">Endometrial thickness (mm)</label><input type="number" id="pf-endo" placeholder="e.g. 9" step="0.1" class="pf-input pf-input-sm"/><div class="pf-ref">Optimal: 8–14mm</div></div>
         </div>
         <div style="margin-bottom:10px;"><label class="pf-label">USG findings</label>
@@ -1763,71 +1530,13 @@ function buildRoadmapProfileModal(){pfBuildChips();pfLoad();document.getElementB
           </select>
         </div>
       </div>
-
-      <!-- TAB: TREATMENT -->
-      <div id="pf-tab-treatment" class="pf-tab-panel" style="display:none;">
-        <div class="pf-section-intro">💊 Current treatment status helps Bloom guide you at exactly the right moment.</div>
-        <div style="margin-bottom:10px;"><label class="pf-label">Where are you in your workup?</label>
-          <select id="pf-workup-status" class="pf-input">
-            <option value="">Select…</option>
-            <option value="no_workup">No investigations done yet</option>
-            <option value="workup_partial">Some investigations done</option>
-            <option value="workup_complete">All investigations done</option>
-            <option value="on_treatment">On active treatment</option>
-            <option value="between_cycles">Between treatment cycles</option>
-            <option value="ivf_prep">Preparing for IVF</option>
-          </select>
-        </div>
-        <div style="margin-bottom:10px;"><label class="pf-label">Current treatment phase</label>
-          <select id="pf-tx-phase" class="pf-input">
-            <option value="">Select…</option>
-            <option value="none">Not on any treatment</option>
-            <option value="oi_letrozole">Ovulation induction — Letrozole</option>
-            <option value="oi_clomiphene">Ovulation induction — Clomiphene</option>
-            <option value="iui_cycle">IUI cycle</option>
-            <option value="ivf_stimulation">IVF — stimulation</option>
-            <option value="ivf_tww">IVF — two-week wait</option>
-            <option value="ivf_fet">FET (frozen embryo transfer)</option>
-            <option value="luteal_support">Luteal phase support</option>
-            <option value="monitoring">Monitoring / follicle tracking</option>
-          </select>
-        </div>
-        <div class="pf-grid2" style="margin-bottom:10px;">
-          <div><label class="pf-label">Current cycle day</label><input type="number" id="pf-cycle-day" placeholder="e.g. 9" min="1" max="45" class="pf-input"/></div>
-        </div>
-        <div style="margin-bottom:10px;"><label class="pf-label">Doctor involved</label>
-          <div class="pf-chip-row" id="pf-doctor-chips">
-            <div class="pf-chip" data-val="gp_only">GP only</div>
-            <div class="pf-chip" data-val="gynaecologist">Gynaecologist</div>
-            <div class="pf-chip" data-val="fertility_specialist">Fertility specialist</div>
-            <div class="pf-chip" data-val="none_yet">No doctor yet</div>
-          </div>
-        </div>
-        <div style="margin-bottom:10px;"><label class="pf-label">Next planned step</label>
-          <select id="pf-next-step" class="pf-input">
-            <option value="">Select…</option>
-            <option value="get_investigations">Get investigations done</option>
-            <option value="see_doctor">See a doctor</option>
-            <option value="start_oi">Start ovulation induction</option>
-            <option value="continue_oi">Continue OI cycle</option>
-            <option value="plan_iui">Plan IUI</option>
-            <option value="plan_ivf">Plan IVF</option>
-            <option value="tww">In two-week wait</option>
-            <option value="test_result">Awaiting test result</option>
-          </select>
-        </div>
-        <div><label class="pf-label">Concerns for next appointment</label><textarea id="pf-concerns" rows="3" placeholder="e.g. Want to ask about starting Letrozole, concerned about AMH result…" class="pf-input" style="resize:vertical;"></textarea></div>
-      </div>
-
-      <!-- TAB: PREGNANCY — Current Pregnancy FIRST, then Obstetric History -->
+      <!-- PREGNANCY TAB -->
       <div id="pf-tab-pregnancy" class="pf-tab-panel" style="display:none;">
-        <div class="pf-section-intro">🤰 This tab captures your current pregnancy details, obstetric history, and ANC investigations — the more you fill, the more personalised your pregnancy roadmap becomes.</div>
-
-        <!-- CURRENT PREGNANCY FIRST -->
+        <div class="pf-section-intro">🤰 Current pregnancy details, obstetric history, and ANC investigations.</div>
         <div class="pf-sep">🌸 Current Pregnancy</div>
         <div class="pf-grid2" style="margin-bottom:10px;">
-          <div><label class="pf-label">LMP (last menstrual period)</label><input type="date" id="pf-preg-lmp" class="pf-input"/></div>
-          <div><label class="pf-label">EDD (expected due date)</label><input type="date" id="pf-preg-edd" class="pf-input" onchange="calcPregLmpFromEdd()"/></div>
+          <div><label class="pf-label">LMP</label><input type="date" id="pf-preg-lmp" class="pf-input"/></div>
+          <div><label class="pf-label">EDD</label><input type="date" id="pf-preg-edd" class="pf-input" onchange="calcPregLmpFromEdd()"/></div>
         </div>
         <div class="pf-grid2" style="margin-bottom:10px;">
           <div><label class="pf-label">Booking week</label><input type="number" id="pf-booking-week" placeholder="e.g. 8" min="4" max="40" class="pf-input"/></div>
@@ -1854,17 +1563,12 @@ function buildRoadmapProfileModal(){pfBuildChips();pfLoad();document.getElementB
             <div class="pf-chip" data-val="recurrent_loss">Recurrent pregnancy loss</div>
           </div>
         </div>
-
-        <!-- OBSTETRIC HISTORY SECOND -->
         <div class="pf-sep">📋 Obstetric History (G/P/A/L)</div>
-        <div style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6;background:#F5EDE6;padding:10px 14px;border-radius:8px;border-left:3px solid var(--terra);">
-          G = Gravida (total pregnancies) · P = Para (deliveries after 20 weeks) · A = Abortions (spontaneous + induced) · L = Living children
-        </div>
         <div class="pf-grid3" style="margin-bottom:10px;">
           <div><label class="pf-label">Gravida (G)</label><input type="number" id="pf-obs-gravida" placeholder="e.g. 2" min="0" max="20" class="pf-input pf-input-sm"/></div>
           <div><label class="pf-label">Para (P)</label><input type="number" id="pf-obs-para" placeholder="e.g. 1" min="0" max="20" class="pf-input pf-input-sm"/></div>
           <div><label class="pf-label">Living children (L)</label><input type="number" id="pf-obs-living-preg" placeholder="e.g. 1" min="0" max="20" class="pf-input pf-input-sm"/></div>
-          <div><label class="pf-label">Spontaneous abortions</label><input type="number" id="pf-obs-spontaneous" placeholder="e.g. 1" min="0" max="10" class="pf-input pf-input-sm"/><div class="pf-ref">Miscarriages</div></div>
+          <div><label class="pf-label">Spontaneous abortions</label><input type="number" id="pf-obs-spontaneous" placeholder="e.g. 1" min="0" max="10" class="pf-input pf-input-sm"/></div>
           <div><label class="pf-label">Induced abortions (MTP)</label><input type="number" id="pf-obs-induced" placeholder="e.g. 0" min="0" max="10" class="pf-input pf-input-sm"/></div>
           <div><label class="pf-label">Years ago (last pregnancy)</label><input type="number" id="pf-obs-years-ago" placeholder="e.g. 2" min="0" max="40" class="pf-input pf-input-sm"/></div>
         </div>
@@ -1872,7 +1576,7 @@ function buildRoadmapProfileModal(){pfBuildChips();pfLoad();document.getElementB
           <div class="pf-chip-row" id="pf-delivery-mode-chips">
             <div class="pf-chip" data-val="normal_vaginal">Normal vaginal delivery</div>
             <div class="pf-chip" data-val="lscs">LSCS (C-section)</div>
-            <div class="pf-chip" data-val="instrumental">Instrumental (forceps/vacuum)</div>
+            <div class="pf-chip" data-val="instrumental">Instrumental</div>
             <div class="pf-chip" data-val="na_no_delivery">No previous deliveries</div>
           </div>
         </div>
@@ -1881,35 +1585,31 @@ function buildRoadmapProfileModal(){pfBuildChips();pfLoad();document.getElementB
             <div class="pf-chip" data-val="fetal_distress">Fetal distress</div>
             <div class="pf-chip" data-val="cephalopelvic">Cephalopelvic disproportion</div>
             <div class="pf-chip" data-val="placenta_praevia_cs">Placenta praevia</div>
-            <div class="pf-chip" data-val="prev_cs_repeat">Previous LSCS (repeat)</div>
+            <div class="pf-chip" data-val="prev_cs_repeat">Previous LSCS</div>
             <div class="pf-chip" data-val="breach">Breech presentation</div>
             <div class="pf-chip" data-val="failed_induction">Failed induction</div>
             <div class="pf-chip" data-val="preeclampsia_cs">Pre-eclampsia</div>
-            <div class="pf-chip" data-val="twins_cs">Twin/multiple pregnancy</div>
           </div>
         </div>
         <div style="margin-bottom:10px;"><label class="pf-label">Previous obstetric complications</label>
           <div class="pf-chip-row" id="pf-obs-complications">
-            <div class="pf-chip" data-val="pph">PPH (postpartum haemorrhage)</div>
+            <div class="pf-chip" data-val="pph">PPH</div>
             <div class="pf-chip" data-val="preeclampsia_hx">Pre-eclampsia</div>
             <div class="pf-chip" data-val="gdm_hx">Gestational diabetes</div>
-            <div class="pf-chip" data-val="preterm_birth">Preterm birth (&lt;37 weeks)</div>
+            <div class="pf-chip" data-val="preterm_birth">Preterm birth</div>
             <div class="pf-chip" data-val="iugr_hx">IUGR / small baby</div>
             <div class="pf-chip" data-val="placental_abruption">Placental abruption</div>
             <div class="pf-chip" data-val="still_birth">Stillbirth</div>
-            <div class="pf-chip" data-val="neonatal_death">Neonatal death</div>
             <div class="pf-chip" data-val="no_complications">No complications</div>
           </div>
         </div>
         <div style="margin-bottom:10px;"><label class="pf-label">H/o medications in previous pregnancy(ies)</label>
-          <textarea id="pf-obs-prior-meds" rows="2" placeholder="e.g. Heparin for APS, insulin for GDM, progesterone for threatened abortion, iron injections…" class="pf-input" style="resize:vertical;font-size:14px;"></textarea>
+          <textarea id="pf-obs-prior-meds" rows="2" placeholder="e.g. Heparin for APS, insulin for GDM, progesterone…" class="pf-input" style="resize:vertical;font-size:14px;"></textarea>
         </div>
-        <div style="margin-bottom:14px;"><label class="pf-label">H/o prior surgeries (gynaec / abdominal)</label>
-          <textarea id="pf-obs-prior-surgeries" rows="2" placeholder="e.g. Appendicectomy 2019, myomectomy 2021, previous LSCS scar details…" class="pf-input" style="resize:vertical;font-size:14px;"></textarea>
+        <div style="margin-bottom:14px;"><label class="pf-label">H/o prior surgeries</label>
+          <textarea id="pf-obs-prior-surgeries" rows="2" placeholder="e.g. Appendicectomy 2019, myomectomy 2021…" class="pf-input" style="resize:vertical;font-size:14px;"></textarea>
         </div>
-
-        <!-- ANC BLOOD TESTS — EXTENDED -->
-        <div class="pf-sep">🩸 ANC Blood Tests (CBC + Extended)</div>
+        <div class="pf-sep">🩸 ANC Blood Tests</div>
         <div class="pf-grid3" style="margin-bottom:10px;">
           <div><label class="pf-label">Blood group + Rh</label>
             <select id="pf-anc-blood-group" class="pf-input pf-input-sm">
@@ -1921,31 +1621,31 @@ function buildRoadmapProfileModal(){pfBuildChips();pfLoad();document.getElementB
             </select>
           </div>
           <div><label class="pf-label">Hb 1st trim (g/dL)</label><input type="number" id="pf-anc-hb1" placeholder="e.g. 11.5" step="0.1" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: &gt;11</div></div>
-          <div><label class="pf-label">Hb 2nd trim (g/dL)</label><input type="number" id="pf-anc-hb2" placeholder="e.g. 10.8" step="0.1" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: &gt;10.5</div></div>
-          <div><label class="pf-label">Hb 3rd trim (g/dL)</label><input type="number" id="pf-anc-hb3" placeholder="e.g. 11.0" step="0.1" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: &gt;11</div></div>
-          <div><label class="pf-label">TLC (×10³/µL)</label><input type="number" id="pf-anc-tlc" placeholder="e.g. 9.5" step="0.1" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: 4–11</div></div>
-          <div><label class="pf-label">Platelets (×10³/µL)</label><input type="number" id="pf-anc-platelets" placeholder="e.g. 220" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: 150–400</div></div>
-          <div><label class="pf-label">RBS (mg/dL)</label><input type="number" id="pf-anc-rbs" placeholder="e.g. 105" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: &lt;140</div></div>
-          <div><label class="pf-label">SGPT / ALT (U/L)</label><input type="number" id="pf-anc-sgpt" placeholder="e.g. 25" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: &lt;40</div></div>
-          <div><label class="pf-label">SGOT / AST (U/L)</label><input type="number" id="pf-anc-sgot" placeholder="e.g. 22" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: &lt;40</div></div>
-          <div><label class="pf-label">Blood urea (mg/dL)</label><input type="number" id="pf-anc-urea" placeholder="e.g. 28" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: 10–45</div></div>
-          <div><label class="pf-label">Creatinine (mg/dL)</label><input type="number" id="pf-anc-creatinine" placeholder="e.g. 0.7" step="0.01" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: &lt;0.9</div></div>
-          <div><label class="pf-label">Uric acid (mg/dL)</label><input type="number" id="pf-anc-uric-acid" placeholder="e.g. 4.2" step="0.1" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: 2.5–5.5 (preg)</div></div>
+          <div><label class="pf-label">Hb 2nd trim (g/dL)</label><input type="number" id="pf-anc-hb2" placeholder="e.g. 10.8" step="0.1" class="pf-input pf-input-sm"/></div>
+          <div><label class="pf-label">Hb 3rd trim (g/dL)</label><input type="number" id="pf-anc-hb3" placeholder="e.g. 11.0" step="0.1" class="pf-input pf-input-sm"/></div>
+          <div><label class="pf-label">TLC (×10³/µL)</label><input type="number" id="pf-anc-tlc" placeholder="e.g. 9.5" step="0.1" class="pf-input pf-input-sm"/></div>
+          <div><label class="pf-label">Platelets (×10³/µL)</label><input type="number" id="pf-anc-platelets" placeholder="e.g. 220" class="pf-input pf-input-sm"/></div>
+          <div><label class="pf-label">RBS (mg/dL)</label><input type="number" id="pf-anc-rbs" placeholder="e.g. 105" class="pf-input pf-input-sm"/></div>
+          <div><label class="pf-label">SGPT / ALT (U/L)</label><input type="number" id="pf-anc-sgpt" placeholder="e.g. 25" class="pf-input pf-input-sm"/></div>
+          <div><label class="pf-label">SGOT / AST (U/L)</label><input type="number" id="pf-anc-sgot" placeholder="e.g. 22" class="pf-input pf-input-sm"/></div>
+          <div><label class="pf-label">Blood urea (mg/dL)</label><input type="number" id="pf-anc-urea" placeholder="e.g. 28" class="pf-input pf-input-sm"/></div>
+          <div><label class="pf-label">Creatinine (mg/dL)</label><input type="number" id="pf-anc-creatinine" placeholder="e.g. 0.7" step="0.01" class="pf-input pf-input-sm"/></div>
+          <div><label class="pf-label">Uric acid (mg/dL)</label><input type="number" id="pf-anc-uric-acid" placeholder="e.g. 4.2" step="0.1" class="pf-input pf-input-sm"/></div>
           <div><label class="pf-label">ANC TSH (mIU/L)</label><input type="number" id="pf-anc-tsh" placeholder="e.g. 2.1" step="0.01" class="pf-input pf-input-sm"/><div class="pf-ref">Optimal: &lt;2.5</div></div>
           <div><label class="pf-label">Free T4</label><input type="number" id="pf-anc-ft4" placeholder="e.g. 1.2" step="0.01" class="pf-input pf-input-sm"/></div>
-          <div><label class="pf-label">Anti-TPO (IU/mL)</label><input type="number" id="pf-anc-anti-tpo" placeholder="e.g. 15" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: &lt;35</div></div>
-          <div><label class="pf-label">Ferritin (ng/mL)</label><input type="number" id="pf-anc-ferritin" placeholder="e.g. 35" class="pf-input pf-input-sm"/><div class="pf-ref">Optimal: &gt;30</div></div>
+          <div><label class="pf-label">Anti-TPO (IU/mL)</label><input type="number" id="pf-anc-anti-tpo" placeholder="e.g. 15" class="pf-input pf-input-sm"/></div>
+          <div><label class="pf-label">Ferritin (ng/mL)</label><input type="number" id="pf-anc-ferritin" placeholder="e.g. 35" class="pf-input pf-input-sm"/></div>
           <div><label class="pf-label">Urine protein</label>
             <select id="pf-anc-urine-protein" class="pf-input pf-input-sm">
               <option value="">Select…</option>
               <option value="nil">Nil / negative ✓</option>
               <option value="trace">Trace</option>
-              <option value="1plus">1+ (significant)</option>
-              <option value="2plus">2+ (significant ⚠️)</option>
-              <option value="3plus">3+ (pre-eclampsia risk 🚨)</option>
+              <option value="1plus">1+</option>
+              <option value="2plus">2+ ⚠️</option>
+              <option value="3plus">3+ 🚨</option>
             </select>
           </div>
-          <div><label class="pf-label">GBS swab (35-37w)</label>
+          <div><label class="pf-label">GBS swab</label>
             <select id="pf-anc-gbs" class="pf-input pf-input-sm">
               <option value="">Select…</option>
               <option value="negative">Negative ✓</option>
@@ -1954,149 +1654,95 @@ function buildRoadmapProfileModal(){pfBuildChips();pfLoad();document.getElementB
             </select>
           </div>
         </div>
-
-        <!-- INFECTION SCREENING -->
         <div class="pf-sep">🦠 Infection Screening</div>
         <div class="pf-grid3" style="margin-bottom:10px;">
           <div><label class="pf-label">VDRL</label>
             <select id="pf-anc-vdrl" class="pf-input pf-input-sm">
-              <option value="">Select…</option>
-              <option value="non_reactive">Non-reactive ✓</option>
-              <option value="reactive">Reactive ⚠️</option>
+              <option value="">Select…</option><option value="non_reactive">Non-reactive ✓</option><option value="reactive">Reactive ⚠️</option>
             </select>
           </div>
           <div><label class="pf-label">HIV</label>
             <select id="pf-anc-hiv" class="pf-input pf-input-sm">
-              <option value="">Select…</option>
-              <option value="non_reactive">Non-reactive ✓</option>
-              <option value="reactive">Reactive ⚠️</option>
+              <option value="">Select…</option><option value="non_reactive">Non-reactive ✓</option><option value="reactive">Reactive ⚠️</option>
             </select>
           </div>
           <div><label class="pf-label">HBsAg</label>
             <select id="pf-anc-hbsag" class="pf-input pf-input-sm">
-              <option value="">Select…</option>
-              <option value="negative">Negative ✓</option>
-              <option value="positive">Positive ⚠️</option>
+              <option value="">Select…</option><option value="negative">Negative ✓</option><option value="positive">Positive ⚠️</option>
             </select>
           </div>
           <div><label class="pf-label">HCV</label>
             <select id="pf-anc-hcv" class="pf-input pf-input-sm">
-              <option value="">Select…</option>
-              <option value="negative">Negative ✓</option>
-              <option value="positive">Positive ⚠️</option>
+              <option value="">Select…</option><option value="negative">Negative ✓</option><option value="positive">Positive ⚠️</option>
             </select>
           </div>
         </div>
-
-        <!-- APLA PROFILE -->
-        <div class="pf-sep">🔬 APLA Profile (Antiphospholipid Antibodies)</div>
-        <div style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.6;background:#FFF5F0;padding:10px 14px;border-radius:8px;border-left:3px solid var(--terra);">
-          Indicated in: recurrent miscarriage (2+), prior pre-eclampsia, IUGR, prior thrombosis, or APS suspected
-        </div>
+        <div class="pf-sep">🔬 APLA Profile</div>
         <div class="pf-grid3" style="margin-bottom:10px;">
           <div><label class="pf-label">Lupus anticoagulant (LA)</label>
             <select id="pf-anc-apla-lupus" class="pf-input pf-input-sm">
-              <option value="">Not done</option>
-              <option value="negative">Negative ✓</option>
-              <option value="positive">Positive ⚠️</option>
+              <option value="">Not done</option><option value="negative">Negative ✓</option><option value="positive">Positive ⚠️</option>
             </select>
           </div>
           <div><label class="pf-label">Anticardiolipin (aCL)</label>
             <select id="pf-anc-anticardiolipin" class="pf-input pf-input-sm">
-              <option value="">Not done</option>
-              <option value="negative">Negative ✓</option>
-              <option value="low_positive">Low positive</option>
-              <option value="medium_positive">Medium/high positive ⚠️</option>
+              <option value="">Not done</option><option value="negative">Negative ✓</option><option value="low_positive">Low positive</option><option value="medium_positive">Medium/high positive ⚠️</option>
             </select>
           </div>
           <div><label class="pf-label">Anti-β2-glycoprotein I</label>
             <select id="pf-anc-beta2gp1" class="pf-input pf-input-sm">
-              <option value="">Not done</option>
-              <option value="negative">Negative ✓</option>
-              <option value="positive">Positive ⚠️</option>
+              <option value="">Not done</option><option value="negative">Negative ✓</option><option value="positive">Positive ⚠️</option>
             </select>
           </div>
         </div>
-
-        <!-- OGTT -->
-        <div class="pf-sep">🍬 OGTT (75g Glucose Tolerance Test)</div>
+        <div class="pf-sep">🍬 OGTT</div>
         <div class="pf-grid3" style="margin-bottom:10px;">
           <div><label class="pf-label">Fasting (mg/dL)</label><input type="number" id="pf-ogtt-fasting" placeholder="e.g. 88" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: &lt;92</div></div>
           <div><label class="pf-label">1 hour (mg/dL)</label><input type="number" id="pf-ogtt-1hr" placeholder="e.g. 145" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: &lt;180</div></div>
           <div><label class="pf-label">2 hour (mg/dL)</label><input type="number" id="pf-ogtt-2hr" placeholder="e.g. 120" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: &lt;153</div></div>
         </div>
-
-        <!-- ANC USG -->
         <div class="pf-sep">🔊 ANC Ultrasound</div>
         <div class="pf-grid2" style="margin-bottom:10px;">
           <div><label class="pf-label">Dating scan</label>
             <select id="pf-dating-scan" class="pf-input pf-input-sm">
-              <option value="">Select…</option>
-              <option value="done_normal">Done — normal</option>
-              <option value="done_abnormal">Done — abnormality noted</option>
-              <option value="pending">Not done yet</option>
+              <option value="">Select…</option><option value="done_normal">Done — normal</option><option value="done_abnormal">Done — abnormality noted</option><option value="pending">Not done yet</option>
             </select>
           </div>
-          <div><label class="pf-label">Nuchal translucency NT (mm)</label><input type="number" id="pf-nuchal-nt" placeholder="e.g. 1.4" step="0.1" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: &lt;3.5mm</div></div>
+          <div><label class="pf-label">Nuchal NT (mm)</label><input type="number" id="pf-nuchal-nt" placeholder="e.g. 1.4" step="0.1" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: &lt;3.5mm</div></div>
           <div><label class="pf-label">Nuchal scan result</label>
             <select id="pf-nuchal-result" class="pf-input pf-input-sm">
-              <option value="">Select…</option>
-              <option value="low_risk">Low risk ✓</option>
-              <option value="high_risk">High risk — further testing</option>
-              <option value="pending">Pending</option>
+              <option value="">Select…</option><option value="low_risk">Low risk ✓</option><option value="high_risk">High risk — further testing</option><option value="pending">Pending</option>
             </select>
           </div>
-          <div><label class="pf-label">Anomaly scan (18-22w)</label>
+          <div><label class="pf-label">Anomaly scan</label>
             <select id="pf-anomaly-scan" class="pf-input pf-input-sm">
-              <option value="">Select…</option>
-              <option value="normal">Normal ✓</option>
-              <option value="soft_marker">Soft marker found</option>
-              <option value="abnormal_minor">Minor structural finding</option>
-              <option value="abnormal_major">Major finding</option>
-              <option value="pending">Not done yet</option>
+              <option value="">Select…</option><option value="normal">Normal ✓</option><option value="soft_marker">Soft marker found</option><option value="abnormal_minor">Minor structural finding</option><option value="abnormal_major">Major finding</option><option value="pending">Not done yet</option>
             </select>
           </div>
           <div><label class="pf-label">Placenta position</label>
             <select id="pf-placenta" class="pf-input pf-input-sm">
-              <option value="">Select…</option>
-              <option value="anterior">Anterior</option>
-              <option value="posterior">Posterior</option>
-              <option value="fundal">Fundal</option>
-              <option value="low_lying">Low lying (&lt;2cm from os)</option>
-              <option value="praevia">Placenta praevia</option>
+              <option value="">Select…</option><option value="anterior">Anterior</option><option value="posterior">Posterior</option><option value="fundal">Fundal</option><option value="low_lying">Low lying</option><option value="praevia">Placenta praevia</option>
             </select>
           </div>
           <div><label class="pf-label">Growth scan result</label>
             <select id="pf-growth-scan" class="pf-input pf-input-sm">
-              <option value="">Select…</option>
-              <option value="normal">Normal growth ✓</option>
-              <option value="iugr">IUGR / small for dates</option>
-              <option value="lga">Large for dates</option>
-              <option value="pending">Not done yet</option>
+              <option value="">Select…</option><option value="normal">Normal growth ✓</option><option value="iugr">IUGR / small for dates</option><option value="lga">Large for dates</option><option value="pending">Not done yet</option>
             </select>
           </div>
           <div><label class="pf-label">Cervical length (mm)</label><input type="number" id="pf-cervix-length" placeholder="e.g. 38" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: &gt;25mm</div></div>
           <div><label class="pf-label">Doppler study</label>
             <select id="pf-doppler" class="pf-input pf-input-sm">
-              <option value="">Select…</option>
-              <option value="normal">Normal ✓</option>
-              <option value="abnormal">Abnormal — increased resistance</option>
-              <option value="pending">Not done</option>
+              <option value="">Select…</option><option value="normal">Normal ✓</option><option value="abnormal">Abnormal</option><option value="pending">Not done</option>
             </select>
           </div>
         </div>
-
-        <!-- BP READINGS -->
         <div class="pf-sep">🩺 Blood Pressure Readings</div>
-        <div style="font-size:12px;color:var(--muted);margin-bottom:8px;line-height:1.5;">Last 2 BP readings — helps Bloom flag pre-eclampsia risk. Normal in pregnancy: &lt;140/90 mmHg.</div>
         <div class="pf-grid2" style="margin-bottom:10px;">
           <div><label class="pf-label">BP reading 1 (mmHg)</label><input type="text" id="pf-bp1" placeholder="e.g. 118/76" class="pf-input pf-input-sm"/></div>
           <div><label class="pf-label">Date</label><input type="date" id="pf-bp1-date" class="pf-input pf-input-sm"/></div>
           <div><label class="pf-label">BP reading 2 (mmHg)</label><input type="text" id="pf-bp2" placeholder="e.g. 124/80" class="pf-input pf-input-sm"/></div>
           <div><label class="pf-label">Date</label><input type="date" id="pf-bp2-date" class="pf-input pf-input-sm"/></div>
         </div>
-
-        <!-- IMMUNIZATIONS -->
         <div class="pf-sep">💉 Immunizations in Pregnancy</div>
         <div class="pf-grid2" style="margin-bottom:4px;">
           <div><label class="pf-label">TT-1 date</label><input type="date" id="pf-tt1" class="pf-input pf-input-sm"/></div>
@@ -2104,10 +1750,7 @@ function buildRoadmapProfileModal(){pfBuildChips();pfLoad();document.getElementB
           <div><label class="pf-label">Flu vaccine date</label><input type="date" id="pf-flu" class="pf-input pf-input-sm"/></div>
         </div>
       </div>
-      <!-- END pf-tab-pregnancy -->
-
     </div>
-    <!-- Footer -->
     <div style="padding:1rem 1.75rem;border-top:1px solid #F0E8E2;flex-shrink:0;display:flex;align-items:center;gap:12px;">
       <button onclick="pfSave()" style="flex:1;padding:14px;background:#C4704F;color:#fff;border:none;border-radius:10px;font-size:18px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;">Save Profile 🌸</button>
       <div id="pf-saved-msg" style="display:none;font-size:13px;color:#4F7A5E;">✓ Saved!</div>
