@@ -896,9 +896,11 @@ ${relevantKnowledge}
 
       const ppResponse = await groq.chat.completions.create({ model: "llama-3.3-70b-versatile", messages: [{ role: "system", content: ppSystemMsg }, { role: "user", content: ppSectionPrompts[section] || ppSectionPrompts.overview }], max_tokens: 1800, temperature: 0.3 });
       const ppRaw = ppResponse.choices[0].message.content.trim();
-console.log('PP RAW RESPONSE:', ppRaw.substring(0, 500));
-const ppParsed = safeParseGroqResponse(ppRaw);
-console.log('PP PARSED main_content:', ppParsed.main_content.substring(0, 100));
+let ppParsed = safeParseGroqResponse(ppRaw);
+if (!ppParsed.main_content || ppParsed.main_content.trim() === '') {
+  const cleaned = ppRaw.replace(/```json|```/g, '').replace(/\*\*/g, '').replace(/\*/g, '').trim();
+  ppParsed = { main_content: cleaned, key_points: [], personalised_tip: '', clinical_note: '', action_items: [] };
+}
 return res.json({ content: ppParsed, journey, section, ppStage });
     }
 
@@ -1207,8 +1209,12 @@ ${relevantKnowledge}
     });
 
     const rawText = response.choices[0].message.content.trim();
-    const parsed = safeParseGroqResponse(rawText);
-    res.json({ content: parsed, journey, month, week, section, clinicalStage });
+let parsed = safeParseGroqResponse(rawText);
+if (!parsed.main_content || parsed.main_content.trim() === '') {
+  const cleaned = rawText.replace(/```json|```/g, '').replace(/\*\*/g, '').replace(/\*/g, '').trim();
+  parsed = { main_content: cleaned, key_points: [], personalised_tip: '', clinical_note: '', action_items: [] };
+}
+res.json({ content: parsed, journey, month, week, section, clinicalStage });
 
   } catch (err) {
     console.error("Roadmap content error:", err.message);
