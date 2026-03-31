@@ -745,13 +745,27 @@ async function loadTTCSection(section,btn){
     renderAIContent(data.content,'ttc-ai-content');
   }catch(e){delete contentCache[key+'_loading'];handleContentError('ttc-ai-content',{error:e.message},section,'ttc');}
 }
-```
-
-**Replace 2 — `loadPregSection` function:**
-
-Find:
-```
+let currentPregSection='overview';
 async function loadPregSection(section,btn){
+  currentPregSection=section;
+  document.querySelectorAll('#preg-sec-tabs .stab').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  const week=PREG_WEEKS[currentPregWeekIdx].week;
+  const checkin=getCheckinData();
+  const key='preg_'+section+'_w'+week+(checkin&&checkin.chips.length?'_ci':'');
+  if(contentCache[key]){renderAIContent(contentCache[key],'preg-ai-content');renderPregInvLog();return;}
+  if(contentCache[key+'_loading']) return;
+  contentCache[key+'_loading']=true;
+  document.getElementById('preg-ai-content').innerHTML='<div class="loading-dots"><span></span><span></span><span></span></div>';
+  try{
+    const res=await fetch('/roadmap-content',{method:'POST',headers:{'Content-Type':'application/json',Authorization:TOKEN},body:JSON.stringify({journey:'pregnancy',week,section,checkin})});
+    if(!res.ok){const err=await res.json();delete contentCache[key+'_loading'];handleContentError('preg-ai-content',err,section,'pregnancy');return;}
+    const data=await res.json();
+    contentCache[key]=data.content;
+    delete contentCache[key+'_loading'];
+    renderAIContent(data.content,'preg-ai-content');
+    renderPregInvLog();
+  }catch(e){delete contentCache[key+'_loading'];handleContentError('preg-ai-content',{error:e.message},section,'pregnancy');}
 }
 
 let currentPregSection='overview';
@@ -890,11 +904,23 @@ async function loadPregSection(section,btn){
 }
 ```
 
-**Replace 3 — `loadPPSection` function:**
-
-Find:
-```
 async function loadPPSection(section,btn){
+  currentPPSection=section;
+  document.querySelectorAll('#pp-sec-tabs .stab').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  const key='pp_'+currentPPStage+'_'+section;
+  if(contentCache[key]){renderAIContent(contentCache[key],'pp-ai-content');return;}
+  if(contentCache[key+'_loading']) return;
+  contentCache[key+'_loading']=true;
+  document.getElementById('pp-ai-content').innerHTML='<div class="loading-dots"><span></span><span></span><span></span></div>';
+  try{
+    const res=await fetch('/roadmap-content',{method:'POST',headers:{'Content-Type':'application/json',Authorization:TOKEN},body:JSON.stringify({journey:'postpartum',section,ppStage:currentPPStage})});
+    if(!res.ok){const err=await res.json();delete contentCache[key+'_loading'];handleContentError('pp-ai-content',err,section,'postpartum');return;}
+    const data=await res.json();
+    contentCache[key]=data.content;
+    delete contentCache[key+'_loading'];
+    renderAIContent(data.content,'pp-ai-content');
+  }catch(e){delete contentCache[key+'_loading'];handleContentError('pp-ai-content',{error:e.message},section,'postpartum');}
 }
 
 function getCheckinData(){
