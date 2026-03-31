@@ -1035,8 +1035,8 @@ function renderAIContent(content,containerId){
   if(typeof content==='string'){
     try{
       const cleaned=content.replace(/```json|```/g,'').trim();
-      const s=cleaned.indexOf('{'),e=cleaned.lastIndexOf('}');
-      content=JSON.parse(s!==-1&&e!==-1?cleaned.slice(s,e+1):cleaned);
+      const s=cleaned.indexOf('{'),e2=cleaned.lastIndexOf('}');
+      content=JSON.parse(s!==-1&&e2!==-1?cleaned.slice(s,e2+1):cleaned);
     }catch(parseErr){
       document.getElementById(containerId).innerHTML=`<div class="ai-content fade-up"><div class="ai-main" style="line-height:1.9;">${formatContent(content)}</div></div>`;return;
     }
