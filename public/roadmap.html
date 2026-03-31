@@ -515,7 +515,7 @@ const PP_STAGES={
   month6:{title:'6 Months Postpartum',sub:'Returning to yourself — body, mind, and hormones.',tip:'At 6 months, many women feel like themselves again hormonally. If you are planning another pregnancy, now is a good time to start preconception supplements again.'},
 };
 const TTC_TIPS={
-  early_ttc:'During early TTC, focus on cycle awareness, preconception nutrition, and both partners taking supplements. Folic acid 5mg/day is essential from now.',
+  early_ttc:'During early TTC, focus on cycle awareness, preconception nutrition, and both partners taking supplements. Folic acid 400-800mcg/day for standard risk (5mg only if high-risk: previous NTD baby, epilepsy, pre-existing diabetes, BMI>35, thalassemia).',
   needs_workup:'After 6 months TTC (or 3 months if you have PCOS, irregular cycles, or are over 35), investigations should begin. A basic fertility workup typically takes 4-6 weeks.',
   needs_urgent_workup:'After 12 months TTC without success, a complete fertility workup is recommended by all major guidelines (NICE, ESHRE, ASRM). Both partners should be investigated simultaneously.',
   workup_partial:'Having partial results is useful — act on what you have. Do not wait for all tests before taking the next step.',
@@ -671,7 +671,7 @@ async function saveTTCInvestigations(){
 
 function renderTTCChecklist(){
   const items={
-    early_ttc:['Start folic acid 5mg daily','Track ovulation with OPK strips','Both partners take preconception supplements','Check your TSH and iron levels','See your GP for a preconception review'],
+    early_ttc:['Start folic acid daily (400-800mcg; 5mg if high-risk: prev NTD/epilepsy/diabetes/BMI>35)','Track ovulation with OPK strips','Both partners take preconception supplements','Check your TSH and iron levels','See your GP for a preconception review'],
     needs_workup:['Book day 2/3 blood tests: FSH, LH, AMH, TSH','Book pelvic ultrasound (AFC check)','Partner books semen analysis','Start fertility specialist referral if PCOS'],
     needs_urgent_workup:['See fertility specialist this month','Complete: AMH, FSH, LH, TSH, prolactin, ultrasound','Partner: complete semen analysis urgently','Review all previous test results'],
     workup_partial:['Complete any outstanding blood tests','Book pelvic USG if not done','Bring all results to doctor for review','Ask for a treatment plan meeting'],
@@ -796,7 +796,7 @@ function buildWeekNav(currentWeek){
 }
 
 function getPregTip(w){
-  if(w<=6) return 'Folic acid 5mg daily in the first 12 weeks is the most important supplement in pregnancy.';
+  if(w<=6) return 'Folic acid daily in the first 12 weeks is the most critical supplement — 400-500mcg for standard risk, 5mg only if high-risk (previous NTD baby, epilepsy, diabetes, BMI>35). Check Supplements tab for your personalised dose.';
   if(w<=12) return 'The first trimester is the period of greatest organ development. Avoid teratogens: alcohol, vitamin A supplements, and unprescribed medications.';
   if(w<=14) return 'Iron supplementation begins at Week 14. Take on an empty stomach with vitamin C for best absorption. Avoid tea and coffee with iron.';
   if(w<=20) return 'The anomaly scan at 18-20 weeks checks all major structures. Report any findings to your doctor — most are reassuring.';
@@ -812,7 +812,7 @@ function renderPregMilestones(w){
 
 function renderPregChecklist(w){
   let items=[];
-  if(w<=12) items=['Take folic acid 5mg daily','Attend viability/dating scan','Book booking appointment with midwife/OB','Start pregnancy vitamins (no iron yet)','Avoid alcohol, smoking, unprescribed medications'];
+  if(w<=12) items=['Take folic acid daily (400-500mcg standard; 5mg only if high-risk)','Attend viability/dating scan','Book booking appointment with midwife/OB','Start pregnancy vitamins (no iron yet)','Avoid alcohol, smoking, unprescribed medications'];
   else if(w<=20) items=['Start iron 60mg daily (from Week 14)','Book anomaly scan for 18-20 weeks','Get TSH, Hb, ferritin checked','Start calcium 500mg BD from Week 16','Attend all scheduled appointments'];
   else if(w<=28) items=['Attend anomaly scan if not done','Book OGTT test (24-28 weeks)','Start DHA 200mg if not already taking','Monitor fetal movements — report changes','Attend all ANC checkups'];
   else items=['Monitor fetal movements daily','Attend growth scan (32w)','Prepare hospital bag from 36 weeks','Discuss birth plan with doctor','Complete all blood tests as scheduled'];
@@ -1067,8 +1067,8 @@ function renderBabyInvLog(){
 init();
 
 // PROFILE MODAL FUNCTIONS
-var SYM_OPTIONS=['pcos_diagnosed','irregular_periods','acne','excess_hair','hair_loss','painful_periods','endometriosis_diagnosed','fibroids_diagnosed','thyroid_disorder','low_libido','mood_changes','bloating','breast_tenderness','spotting_between_periods','heavy_bleeding','night_sweats','hot_flushes'];
-var SYM_LABELS={'pcos_diagnosed':'PCOS diagnosed','irregular_periods':'Irregular periods','acne':'Acne / oily skin','excess_hair':'Excess hair (hirsutism)','hair_loss':'Hair thinning','painful_periods':'Painful periods','endometriosis_diagnosed':'Endometriosis','fibroids_diagnosed':'Fibroids','thyroid_disorder':'Thyroid disorder','low_libido':'Low libido','mood_changes':'Mood changes / anxiety','bloating':'Bloating','breast_tenderness':'Breast tenderness','spotting_between_periods':'Spotting between periods','heavy_bleeding':'Heavy periods','night_sweats':'Night sweats','hot_flushes':'Hot flushes'};
+var SYM_OPTIONS=['pcos_diagnosed','irregular_periods','acne','excess_hair','hair_loss','painful_periods','endometriosis_diagnosed','fibroids_diagnosed','thyroid_disorder','low_libido','mood_changes','bloating','breast_tenderness','spotting_between_periods','heavy_bleeding','night_sweats','hot_flushes','prev_ntd_baby','epilepsy','on_valproate','on_carbamazepine','on_phenytoin','diabetes_preexisting','thalassemia_trait','sickle_cell_trait','mthfr_mutation','malabsorption','family_ntd'];
+var SYM_LABELS={'pcos_diagnosed':'PCOS diagnosed','irregular_periods':'Irregular periods','acne':'Acne / oily skin','excess_hair':'Excess hair (hirsutism)','hair_loss':'Hair thinning','painful_periods':'Painful periods','endometriosis_diagnosed':'Endometriosis','fibroids_diagnosed':'Fibroids','thyroid_disorder':'Thyroid disorder','low_libido':'Low libido','mood_changes':'Mood changes / anxiety','bloating':'Bloating','breast_tenderness':'Breast tenderness','spotting_between_periods':'Spotting between periods','heavy_bleeding':'Heavy periods','night_sweats':'Night sweats','hot_flushes':'Hot flushes','prev_ntd_baby':'Previous baby with NTD (spina bifida)','epilepsy':'Epilepsy / anti-seizure medication','on_valproate':'On Valproate (Encorate/Epilex)','on_carbamazepine':'On Carbamazepine (Tegretol)','on_phenytoin':'On Phenytoin (Eptoin)','diabetes_preexisting':'Pre-existing Diabetes (Type 1/2)','thalassemia_trait':'Thalassemia trait / carrier','sickle_cell_trait':'Sickle cell trait / carrier','mthfr_mutation':'MTHFR gene mutation (known)','malabsorption':'Coeliac / IBD / malabsorption','family_ntd':'Family history of NTD'};
 var MED_OPTIONS=['Metformin','Letrozole','Clomiphene','Progesterone','Inositol','CoQ10','Folic acid','Iron','Vitamin D','Omega-3','Levothyroxine','Cabergoline','DHEA','Aspirin low-dose','Heparin/Clexane','Estrogen','Provera'];
 
 function pfBuildChips(){
