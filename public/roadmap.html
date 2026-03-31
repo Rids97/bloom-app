@@ -346,11 +346,15 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
                 <option value="pending">Result pending</option>
               </select>
             </div>
+           <div style="margin-bottom:4px;"><div style="font-size:11px;color:var(--muted);margin-bottom:3px;">Value (e.g. Hb 9.2, TSH 3.8, NT 1.4mm)</div>
+              <input type="text" id="preg-log-value" placeholder="e.g. 9.2 g/dL, 3.8 mIU/L, 1.4mm…" class="inv-input-sm"/>
+            </div>
             <div style="margin-bottom:4px;"><div style="font-size:11px;color:var(--muted);margin-bottom:3px;">Notes (optional)</div>
               <input type="text" id="preg-log-notes" placeholder="e.g. placenta low, rest advised…" class="inv-input-sm"/>
             </div>
-            <button class="inv-save-btn" onclick="savePregInvestigation()">Save &amp; Update Guidance</button>
+            <button class="inv-save-btn" onclick="savePregInvestigation()">Save &amp; Get Advice</button>
             <div id="preg-inv-saved" style="display:none;font-size:12px;color:var(--sage-d);text-align:center;margin-top:6px;">✓ Saved</div>
+            <div id="preg-inv-advice" style="display:none;margin-top:10px;background:var(--gold-l);border:1px solid #E8D5AF;border-radius:10px;padding:14px 16px;"></div>
             <div id="preg-inv-log" style="margin-top:10px;"></div>
           </div>
           <div class="milestone-card">
@@ -420,12 +424,16 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
               <option value="pending">Pending</option>
             </select>
           </div>
-          <div style="margin-bottom:4px;"><div style="font-size:11px;color:var(--muted);margin-bottom:3px;">Notes</div>
-            <input type="text" id="baby-log-notes" placeholder="e.g. weight 3.2kg, mild jaundice…" class="inv-input-sm"/>
-          </div>
-          <button class="inv-save-btn" style="background:var(--sage-d);" onclick="saveBabyInvestigation()">Save &amp; Update Advice</button>
-          <div id="baby-inv-saved" style="display:none;font-size:12px;color:var(--sage-d);text-align:center;margin-top:6px;">✓ Saved</div>
-          <div id="baby-inv-log" style="margin-top:10px;"></div>
+          <div style="margin-bottom:4px;"><div style="font-size:11px;color:var(--muted);margin-bottom:3px;">Value (e.g. weight 3.2kg, bilirubin 14.5, Hb 16)</div>
+              <input type="text" id="baby-log-value" placeholder="e.g. 3.2 kg, 14.5 mg/dL…" class="inv-input-sm"/>
+            </div>
+            <div style="margin-bottom:4px;"><div style="font-size:11px;color:var(--muted);margin-bottom:3px;">Notes</div>
+              <input type="text" id="baby-log-notes" placeholder="e.g. mild jaundice, feeding well…" class="inv-input-sm"/>
+            </div>
+            <button class="inv-save-btn" style="background:var(--sage-d);" onclick="saveBabyInvestigation()">Save &amp; Get Advice</button>
+            <div id="baby-inv-saved" style="display:none;font-size:12px;color:var(--sage-d);text-align:center;margin-top:6px;">✓ Saved</div>
+            <div id="baby-inv-advice" style="display:none;margin-top:10px;background:var(--gold-l);border:1px solid #E8D5AF;border-radius:10px;padding:14px 16px;"></div>
+            <div id="baby-inv-log" style="margin-top:10px;"></div>
         </div>
         <div class="inv-card">
           <div class="inv-card-title" style="color:var(--terra-d);">👩 Mother Update</div>
@@ -876,27 +884,96 @@ function saveCheckin(){
   }
 }
 
-function savePregInvestigation(){
-  const test=document.getElementById('preg-log-test').value;
-  const result=document.getElementById('preg-log-result').value;
-  const notes=document.getElementById('preg-log-notes').value;
+async function savePregInvestigation(){
+  var test=document.getElementById('preg-log-test').value;
+  var result=document.getElementById('preg-log-result').value;
+  var testValue=(document.getElementById('preg-log-value')?document.getElementById('preg-log-value').value:'').trim();
+  var notes=document.getElementById('preg-log-notes').value;
   if(!test) return;
-  const week=PREG_WEEKS[currentPregWeekIdx].week;
-  const log=JSON.parse(localStorage.getItem('bloom_preg_inv_log')||'[]');
-  log.unshift({test,result,notes,week,date:new Date().toLocaleDateString('en-IN')});
+  var week=PREG_WEEKS[currentPregWeekIdx].week;
+  var log=JSON.parse(localStorage.getItem('bloom_preg_inv_log')||'[]');
+  log.unshift({test:test,result:result,value:testValue,notes:notes,week:week,date:new Date().toLocaleDateString('en-IN')});
   localStorage.setItem('bloom_preg_inv_log',JSON.stringify(log.slice(0,20)));
   document.getElementById('preg-inv-saved').style.display='block';
-  setTimeout(function(){document.getElementById('preg-inv-saved').style.display='none';},2000);
-  renderPregInvLog();contentCache={};
-  loadPregSection(currentPregSection,document.querySelector('#preg-sec-tabs .stab.active'));
-}
+  setTimeout(function(){document.getElementById('preg-inv-saved').style.display='none';},3000);
+  renderPregInvLog();
 
+  // Save value to MongoDB profile if it maps to a known ANC field
+  if(testValue){
+    var profileUpdate={};
+    var val=parseFloat(testValue);
+    if(test==='blood_test'&&!isNaN(val)){
+      var combined=(notes+' '+testValue).toLowerCase();
+      if(combined.includes('hb')||combined.includes('haemoglobin')||combined.includes('hemoglobin')) profileUpdate.ancHb1=val;
+      else if(combined.includes('tsh')) profileUpdate.ancTsh=val;
+      else if(combined.includes('ferritin')) profileUpdate.ancFerritin=val;
+      else if(combined.includes('platelet')) profileUpdate.ancPlateletCount=val;
+      else if(combined.includes('rbs')||combined.includes('sugar')) profileUpdate.ancRbs=val;
+      else if(combined.includes('sgpt')||combined.includes('alt')) profileUpdate.ancSgpt=val;
+      else if(combined.includes('sgot')||combined.includes('ast')) profileUpdate.ancSgot=val;
+      else if(combined.includes('urea')) profileUpdate.ancUrea=val;
+      else if(combined.includes('creatinine')||combined.includes('creat')) profileUpdate.ancCreatinine=val;
+      else if(combined.includes('uric')) profileUpdate.ancUricAcid=val;
+    }
+    if(test==='nuchal_scan'&&!isNaN(val)) profileUpdate.ancNuchalNt=val;
+    if(test==='ogtt'&&!isNaN(val)){
+      var combined2=(notes+' '+testValue).toLowerCase();
+      if(combined2.includes('fasting')) profileUpdate.ancOgttFasting=val;
+      else if(combined2.includes('1hr')||combined2.includes('1 hr')||combined2.includes('1hour')) profileUpdate.ancOgtt1hr=val;
+      else if(combined2.includes('2hr')||combined2.includes('2 hr')||combined2.includes('2hour')) profileUpdate.ancOgtt2hr=val;
+    }
+    if(test==='anomaly_scan') profileUpdate.ancAnomalyScan=result==='normal'?'normal':result==='abnormal'?'abnormal — '+notes:'pending';
+    if(test==='growth_scan') profileUpdate.ancGrowthScan=result==='normal'?'normal':result;
+    if(test==='doppler') profileUpdate.ancDoppler=result==='normal'?'normal':result;
+    if(Object.keys(profileUpdate).length>0){
+      try{
+        var merged={};for(var k in userProfile){merged[k]=userProfile[k];}for(var k2 in profileUpdate){merged[k2]=profileUpdate[k2];}
+        var pRes=await fetch('/profile',{method:'PUT',headers:{'Content-Type':'application/json',Authorization:TOKEN},body:JSON.stringify(merged)});
+        if(pRes.ok){userData=await pRes.json();userProfile=userData.profile||{};}
+      }catch(e){console.log('Profile save error:',e);}
+    }
+  }
+
+  // Clear cache so Investigations tab picks up new values
+  contentCache={};
+
+  // GOLD BOX — instant AI advice if value entered
+  if(testValue){
+    var adviceEl=document.getElementById('preg-inv-advice');
+    adviceEl.style.display='block';
+    adviceEl.innerHTML='<div style="font-size:14px;color:var(--terra-d);font-weight:600;margin-bottom:6px;">🔬 Analysing your result...</div><div class="loading-dots"><span></span><span></span><span></span></div>';
+    try{
+      var testLabel=document.getElementById('preg-log-test').options[document.getElementById('preg-log-test').selectedIndex].text;
+      var aRes=await fetch('/roadmap-content',{method:'POST',headers:{'Content-Type':'application/json',Authorization:TOKEN},body:JSON.stringify({journey:'pregnancy',week:week,section:'overview',checkin:{chips:['inv_result'],notes:'URGENT — Patient just logged a test result. Provide specific advice for this result ONLY:\nTEST: '+testLabel+'\nVALUE: '+testValue+'\nRESULT: '+result+'\nNOTES: '+(notes||'none')+'\nWEEK: '+week+'\n\nGive 2-3 sentences: Is this value normal? What does it mean for her? What should she do next? If concerning, say so clearly.'}})});
+      if(aRes.ok){
+        var aData=await aRes.json();
+        var content=aData.content;
+        var adviceHtml='<div style="font-size:14px;font-weight:600;color:var(--terra-d);margin-bottom:8px;">💡 '+testLabel+(testValue?' — '+testValue:'')+'</div>';
+        if(typeof content==='object'&&content.main_content){
+          adviceHtml+='<div style="font-size:15px;color:var(--text);line-height:1.85;">'+formatContent(content.main_content)+'</div>';
+          if(content.clinical_note) adviceHtml+='<div style="margin-top:10px;padding:10px 12px;background:#FFF5F5;border:1px solid #F0C8C8;border-radius:8px;font-size:14px;color:#9E2020;line-height:1.7;">⚠ '+content.clinical_note+'</div>';
+        }else if(typeof content==='string'){
+          adviceHtml+='<div style="font-size:15px;color:var(--text);line-height:1.85;">'+formatContent(content)+'</div>';
+        }
+        adviceHtml+='<div style="margin-top:10px;"><button onclick="var invTab=document.querySelectorAll(\'#preg-sec-tabs .stab\')[3];if(invTab){loadPregSection(\'pretreatment\',invTab);window.scrollTo({top:0,behavior:\'smooth\'});}" style="font-size:13px;padding:8px 16px;background:var(--terra);color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:DM Sans,sans-serif;">View full Investigations plan →</button></div>';
+        adviceEl.innerHTML=adviceHtml;
+      }else{
+        adviceEl.style.display='none';
+      }
+    }catch(e){
+      adviceEl.style.display='none';
+    }
+  }
+
+  // Also refresh Investigations tab in background (so it is ready when user clicks)
+  loadPregSection('pretreatment',null);
+}
 function renderPregInvLog(){
   const log=JSON.parse(localStorage.getItem('bloom_preg_inv_log')||'[]');
   const el=document.getElementById('preg-inv-log');if(!el||!log.length) return;
   const statusColors={normal:'var(--sage-d)',borderline:'#9A7340',abnormal:'#9E2020',pending:'var(--muted)'};
-  el.innerHTML='<div style="font-size:11px;color:var(--muted);font-weight:500;margin-bottom:6px;">Recent Results</div>'+
-    log.slice(0,3).map(function(l){return '<div style="font-size:12px;padding:5px 0;border-bottom:1px solid var(--border-l);display:flex;justify-content:space-between;"><span>'+l.test.replace(/_/g,' ')+' (W'+l.week+')</span><span style="color:'+(statusColors[l.result]||'var(--muted)')+';font-weight:500;">'+(l.result||'—')+'</span></div>';}).join('');
+ el.innerHTML='<div style="font-size:11px;color:var(--muted);font-weight:500;margin-bottom:6px;">Recent Results</div>'+
+    log.slice(0,3).map(function(l){return '<div style="font-size:12px;padding:5px 0;border-bottom:1px solid var(--border-l);display:flex;justify-content:space-between;gap:6px;"><span>'+l.test.replace(/_/g,' ')+' (W'+l.week+')'+(l.value?' — <strong>'+l.value+'</strong>':'')+'</span><span style="color:'+(statusColors[l.result]||'var(--muted)')+';font-weight:500;flex-shrink:0;">'+(l.result||'—')+'</span></div>';}).join('');
 }
 
 function initPostpartum(){switchPPStage('day1_3',document.querySelector('.pp-tab'));}
@@ -1042,17 +1119,47 @@ function openRoadmapProfile(){
   setTimeout(function(){if(typeof pfLoad==='function') pfLoad();modal.style.display='flex';},100);
 }
 
-function saveBabyInvestigation(){
+async function saveBabyInvestigation(){
   var test=document.getElementById('baby-log-test').value;
   var result=document.getElementById('baby-log-result').value;
+  var testValue=(document.getElementById('baby-log-value')?document.getElementById('baby-log-value').value:'').trim();
   var notes=document.getElementById('baby-log-notes').value;
   if(!test) return;
   var log=JSON.parse(localStorage.getItem('bloom_baby_inv_log')||'[]');
-  log.unshift({test,result,notes,stage:currentPPStage,date:new Date().toLocaleDateString('en-IN')});
+  log.unshift({test:test,result:result,value:testValue,notes:notes,stage:currentPPStage,date:new Date().toLocaleDateString('en-IN')});
   localStorage.setItem('bloom_baby_inv_log',JSON.stringify(log.slice(0,20)));
   document.getElementById('baby-inv-saved').style.display='block';
-  setTimeout(function(){document.getElementById('baby-inv-saved').style.display='none';},2000);
+  setTimeout(function(){document.getElementById('baby-inv-saved').style.display='none';},3000);
   renderBabyInvLog();contentCache={};
+
+  // GOLD BOX — instant AI advice if value entered
+  if(testValue){
+    var adviceEl=document.getElementById('baby-inv-advice');
+    adviceEl.style.display='block';
+    adviceEl.innerHTML='<div style="font-size:14px;color:var(--sage-d);font-weight:600;margin-bottom:6px;">🔬 Analysing baby result...</div><div class="loading-dots"><span></span><span></span><span></span></div>';
+    try{
+      var testLabel=document.getElementById('baby-log-test').options[document.getElementById('baby-log-test').selectedIndex].text;
+      var aRes=await fetch('/roadmap-content',{method:'POST',headers:{'Content-Type':'application/json',Authorization:TOKEN},body:JSON.stringify({journey:'postpartum',ppStage:currentPPStage,section:'baby_care',checkin:{chips:['inv_result'],notes:'URGENT — Mother just logged a baby test result. Provide specific advice for this result ONLY:\nTEST: '+testLabel+'\nVALUE: '+testValue+'\nRESULT: '+result+'\nNOTES: '+(notes||'none')+'\nStage: '+currentPPStage+'\n\nGive 2-3 sentences: Is this value normal for a baby at this stage? What does it mean? What should she do next? If concerning, say so clearly.'}})});
+      if(aRes.ok){
+        var aData=await aRes.json();
+        var content=aData.content;
+        var adviceHtml='<div style="font-size:14px;font-weight:600;color:var(--sage-d);margin-bottom:8px;">💡 '+testLabel+(testValue?' — '+testValue:'')+'</div>';
+        if(typeof content==='object'&&content.main_content){
+          adviceHtml+='<div style="font-size:15px;color:var(--text);line-height:1.85;">'+formatContent(content.main_content)+'</div>';
+          if(content.clinical_note) adviceHtml+='<div style="margin-top:10px;padding:10px 12px;background:#FFF5F5;border:1px solid #F0C8C8;border-radius:8px;font-size:14px;color:#9E2020;line-height:1.7;">⚠ '+content.clinical_note+'</div>';
+        }else if(typeof content==='string'){
+          adviceHtml+='<div style="font-size:15px;color:var(--text);line-height:1.85;">'+formatContent(content)+'</div>';
+        }
+        adviceEl.innerHTML=adviceHtml;
+      }else{
+        adviceEl.style.display='none';
+      }
+    }catch(e){
+      adviceEl.style.display='none';
+    }
+  }
+
+  // Also refresh baby care tab
   loadPPSection('baby_care',document.querySelector('#pp-sec-tabs .stab.active')||document.querySelector('#pp-sec-tabs .stab'));
 }
 
