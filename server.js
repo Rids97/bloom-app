@@ -1155,12 +1155,35 @@ Next 4 weeks — what to plan and book.
 SECTION 4 — HIGH RISK MONITORING:
 If she has any high risk factors (${profile.pregHighRisk && profile.pregHighRisk.length ? profile.pregHighRisk.join(', ') : 'none'}), what additional monitoring is needed.`
 
-        : `Generate investigation and pre-treatment guidance for TTC.
-WORKUP: ${profile.workupStatus || 'not specified'}
-DONE: ${profile.investigationsDone && profile.investigationsDone.length ? profile.investigationsDone.join(', ') : 'none'}
-${!profile.workupStatus || profile.workupStatus === 'no_workup' ? 'No investigations done. Give prioritised list of what to get done, cycle day timing, and why.' : 'What is still missing? What happens in next 4-8 weeks?'}
-Format each investigation as: → Test name — When to do it — Why it matters — Normal range`,
+       : `Generate investigation and pre-treatment guidance for TTC.
+WORKUP STATUS: ${profile.workupStatus || 'not specified'}
+INVESTIGATIONS DONE: ${profile.investigationsDone && profile.investigationsDone.length ? profile.investigationsDone.join(', ') : 'none'}
 
+PATIENT'S ACTUAL VALUES (interpret each one that is available):
+${profile.amh ? '→ AMH: ' + profile.amh + ' ng/mL ' + (profile.amh < 1.0 ? '(LOW — diminished ovarian reserve)' : profile.amh < 1.5 ? '(borderline low)' : profile.amh > 3.5 ? '(high — consider PCOS)' : '(normal)') : '→ AMH: not done yet'}
+${profile.fsh ? '→ FSH (Day 2/3): ' + profile.fsh + ' IU/L ' + (profile.fsh > 10 ? '(ELEVATED — reduced reserve)' : '(normal)') : '→ FSH: not done yet'}
+${profile.lh ? '→ LH (Day 2/3): ' + profile.lh + ' IU/L' + (profile.fsh ? ' | LH:FSH ratio: ' + (profile.lh/profile.fsh).toFixed(1) + (profile.lh/profile.fsh > 2 ? ' (ELEVATED — PCOS pattern)' : ' (normal)') : '') : '→ LH: not done yet'}
+${profile.tsh ? '→ TSH: ' + profile.tsh + ' mIU/L ' + (profile.tsh > 4.0 ? '(HIGH — hypothyroid)' : profile.tsh > 2.5 ? '(above optimal for TTC — target <2.5)' : '(optimal)') : '→ TSH: not done yet'}
+${profile.prolactin ? '→ Prolactin: ' + profile.prolactin + ' ng/mL ' + (profile.prolactin > 25 ? '(ELEVATED — may inhibit ovulation)' : '(normal)') : '→ Prolactin: not done yet'}
+${profile.testosterone ? '→ Testosterone: ' + profile.testosterone + ' ng/dL ' + (profile.testosterone > 70 ? '(ELEVATED — hyperandrogenism)' : '(normal)') : ''}
+${profile.dheas ? '→ DHEA-S: ' + profile.dheas + ' µg/dL' : ''}
+${profile.estradiol ? '→ Estradiol: ' + profile.estradiol + ' pg/mL' : ''}
+${profile.progesterone ? '→ Day 21 Progesterone: ' + profile.progesterone + ' ng/mL ' + (profile.progesterone > 5 ? '(ovulatory)' : '(anovulatory — not ovulating this cycle)') : ''}
+${profile.hb ? '→ Hb: ' + profile.hb + ' g/dL ' + (profile.hb < 11 ? '(ANAEMIC)' : '(normal)') : ''}
+${profile.vitaminD ? '→ Vitamin D: ' + profile.vitaminD + ' ng/mL ' + (profile.vitaminD < 20 ? '(DEFICIENT)' : profile.vitaminD < 30 ? '(insufficient)' : '(normal)') : ''}
+${profile.fastingInsulin ? '→ Fasting insulin: ' + profile.fastingInsulin + ' µIU/mL ' + (profile.fastingInsulin > 12 ? '(ELEVATED — insulin resistance)' : '(normal)') : ''}
+${profile.hba1c ? '→ HbA1c: ' + profile.hba1c + '%' : ''}
+${profile.afc ? '→ AFC: ' + profile.afc + ' ' + (profile.afc < 5 ? '(LOW — poor reserve)' : profile.afc > 20 ? '(HIGH — PCOS pattern)' : '(normal)') : '→ AFC: not done yet'}
+${profile.endometrialThickness ? '→ Endometrial thickness: ' + profile.endometrialThickness + ' mm ' + (profile.endometrialThickness < 7 ? '(THIN — may need estrogen support)' : '(adequate)') : ''}
+${profile.usgFindings && profile.usgFindings.length ? '→ USG findings: ' + profile.usgFindings.join(', ') : ''}
+${profile.hsgResult ? '→ HSG: ' + profile.hsgResult : '→ HSG: not done yet'}
+${profile.semenAnalysis && profile.semenAnalysis.length ? '→ Semen analysis: ' + profile.semenAnalysis.join(', ') : '→ Semen analysis: not done yet'}
+
+INSTRUCTIONS:
+${!profile.workupStatus || profile.workupStatus === 'no_workup' ? 'No investigations done yet. Give a PRIORITISED list of what she needs, which cycle day to do each test, and why each matters.' : 'Interpret ALL her available values above. What is normal, what is abnormal, what needs action. Then list what is STILL MISSING and should be done next.'}
+For tests not yet done: explain why it matters, when to do it (cycle day), and normal range.
+For tests already done: interpret the value, flag if abnormal, give specific advice.
+Format each as: → Test name — Her value (or "not done") — Normal range — What it means — Action needed`,
       immunization: journey === 'pregnancy'
         ? `Generate pregnancy immunization guidance for Week ${week} of PREGNANCY.
 This is a PREGNANCY — do NOT reference TTC.
