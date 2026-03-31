@@ -606,6 +606,84 @@ app.post('/webhook/razorpay', express.raw({ type: 'application/json' }), async (
 });
 
 // ─────────────────────────────────────────────
+//  ROBUST GROQ JSON PARSER
+// ─────────────────────────────────────────────
+function safeParseGroqResponse(raw) {
+  if (!raw) return { main_content: '', key_points: [], personalised_tip: '', clinical_note: '', action_items: [] };
+
+  // Step 1: Strip markdown fences
+  let cleaned = raw.replace(/```json|```/g, '').trim();
+
+  // Step 2: Extract outermost { }
+  const first = cleaned.indexOf('{');
+  const last = cleaned.lastIndexOf('}');
+  if (first !== -1 && last !== -1 && last > first) {
+    cleaned = cleaned.slice(first, last + 1);
+  }
+
+  // Step 3: Try direct JSON.parse
+  try {
+    const result = JSON.parse(cleaned);
+    // Validate it has main_content
+    if (result && typeof result === 'object' && (result.main_content !== undefined || result.key_points !== undefined)) {
+      // Clean up: ensure no raw JSON leaked into main_content
+      if (typeof result.main_content === 'string') {
+        // If main_content contains JSON keys like "key_points": strip them
+        result.main_content = result.main_content
+          .replace(/",\s*"key_points"\s*:\s*\[[\s\S]*$/, '')
+          .replace(/",\s*"personalised_tip"\s*:[\s\S]*$/, '')
+          .replace(/",\s*"clinical_note"\s*:[\s\S]*$/, '')
+          .replace(/",\s*"action_items"\s*:[\s\S]*$/, '')
+          .trim();
+      }
+      // Ensure arrays
+      if (!Array.isArray(result.key_points)) result.key_points = [];
+      if (!Array.isArray(result.action_items)) result.action_items = [];
+      if (typeof result.personalised_tip !== 'string') result.personalised_tip = '';
+      if (typeof result.clinical_note !== 'string') result.clinical_note = '';
+      return result;
+    }
+  } catch(e) {}
+
+  // Step 4: Field-by-field regex extraction
+  try {
+    const extractStr = (key) => {
+      const rx = new RegExp('"' + key + '"\\s*:\\s*"((?:[^"\\\\]|\\\\.)*)"');
+      const m = cleaned.match(rx);
+      return m ? m[1].replace(/\\n/g, '\n').replace(/\\"/g, '"') : '';
+    };
+    const extractArr = (key) => {
+      const rx = new RegExp('"' + key + '"\\s*:\\s*\\[((?:[^\\[\\]]|"[^"]*")*)\\]');
+      const m = cleaned.match(rx);
+      if (!m) return [];
+      const items = [];
+      const itemRx = /"((?:[^"\\\\]|\\\\.)*)"/g;
+      let match;
+      while ((match = itemRx.exec(m[1])) !== null) {
+        items.push(match[1].replace(/\\n/g, '\n'));
+      }
+      return items;
+    };
+    return {
+      main_content: extractStr('main_content'),
+      key_points: extractArr('key_points'),
+      personalised_tip: extractStr('personalised_tip'),
+      clinical_note: extractStr('clinical_note'),
+      action_items: extractArr('action_items'),
+    };
+  } catch(e2) {}
+
+  // Step 5: Last resort — return as plain text, strip any JSON artifacts
+  const plainText = raw
+    .replace(/```json|```/g, '')
+    .replace(/^\s*\{/, '')
+    .replace(/\}\s*$/, '')
+    .replace(/"(main_content|key_points|personalised_tip|clinical_note|action_items)"\s*:/g, '')
+    .trim();
+  return { main_content: plainText, key_points: [], personalised_tip: '', clinical_note: '', action_items: [] };
+}
+
+// ─────────────────────────────────────────────
 //  ROADMAP CONTENT API
 // ─────────────────────────────────────────────
 app.post("/roadmap-content", auth, async (req, res) => {
@@ -795,14 +873,22 @@ Patient: ${clinicalContext || 'New mother'}
 FORMATTING RULES — STRICTLY FOLLOW:
 - Use → (arrow) symbol for ALL bullet points, NOT hyphens or asterisks
 - Leave ONE blank line between each → point for readability
-- main_content format: intro sentence\n\n→ Point one\n\n→ Point two
+- CRITICAL: main_content must be a plain text string with NO JSON syntax inside it
+- main_content format example: "At week 18 your baby is growing rapidly.\n\n→ Your baby is now 14cm long.\n\n→ You may start feeling movement."
+- Do NOT put JSON keys or curly braces inside main_content
 - No long paragraphs — max 2 sentences then arrows
 - Warm, supportive tone
 
-Format response as JSON:
-{"main_content":"intro\n\n→ Point one\n\n→ Point two","key_points":["Point 1","Point 2","Point 3","Point 4"],"personalised_tip":"1-2 sentences specific to this patient","clinical_note":"important warning sign or urgent flag","action_items":["→ Action 1","→ Action 2","→ Action 3"]}
+CRITICAL JSON RULES:
+- Return ONLY a single JSON object, nothing else before or after
+- All string values must use escaped newlines \\n not actual newlines
+- Do NOT nest JSON inside string values
+- key_points must be a JSON array of strings
 
-Return ONLY valid JSON.
+Format response as EXACTLY this structure:
+{"main_content":"intro sentence.\\n\\n→ Point one\\n\\n→ Point two","key_points":["Point 1","Point 2","Point 3","Point 4"],"personalised_tip":"1-2 sentences specific to this patient","clinical_note":"important warning sign or urgent flag","action_items":["→ Action 1","→ Action 2","→ Action 3"]}
+
+Return ONLY valid JSON. No markdown. No preamble. No text after the closing }
 
 --- CLINICAL KNOWLEDGE ---
 ${relevantKnowledge}
@@ -810,17 +896,8 @@ ${relevantKnowledge}
 
       const ppResponse = await groq.chat.completions.create({ model: "llama-3.3-70b-versatile", messages: [{ role: "system", content: ppSystemMsg }, { role: "user", content: ppSectionPrompts[section] || ppSectionPrompts.overview }], max_tokens: 1500, temperature: 0.3 });
       const ppRaw = ppResponse.choices[0].message.content.trim();
-      let ppParsed;
-      try {
-        const ppCleaned = ppRaw.replace(/```json|```/g, "").trim();
-        const ppStart = ppCleaned.indexOf('{');
-        const ppEnd = ppCleaned.lastIndexOf('}');
-        const ppStr = ppStart !== -1 && ppEnd !== -1 ? ppCleaned.slice(ppStart, ppEnd + 1) : ppCleaned;
-        ppParsed = JSON.parse(ppStr);
-      } catch(e) {
-        ppParsed = { main_content: ppRaw.replace(/```json|```/g,"").trim(), key_points: [], personalised_tip: "", clinical_note: "", action_items: [] };
-      }
-      return res.json({ content: typeof ppParsed === 'string' ? JSON.parse(ppParsed.replace(/```json|```/g,'').trim()) : ppParsed, journey, section, ppStage });
+      const ppParsed = safeParseGroqResponse(ppRaw);
+      return res.json({ content: ppParsed, journey, section, ppStage });
     }
 
     const stageDescriptions = {
@@ -1096,17 +1173,23 @@ ${clinicalContext}
 FORMATTING RULES — STRICTLY FOLLOW:
 - Use → (arrow) for ALL bullet points throughout the response
 - Leave ONE blank line between each → point for readability
-- main_content format: intro sentence\n\n→ Point one\n\n→ Point two\n\n→ Point three
-- key_points: each a single clear sentence, start with →
-- action_items: start with →, be specific and actionable
+- CRITICAL: main_content must be a plain text string with NO JSON syntax inside it
+- main_content format example: "At week 18 your baby is growing rapidly.\\n\\n→ Your baby is 14cm long.\\n\\n→ You may feel movement."
+- Do NOT put JSON keys, curly braces, or square brackets inside main_content string value
 - NO long paragraphs — max 2 sentences then arrows
 - Simple language — explain medical terms in brackets immediately after
 - Adequate spacing between different topics/sections
 
-Format as JSON:
-{"main_content":"intro\n\n→ Point one\n\n→ Point two","key_points":["→ Point 1","→ Point 2","→ Point 3","→ Point 4","→ Point 5"],"personalised_tip":"Specific to THIS patient based on her actual results and history","clinical_note":"One important warning or urgent clinical note","action_items":["→ Action 1","→ Action 2","→ Action 3"]}
+CRITICAL JSON RULES:
+- Return ONLY a single JSON object, nothing before or after
+- All string values must use escaped newlines \\n not actual newlines
+- Do NOT nest JSON inside string values
+- key_points and action_items must be JSON arrays of strings
 
-Return ONLY valid JSON. No markdown, no preamble.
+Format as EXACTLY this structure:
+{"main_content":"intro sentence.\\n\\n→ Point one\\n\\n→ Point two\\n\\n→ Point three","key_points":["→ Point 1","→ Point 2","→ Point 3","→ Point 4","→ Point 5"],"personalised_tip":"Specific to THIS patient based on her actual results and history","clinical_note":"One important warning or urgent clinical note","action_items":["→ Action 1","→ Action 2","→ Action 3"]}
+
+Return ONLY valid JSON. No markdown. No preamble. No text after the closing }
 
 --- CLINICAL KNOWLEDGE ---
 ${relevantKnowledge}
@@ -1120,17 +1203,8 @@ ${relevantKnowledge}
     });
 
     const rawText = response.choices[0].message.content.trim();
-    let parsed;
-    try {
-      const cleaned = rawText.replace(/```json|```/g, "").trim();
-      const jsonStart = cleaned.indexOf('{');
-      const jsonEnd = cleaned.lastIndexOf('}');
-      const jsonStr = jsonStart !== -1 && jsonEnd !== -1 ? cleaned.slice(jsonStart, jsonEnd + 1) : cleaned;
-      parsed = JSON.parse(jsonStr);
-    } catch(e) {
-      parsed = { main_content: rawText.replace(/```json|```/g,"").trim(), key_points: [], personalised_tip: "", clinical_note: "", action_items: [] };
-    }
-    return res.json({ content: typeof parsed === 'string' ? JSON.parse(parsed.replace(/```json|```/g,'').trim()) : parsed, journey, section, ppStage });
+    const parsed = safeParseGroqResponse(rawText);
+    res.json({ content: parsed, journey, month, week, section, clinicalStage });
 
   } catch (err) {
     console.error("Roadmap content error:", err.message);
