@@ -9,12 +9,66 @@ const jwt = require("jsonwebtoken");
 const Razorpay = require("razorpay");
 const Groq = require("groq-sdk");
 const crypto = require("crypto");
+const nodemailer = require("nodemailer");
 
 const app = express();
 app.use((req, res, next) => {
   if (req.path === '/webhook/razorpay') return next();
   express.json({ limit: '20mb' })(req, res, next);
 });
+
+// -- EMAIL TRANSPORTER (Nodemailer + Gmail SMTP) --
+const emailTransporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.GMAIL_USER,       // your gmail address
+    pass: process.env.GMAIL_APP_PASS,   // Gmail App Password (not your login password)
+  },
+});
+
+// In-memory OTP store: { email: { otp, expiresAt } }
+const otpStore = {};
+
+function generateOTP() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+async function sendOTPEmail(email, otp) {
+  await emailTransporter.sendMail({
+    from: `"Bloom AI 🌸" <${process.env.GMAIL_USER}>`,
+    to: email,
+    subject: 'Your Bloom AI verification code',
+    html: `
+      <div style="font-family:sans-serif;max-width:480px;margin:auto;padding:40px 32px;background:#FAF6F1;border-radius:16px;">
+        <div style="font-size:32px;font-weight:600;color:#C4704F;margin-bottom:8px;">🌸 bloom</div>
+        <h2 style="color:#2C2420;font-weight:500;margin-bottom:8px;">Verify your email</h2>
+        <p style="color:#8C7468;margin-bottom:24px;">Use the code below to complete your Bloom AI signup. It expires in 10 minutes.</p>
+        <div style="background:#fff;border:2px solid #E8DDD5;border-radius:12px;padding:24px;text-align:center;margin-bottom:24px;">
+          <div style="font-size:40px;font-weight:700;letter-spacing:12px;color:#C4704F;">${otp}</div>
+        </div>
+        <p style="color:#B8A89F;font-size:13px;">If you did not request this, please ignore this email.</p>
+      </div>
+    `,
+  });
+}
+
+async function sendResetEmail(email, resetUrl) {
+  await emailTransporter.sendMail({
+    from: `"Bloom AI 🌸" <${process.env.GMAIL_USER}>`,
+    to: email,
+    subject: 'Reset your Bloom AI password',
+    html: `
+      <div style="font-family:sans-serif;max-width:480px;margin:auto;padding:40px 32px;background:#FAF6F1;border-radius:16px;">
+        <div style="font-size:32px;font-weight:600;color:#C4704F;margin-bottom:8px;">🌸 bloom</div>
+        <h2 style="color:#2C2420;font-weight:500;margin-bottom:8px;">Reset your password</h2>
+        <p style="color:#8C7468;margin-bottom:24px;">Click the button below to set a new password. This link expires in 1 hour.</p>
+        <a href="${resetUrl}" style="display:inline-block;padding:14px 32px;background:#C4704F;color:#fff;text-decoration:none;border-radius:10px;font-size:16px;font-weight:500;margin-bottom:24px;">Reset Password →</a>
+        <p style="color:#B8A89F;font-size:13px;">If you did not request a password reset, your account is safe — ignore this email.</p>
+        <p style="color:#B8A89F;font-size:12px;margin-top:8px;">Link: ${resetUrl}</p>
+      </div>
+    `,
+  });
+}
 
 // -- KNOWLEDGE BASE --
 let knowledgeBase = [];
@@ -129,6 +183,9 @@ connectDB();
 const UserSchema = new mongoose.Schema({
   email:               { type: String, required: true, unique: true },
   password:            { type: String, required: true },
+  isVerified:          { type: Boolean, default: false },
+  resetToken:          String,
+  resetTokenExpiry:    Date,
   plan:                { type: String, default: "free" },
   isPremium:           { type: Boolean, default: false },
   messageCount:        { type: Number, default: 0 },
@@ -152,7 +209,7 @@ const UserSchema = new mongoose.Schema({
     prolactin: Number, testosterone: Number, dheas: Number,
     estradiol: Number, progesterone: Number,
     fastingGlucose: Number, hba1c: Number, fastingInsulin: Number, homaIr: Number,
-    hb: Number, cbc: String, ferritin: Number,
+    hb: Number, ferritin: Number,
     vitaminD: Number, vitaminB12: Number,
     bloodGroup: String, rhFactor: String,
     afc: Number, endometrialThickness: Number, usgFindings: [String],
@@ -160,21 +217,60 @@ const UserSchema = new mongoose.Schema({
     // TREATMENT STATUS
     workupStatus: String, txPhase: String, cycleDay: Number,
     doctorInvolved: [String], nextStep: String, concerns: String,
-    // PREGNANCY HISTORY TAB
-    obsGravida: Number, obsPara: Number, obsAbortions: Number, obsLiving: Number,
+
+    // ── OBSTETRIC HISTORY (detailed) ──
+    obsGravida: Number,        // G
+    obsPara: Number,           // P
+    obsAbortions: Number,      // A (spontaneous + induced combined)
+    obsSpontaneous: Number,    // spontaneous miscarriages
+    obsInduced: Number,        // induced abortions (MTP)
+    obsLiving: Number,         // L
+    obsDeliveryModes: [String],// e.g. ["normal","lscs","lscs"]
+    obsLscsReasons: [String],  // e.g. ["fetal distress","placenta praevia"]
+    obsYearsAgo: [Number],     // years since each pregnancy
+    obsComplications: [String],// e.g. ["pph","preeclampsia"]
+    obsPriorMedications: String,
+    obsPriorSurgeries: String,
+
+    // PREGNANCY (current)
     pregLmp: String, pregEdd: String, pregBookingWeek: Number,
     pregConception: String,
     pregHighRisk: [String],
-    // ANC blood tests
+
+    // ANC BLOOD TESTS — extended
     ancBloodGroup: String, ancRhFactor: String,
     ancHb1: Number, ancHb2: Number, ancHb3: Number,
-    ancVdrl: String, ancHiv: String, ancHbsag: String,
+    // CBC components
+    ancTlc: Number,            // Total leucocyte count (×10³/µL)
+    ancPlateletCount: Number,  // Platelets (×10³/µL)
+    ancRbs: Number,            // Random blood sugar (mg/dL)
+    ancSgpt: Number,           // SGPT / ALT (U/L)
+    ancSgot: Number,           // SGOT / AST (U/L)
+    ancUrea: Number,           // Blood urea (mg/dL)
+    ancCreatinine: Number,     // Serum creatinine (mg/dL)
+    ancUricAcid: Number,       // Serum uric acid (mg/dL) — last 3 months
+    ancVdrl: String,
+    ancHiv: String,
+    ancHbsag: String,
+    ancHcv: String,            // HCV antibody
+    // APLA profile
+    ancAplaLupus: String,      // Lupus anticoagulant
+    ancAnticardiolipin: String,// Anticardiolipin antibody (IgG/IgM)
+    ancBeta2Gp1: String,       // Anti-β2-glycoprotein I
+    // Other outcome-changing
+    ancTsh: Number,
+    ancFt4: Number,            // Free T4
+    ancAntiTpo: Number,        // Anti-TPO antibody
+    ancFerritin: Number,
+    ancVitaminD: Number,
     ancOgttFasting: Number, ancOgtt1hr: Number, ancOgtt2hr: Number,
-    ancTsh: Number, ancFerritin: Number, ancVitaminD: Number,
-    ancPlateletCount: Number, ancUrineRoutine: String,
+    ancUrineRoutine: String,
+    ancUrineProtein: String,   // urine protein (for pre-eclampsia)
+    ancGbs: String,            // Group B Strep (35-37 weeks)
     // ANC USG
-    ancDatingScan: String, ancNuchalNt: Number, ancNuchalCrl: Number,
-    ancNuchalResult: String, ancAnomalyScan: String, ancGrowthScan: String,
+    ancDatingScan: String,
+    ancNuchalNt: Number, ancNuchalCrl: Number, ancNuchalResult: String,
+    ancAnomalyScan: String, ancGrowthScan: String,
     ancDoppler: String, ancPlacentaPos: String, ancCervixLength: Number,
     // Immunizations
     immTt1Date: String, immTt2Date: String, immTdDate: String,
@@ -204,15 +300,63 @@ function auth(req, res, next) {
   catch (e) { res.status(401).json({ error: "Invalid token" }); }
 }
 
+// -- STATIC ROUTES --
 app.get("/test", (req, res) => res.json({ status: "ok", mongo: process.env.MONGO_URI ? "set" : "missing", groq: process.env.GROQ_API_KEY ? "set" : "missing", dbState: mongoose.connection.readyState === 1 ? "connected" : "disconnected", kbChunks: knowledgeBase.length }));
 app.get("/", (req, res) => res.sendFile(path.join(__dirname, "public", "landing.html")));
 app.get("/app", (req, res) => res.sendFile(path.join(__dirname, "public", "index.html")));
 app.get("/login", (req, res) => res.sendFile(path.join(__dirname, "public", "login.html")));
 app.get("/report", (req, res) => res.sendFile(path.join(__dirname, "public", "report.html")));
 app.get("/roadmap", (req, res) => res.sendFile(path.join(__dirname, "public", "roadmap.html")));
-
+app.get("/reset-password", (req, res) => res.sendFile(path.join(__dirname, "public", "reset-password.html")));
 app.use(express.static(path.join(__dirname, "public")));
 
+// ─────────────────────────────────────────────
+//  AUTH ROUTES
+// ─────────────────────────────────────────────
+
+// STEP 1: Send OTP (called before account is created)
+app.post("/send-otp", async (req, res) => {
+  try {
+    await connectDB();
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: "Email required" });
+    const existing = await User.findOne({ email });
+    if (existing) return res.status(409).json({ error: "Email already registered" });
+    const otp = generateOTP();
+    otpStore[email] = { otp, expiresAt: Date.now() + 10 * 60 * 1000 }; // 10 min
+    await sendOTPEmail(email, otp);
+    res.json({ message: "OTP sent" });
+  } catch (err) {
+    console.error("OTP send error:", err.message);
+    res.status(500).json({ error: "Could not send OTP. Check Gmail config." });
+  }
+});
+
+// STEP 2: Verify OTP + create account
+app.post("/verify-otp", async (req, res) => {
+  try {
+    await connectDB();
+    const { email, otp, password } = req.body;
+    if (!email || !otp || !password) return res.status(400).json({ error: "Email, OTP and password required" });
+    const record = otpStore[email];
+    if (!record) return res.status(400).json({ error: "No OTP found. Please request a new one." });
+    if (Date.now() > record.expiresAt) {
+      delete otpStore[email];
+      return res.status(400).json({ error: "OTP expired. Please request a new one." });
+    }
+    if (record.otp !== otp.trim()) return res.status(400).json({ error: "Incorrect OTP." });
+    delete otpStore[email];
+    const existing = await User.findOne({ email });
+    if (existing) return res.status(409).json({ error: "Email already registered" });
+    const hash = await bcrypt.hash(password, 10);
+    const user = await User.create({ email, password: hash, isVerified: true });
+    res.json({ message: "Account created", userId: user._id });
+  } catch (err) {
+    res.status(500).json({ error: "Signup failed: " + err.message });
+  }
+});
+
+// LEGACY signup (kept for compatibility, but now requires OTP first)
 app.post("/signup", async (req, res) => {
   try {
     await connectDB();
@@ -221,7 +365,7 @@ app.post("/signup", async (req, res) => {
     const existing = await User.findOne({ email });
     if (existing) return res.status(409).json({ error: "Email already registered" });
     const hash = await bcrypt.hash(password, 10);
-    const user = await User.create({ email, password: hash });
+    const user = await User.create({ email, password: hash, isVerified: false });
     res.json({ message: "Account created", userId: user._id });
   } catch (err) { res.status(500).json({ error: "Signup failed: " + err.message }); }
 });
@@ -237,6 +381,44 @@ app.post("/login", async (req, res) => {
     const token = jwt.sign({ id: user._id, plan: user.plan }, process.env.JWT_SECRET || "BLOOM_SECRET", { expiresIn: "30d" });
     res.json({ token, plan: user.plan, email: user.email, messageCount: user.messageCount });
   } catch (err) { res.status(500).json({ error: "Login failed: " + err.message }); }
+});
+
+// FORGOT PASSWORD — send reset link
+app.post("/forgot-password", async (req, res) => {
+  try {
+    await connectDB();
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: "Email required" });
+    const user = await User.findOne({ email });
+    // Always return success (don't reveal if email exists)
+    if (!user) return res.json({ message: "If this email is registered, a reset link has been sent." });
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const resetTokenExpiry = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+    await User.findByIdAndUpdate(user._id, { resetToken, resetTokenExpiry });
+    const resetUrl = `${process.env.APP_URL || 'https://bloom-fertility.onrender.com'}/reset-password?token=${resetToken}&email=${encodeURIComponent(email)}`;
+    await sendResetEmail(email, resetUrl);
+    res.json({ message: "If this email is registered, a reset link has been sent." });
+  } catch (err) {
+    console.error("Forgot password error:", err.message);
+    res.status(500).json({ error: "Could not send reset email." });
+  }
+});
+
+// RESET PASSWORD — set new password using token
+app.post("/reset-password", async (req, res) => {
+  try {
+    await connectDB();
+    const { email, token, newPassword } = req.body;
+    if (!email || !token || !newPassword) return res.status(400).json({ error: "All fields required" });
+    const user = await User.findOne({ email, resetToken: token });
+    if (!user) return res.status(400).json({ error: "Invalid or expired reset link." });
+    if (new Date() > user.resetTokenExpiry) return res.status(400).json({ error: "Reset link expired. Please request a new one." });
+    const hash = await bcrypt.hash(newPassword, 10);
+    await User.findByIdAndUpdate(user._id, { password: hash, resetToken: null, resetTokenExpiry: null });
+    res.json({ message: "Password reset successfully. You can now sign in." });
+  } catch (err) {
+    res.status(500).json({ error: "Could not reset password." });
+  }
 });
 
 app.get("/me", auth, async (req, res) => {
@@ -423,7 +605,9 @@ app.post('/webhook/razorpay', express.raw({ type: 'application/json' }), async (
   res.json({ status: 'ok' });
 });
 
-// -- ROADMAP CONTENT API --
+// ─────────────────────────────────────────────
+//  ROADMAP CONTENT API
+// ─────────────────────────────────────────────
 app.post("/roadmap-content", auth, async (req, res) => {
   try {
     await connectDB();
@@ -467,47 +651,75 @@ app.post("/roadmap-content", auth, async (req, res) => {
       if (p.symptoms && p.symptoms.length) lines.push(`Symptoms: ${p.symptoms.join(', ')}`);
       if (p.medications && p.medications.length) lines.push(`Medications: ${p.medications.join(', ')}`);
       if (p.ttcDuration) lines.push(`TTC duration: ${p.ttcDuration}`);
-      if (p.gravida) lines.push(`Previous pregnancies: ${p.gravida}`);
+      // Obstetric history
+      if (p.obsGravida !== undefined) lines.push(`Gravida: ${p.obsGravida}`);
+      if (p.obsPara !== undefined) lines.push(`Para: ${p.obsPara}`);
+      if (p.obsAbortions !== undefined) lines.push(`Abortions: ${p.obsAbortions} (Spontaneous: ${p.obsSpontaneous||0}, Induced: ${p.obsInduced||0})`);
+      if (p.obsLiving !== undefined) lines.push(`Living children: ${p.obsLiving}`);
+      if (p.obsDeliveryModes && p.obsDeliveryModes.length) lines.push(`Delivery modes: ${p.obsDeliveryModes.join(', ')}`);
+      if (p.obsLscsReasons && p.obsLscsReasons.length) lines.push(`LSCS reasons: ${p.obsLscsReasons.join(', ')}`);
+      if (p.obsComplications && p.obsComplications.length) lines.push(`Obstetric complications: ${p.obsComplications.join(', ')}`);
+      if (p.obsPriorMedications) lines.push(`Prior medications in pregnancy: ${p.obsPriorMedications}`);
+      if (p.obsPriorSurgeries) lines.push(`Prior surgeries: ${p.obsPriorSurgeries}`);
       if (p.pregnancyOutcomes && p.pregnancyOutcomes.length) lines.push(`Outcomes: ${p.pregnancyOutcomes.join(', ')}`);
       if (p.semenAnalysis && p.semenAnalysis.length) lines.push(`Semen analysis: ${p.semenAnalysis.join(', ')}`);
       if (p.prevTreatments && p.prevTreatments.length) lines.push(`Previous treatments: ${p.prevTreatments.join(', ')}`);
       if (p.fertilityConditions && p.fertilityConditions.length) lines.push(`Fertility conditions: ${p.fertilityConditions.join(', ')}`);
       if (p.previousSurgeries && p.previousSurgeries.length) lines.push(`Previous surgeries: ${p.previousSurgeries.join(', ')}`);
+      // Hormones
       if (p.amh) lines.push(`AMH: ${p.amh} ng/mL ${p.amh < 1.0 ? '(LOW)' : p.amh < 1.5 ? '(borderline low)' : '(normal)'}`);
       if (p.fsh) lines.push(`FSH: ${p.fsh} IU/L ${p.fsh > 10 ? '(ELEVATED)' : '(normal)'}`);
       if (p.lh) lines.push(`LH: ${p.lh} IU/L${p.fsh && p.lh/p.fsh > 2 ? ' (LH:FSH >2 -- PCOS pattern)' : ''}`);
       if (p.tsh) lines.push(`TSH: ${p.tsh} mIU/L ${p.tsh > 2.5 ? '(above TTC optimal)' : '(optimal)'}`);
       if (p.prolactin) lines.push(`Prolactin: ${p.prolactin} ng/mL ${p.prolactin > 25 ? '(ELEVATED)' : '(normal)'}`);
       if (p.testosterone) lines.push(`Testosterone: ${p.testosterone} ng/dL ${p.testosterone > 70 ? '(ELEVATED)' : '(normal)'}`);
-      if (p.dheas) lines.push(`DHEA-S: ${p.dheas} ug/dL`);
       if (p.hb) lines.push(`Hb: ${p.hb} g/dL ${p.hb < 11 ? '(ANAEMIC)' : '(normal)'}`);
       if (p.ferritin) lines.push(`Ferritin: ${p.ferritin} ng/mL`);
-      if (p.fastingGlucose) lines.push(`Fasting glucose: ${p.fastingGlucose} mg/dL ${p.fastingGlucose > 100 ? '(elevated)' : '(normal)'}`);
-      if (p.hba1c) lines.push(`HbA1c: ${p.hba1c}%`);
-      if (p.fastingInsulin) lines.push(`Fasting insulin: ${p.fastingInsulin} uIU/mL`);
+      if (p.fastingGlucose) lines.push(`Fasting glucose: ${p.fastingGlucose} mg/dL`);
       if (p.vitaminD) lines.push(`Vitamin D: ${p.vitaminD} ng/mL ${p.vitaminD < 20 ? '(DEFICIENT)' : p.vitaminD < 30 ? '(insufficient)' : '(normal)'}`);
-      if (p.vitaminB12) lines.push(`B12: ${p.vitaminB12} pg/mL ${p.vitaminB12 < 200 ? '(LOW)' : '(normal)'}`);
-      if (p.afc) lines.push(`AFC: ${p.afc} ${p.afc < 5 ? '(LOW)' : p.afc < 10 ? '(borderline)' : '(normal)'}`);
-      if (p.endometrialThickness) lines.push(`Endometrial thickness: ${p.endometrialThickness} mm`);
+      if (p.afc) lines.push(`AFC: ${p.afc}`);
       if (p.usgFindings && p.usgFindings.length) lines.push(`USG findings: ${p.usgFindings.join(', ')}`);
       if (p.hsgResult) lines.push(`HSG result: ${p.hsgResult}`);
       if (p.workupStatus) lines.push(`Workup status: ${p.workupStatus}`);
       if (p.txPhase) lines.push(`Treatment phase: ${p.txPhase}`);
-      if (p.cycleDay) lines.push(`Cycle day: ${p.cycleDay}`);
-      if (p.nextStep) lines.push(`Next step: ${p.nextStep}`);
-      if (p.concerns) lines.push(`Concerns: ${p.concerns}`);
+      // Pregnancy
       if (p.pregLmp) lines.push(`Pregnancy LMP: ${p.pregLmp}`);
       if (p.pregEdd) lines.push(`EDD: ${p.pregEdd}`);
+      if (p.pregHighRisk && p.pregHighRisk.length) lines.push(`High risk factors: ${p.pregHighRisk.join(', ')}`);
+      // ANC extended labs
       if (p.ancHb1) lines.push(`ANC Hb 1st trim: ${p.ancHb1} g/dL ${p.ancHb1 < 11 ? '(ANAEMIC)' : ''}`);
       if (p.ancHb2) lines.push(`ANC Hb 2nd trim: ${p.ancHb2} g/dL ${p.ancHb2 < 10.5 ? '(ANAEMIC)' : ''}`);
-      if (p.ancOgttFasting) lines.push(`OGTT fasting: ${p.ancOgttFasting}, 1hr: ${p.ancOgtt1hr || '?'}, 2hr: ${p.ancOgtt2hr || '?'} mg/dL`);
-      if (p.ancTsh) lines.push(`ANC TSH: ${p.ancTsh} mIU/L`);
+      if (p.ancHb3) lines.push(`ANC Hb 3rd trim: ${p.ancHb3} g/dL ${p.ancHb3 < 11 ? '(ANAEMIC)' : ''}`);
+      if (p.ancTlc) lines.push(`TLC: ${p.ancTlc} ×10³/µL`);
+      if (p.ancPlateletCount) lines.push(`Platelets: ${p.ancPlateletCount} ×10³/µL ${p.ancPlateletCount < 150 ? '(LOW)' : ''}`);
+      if (p.ancRbs) lines.push(`RBS: ${p.ancRbs} mg/dL ${p.ancRbs > 140 ? '(ELEVATED)' : ''}`);
+      if (p.ancSgpt) lines.push(`SGPT/ALT: ${p.ancSgpt} U/L ${p.ancSgpt > 40 ? '(ELEVATED)' : ''}`);
+      if (p.ancSgot) lines.push(`SGOT/AST: ${p.ancSgot} U/L ${p.ancSgot > 40 ? '(ELEVATED)' : ''}`);
+      if (p.ancUrea) lines.push(`Blood urea: ${p.ancUrea} mg/dL ${p.ancUrea > 40 ? '(ELEVATED)' : ''}`);
+      if (p.ancCreatinine) lines.push(`Creatinine: ${p.ancCreatinine} mg/dL ${p.ancCreatinine > 0.9 ? '(ELEVATED)' : ''}`);
+      if (p.ancUricAcid) lines.push(`Serum uric acid: ${p.ancUricAcid} mg/dL ${p.ancUricAcid > 5.5 ? '(ELEVATED -- pre-eclampsia risk)' : ''}`);
+      if (p.ancVdrl) lines.push(`VDRL: ${p.ancVdrl}`);
+      if (p.ancHiv) lines.push(`HIV: ${p.ancHiv}`);
+      if (p.ancHbsag) lines.push(`HBsAg: ${p.ancHbsag}`);
+      if (p.ancHcv) lines.push(`HCV: ${p.ancHcv}`);
+      // APLA
+      if (p.ancAplaLupus) lines.push(`Lupus anticoagulant: ${p.ancAplaLupus}`);
+      if (p.ancAnticardiolipin) lines.push(`Anticardiolipin Ab: ${p.ancAnticardiolipin}`);
+      if (p.ancBeta2Gp1) lines.push(`Anti-β2-GP1: ${p.ancBeta2Gp1}`);
+      // More ANC
+      if (p.ancTsh) lines.push(`ANC TSH: ${p.ancTsh} mIU/L ${p.ancTsh > 2.5 ? '(above optimal)' : ''}`);
+      if (p.ancFt4) lines.push(`Free T4: ${p.ancFt4}`);
+      if (p.ancAntiTpo) lines.push(`Anti-TPO: ${p.ancAntiTpo} IU/mL ${p.ancAntiTpo > 35 ? '(POSITIVE)' : ''}`);
+      if (p.ancFerritin) lines.push(`ANC Ferritin: ${p.ancFerritin} ng/mL`);
+      if (p.ancOgttFasting) lines.push(`OGTT fasting: ${p.ancOgttFasting}, 1hr: ${p.ancOgtt1hr||'?'}, 2hr: ${p.ancOgtt2hr||'?'} mg/dL`);
+      if (p.ancUrineProtein) lines.push(`Urine protein: ${p.ancUrineProtein}`);
+      if (p.ancGbs) lines.push(`Group B Strep: ${p.ancGbs}`);
       if (p.ancNuchalNt) lines.push(`Nuchal NT: ${p.ancNuchalNt} mm`);
       if (p.ancAnomalyScan) lines.push(`Anomaly scan: ${p.ancAnomalyScan}`);
       if (p.ancPlacentaPos) lines.push(`Placenta: ${p.ancPlacentaPos}`);
-      if (p.pregHighRisk && p.pregHighRisk.length) lines.push(`High risk: ${p.pregHighRisk.join(', ')}`);
       if (p.bpReading1) lines.push(`BP reading 1: ${p.bpReading1}${p.bpReading1Date ? ' on ' + p.bpReading1Date : ''}`);
       if (p.bpReading2) lines.push(`BP reading 2: ${p.bpReading2}${p.bpReading2Date ? ' on ' + p.bpReading2Date : ''}`);
+      if (p.concerns) lines.push(`Concerns: ${p.concerns}`);
       if (p.notes) lines.push(`Notes: ${p.notes}`);
       return lines.join('\n');
     }
@@ -515,7 +727,7 @@ app.post("/roadmap-content", auth, async (req, res) => {
     const clinicalStage = determineClinicalStage(profile);
     const clinicalContext = buildClinicalContext(profile);
 
-    // POSTPARTUM
+    // ── POSTPARTUM ──
     if (journey === 'postpartum') {
       const ppStageLabel = { day1_3: 'Day 1-3 after birth', week1_2: 'Week 1-2 postpartum', week3_6: 'Week 3-6 postpartum', '6week_check': '6-week postnatal check', month3: '3 months postpartum', month6: '6 months postpartum' }[ppStage] || 'postpartum';
       const ppQuery = `postpartum breastfeeding newborn baby care recovery immunization vaccination ${ppStage}`;
@@ -523,34 +735,80 @@ app.post("/roadmap-content", auth, async (req, res) => {
 
       const ppSectionPrompts = {
         overview: `Generate a comprehensive postpartum overview for ${ppStageLabel}. Cover: physical recovery, emotional wellbeing, what is normal vs warning signs. Warm and specific.`,
+
         breastfeeding: `Generate detailed breastfeeding guidance for ${ppStageLabel}. Cover: feeding frequency (8-12 times/day newborn), latch technique, milk supply, engorgement, mastitis (signs and treatment), sore nipples, blocked ducts, when to seek lactation support. Indian-context advice.`,
+
         recovery: `Generate postpartum recovery guidance for ${ppStageLabel}. Cover: lochia (normal progression: red->pink->white), perineal care (stitches, sitz bath), C-section wound care if relevant, when to return to exercise, postpartum blues vs PPD (Edinburgh score mention), when to see doctor urgently.`,
-        baby_care: `Generate baby care guidance for ${ppStageLabel}. Cover: feeding cues (rooting, sucking hands), wet nappy count (6+ per day by day 5 = adequate feeding), sleep patterns (normal newborn sleep), umbilical cord care (dry method), bathing, skin care (vernix, milia), jaundice (physiological vs pathological), temperature check, when to call paediatrician URGENTLY. Keep practical.`,
+
+        baby_care: `Generate DETAILED baby care guidance for ${ppStageLabel}.
+
+INCLUDE ALL of the following appropriate to stage:
+→ Feeding: cues, frequency, wet nappy count (6+ per day by day 5 = adequate)
+→ Sleep: normal patterns, safe sleep position (supine), room temperature
+→ Umbilical cord: dry care, when it falls off (7-14 days), signs of infection
+→ Skin: vernix, milia, erythema toxicum, neonatal acne — what is normal
+→ Jaundice: physiological (day 2-5, resolves by day 14) vs pathological (first 24hrs, >14 days, very yellow) — when to get bilirubin checked
+→ Weight: normal loss 7-10% in first week, regain by 2 weeks
+→ Temperature: normal 36.5-37.5°C, when to go to hospital (any fever <3 months = emergency)
+→ Colic and crying: causes, soothing techniques (5 S's: swaddle, side/stomach, shush, swing, suck)
+→ Constipation: normal in breastfed baby (can go days without stool)
+→ Rashes: heat rash, cradle cap, eczema — management
+→ Vision and hearing: what baby can see/hear at this stage
+→ Development: milestones to watch for 0-6 months (smiling at 6w, head control at 3m, rolling at 4-5m, sitting at 6m)
+→ Baby complaints: NOT feeding / refusing feeds, excessive crying, blood in stool, green watery stools, projectile vomiting, not passing meconium (first 24hrs), blue lips, grunting breathing
+→ URGENT signs: go to hospital NOW — fever >38°C in under 3 months, blue lips/tongue, not breathing normally, seizures, inconsolable high-pitched cry, bulging fontanelle, very yellow skin
+→ Paediatrician review: when to book, routine follow-up schedule
+Keep it practical. Indian context.`,
+
         immunization: `Generate complete immunization schedule for ${ppStageLabel}.
 
-BABY -- Indian National Immunization Schedule:
-Birth: BCG, OPV-0, Hepatitis B (birth dose within 24 hours)
-6 weeks: DTwP-1, IPV-1, Hib-1, HepB-2, PCV-1, Rotavirus-1
-10 weeks: DTwP-2, IPV-2, Hib-2, PCV-2, Rotavirus-2
-14 weeks: DTwP-3, IPV-3, Hib-3, HepB-3, PCV-3, Rotavirus-3
-6 months: OPV-1, Influenza-1
-9 months: MMR-1, OPV-2
-12 months: Hepatitis A-1
-15 months: MMR-2, Varicella-1, PCV booster
-18 months: DTwP booster-1, IPV booster, Hib booster, Hepatitis A-2
+BABY — Indian National Immunization Schedule (complete):
+→ Birth (within 24 hours): BCG (left shoulder, intradermal) — protects against TB
+→ Birth (within 24 hours): OPV-0 (oral) — polio
+→ Birth (within 24 hours): Hepatitis B (birth dose) — hepatitis B
+→ 6 weeks: DTwP-1 or DTaP-1, IPV-1, Hib-1, HepB-2, PCV-1, Rotavirus-1
+→ 10 weeks: DTwP-2, IPV-2, Hib-2, PCV-2, Rotavirus-2
+→ 14 weeks: DTwP-3, IPV-3, Hib-3, HepB-3, PCV-3, Rotavirus-3
+→ 6 months: OPV-1, Influenza-1 (first dose, repeat after 4 weeks, then annually)
+→ 9 months: MMR-1, OPV-2, Vitamin A (first dose)
+→ 12 months: Hepatitis A-1
+→ 15 months: MMR-2, Varicella-1, PCV booster
+→ 18 months: DTwP booster-1, IPV booster, Hib booster, Hepatitis A-2
 
-MOTHER after birth:
-TT/Td if incomplete during pregnancy
-Rubella if non-immune (no breastfeeding 28 days after)
-Flu vaccine (safe while breastfeeding)
+Additional recommended (private):
+→ Meningococcal, Typhoid conjugate, HPV (girls 9-14 years)
 
-Specify which vaccines are due at ${ppStageLabel}. Explain what each protects against simply.`,
-        supplements: `Generate postpartum nutrition and supplement guidance for ${ppStageLabel}. Cover: iron replacement (if Hb low after delivery), calcium 1000-1200mg (crucial while breastfeeding), vitamin D, omega-3 DHA, B12, hydration (3L/day minimum while breastfeeding). Indian foods that boost milk supply (methi, jeera, dill, saunf, ragi). Foods to moderate while breastfeeding. Include Indian brand names.`,
+MOTHER after delivery:
+→ TT/Td if incomplete during pregnancy
+→ Rubella if non-immune (avoid pregnancy for 28 days after)
+→ Flu vaccine (safe while breastfeeding)
+
+Specify which vaccines are due at ${ppStageLabel}. What each protects against. Common side effects to expect. When to call doctor post-vaccination.`,
+
+        supplements: `Generate postpartum nutrition and supplement guidance for ${ppStageLabel}. Cover: iron (if Hb low after delivery), calcium 1000-1200mg (crucial while breastfeeding — depletes maternal bone), vitamin D, omega-3 DHA (200mg for breastfeeding), B12, hydration (3L/day minimum while breastfeeding). Indian foods that boost milk supply: methi (fenugreek), jeera water, dill (suva), saunf, ragi, saag, til (sesame), drumstick leaves. Foods to avoid while breastfeeding (gassy foods if baby colicky: cabbage, beans). Include Indian brand names where helpful. Format: → Supplement — Dose — Timing — Why`,
       };
 
-      const ppSystemMsg = `You are Bloom's postpartum and newborn care specialist, created by a licensed Indian gynaecologist.\n\nPatient: ${clinicalContext || 'New mother'}\n\nFORMATTING RULES:\n- Bullet points (*) for all lists, each on own line with blank line between\n- main_content: intro sentence\\n\\n* Point one\\n\\n* Point two\n- No long paragraphs -- max 2 sentences then bullets\n- Warm, supportive tone\n\nFormat as JSON:\n{"main_content":"intro\\n\\n* Point one\\n\\n* Point two","key_points":["Point 1","Point 2","Point 3","Point 4"],"personalised_tip":"1-2 sentences","clinical_note":"important warning","action_items":["Action 1","Action 2","Action 3"]}\n\nReturn ONLY valid JSON.\n\n--- CLINICAL KNOWLEDGE ---\n${relevantKnowledge}\n--- END ---`;
+      const ppSystemMsg = `You are Bloom's postpartum and newborn care specialist, created by a licensed Indian gynaecologist.
 
-      const ppResponse = await groq.chat.completions.create({ model: "llama-3.3-70b-versatile", messages: [{ role: "system", content: ppSystemMsg }, { role: "user", content: ppSectionPrompts[section] || ppSectionPrompts.overview }], max_tokens: 1200, temperature: 0.3 });
+Patient: ${clinicalContext || 'New mother'}
+
+FORMATTING RULES — STRICTLY FOLLOW:
+- Use → (arrow) symbol for ALL bullet points, NOT hyphens or asterisks
+- Leave ONE blank line between each → point for readability
+- main_content format: intro sentence\n\n→ Point one\n\n→ Point two
+- No long paragraphs — max 2 sentences then arrows
+- Warm, supportive tone
+
+Format response as JSON:
+{"main_content":"intro\n\n→ Point one\n\n→ Point two","key_points":["Point 1","Point 2","Point 3","Point 4"],"personalised_tip":"1-2 sentences specific to this patient","clinical_note":"important warning sign or urgent flag","action_items":["→ Action 1","→ Action 2","→ Action 3"]}
+
+Return ONLY valid JSON.
+
+--- CLINICAL KNOWLEDGE ---
+${relevantKnowledge}
+--- END ---`;
+
+      const ppResponse = await groq.chat.completions.create({ model: "llama-3.3-70b-versatile", messages: [{ role: "system", content: ppSystemMsg }, { role: "user", content: ppSectionPrompts[section] || ppSectionPrompts.overview }], max_tokens: 1500, temperature: 0.3 });
       const ppRaw = ppResponse.choices[0].message.content.trim();
       let ppParsed;
       try {
@@ -578,15 +836,40 @@ Specify which vaccines are due at ${ppStageLabel}. Explain what each protects ag
       ivf_active: 'Currently in active IVF cycle',
     };
 
+    // ── SECTION PROMPTS (TTC + PREGNANCY) ──
     let query = '';
     if (journey === 'ttc') {
-      const stageQueries = { early_ttc: 'preconception folic acid cycle tracking ovulation fertile window', needs_workup: 'infertility workup investigations FSH AMH TSH prolactin semen analysis', needs_urgent_workup: 'infertility workup specialist referral investigations urgent', workup_partial: 'infertility investigations results interpretation next steps', workup_complete: 'ovulation induction letrozole clomiphene treatment plan', oi_active: 'ovulation induction letrozole clomiphene follicle monitoring trigger', monitoring: 'follicle scan monitoring luteal phase progesterone support', iui_active: 'IUI cycle preparation timing success rate', pre_ivf: 'IVF pre-treatment optimisation egg quality supplements', ivf_active: 'IVF stimulation monitoring egg retrieval embryo transfer TWW' };
+      const stageQueries = {
+        early_ttc: 'preconception folic acid cycle tracking ovulation fertile window',
+        needs_workup: 'infertility workup investigations FSH AMH TSH prolactin semen analysis',
+        needs_urgent_workup: 'infertility workup specialist referral investigations urgent',
+        workup_partial: 'infertility investigations results interpretation next steps',
+        workup_complete: 'ovulation induction letrozole clomiphene treatment plan',
+        oi_active: 'ovulation induction letrozole clomiphene follicle monitoring trigger',
+        monitoring: 'follicle scan monitoring luteal phase progesterone support',
+        iui_active: 'IUI cycle preparation timing success rate',
+        pre_ivf: 'IVF pre-treatment optimisation egg quality supplements',
+        ivf_active: 'IVF stimulation monitoring egg retrieval embryo transfer TWW',
+      };
       query = stageQueries[clinicalStage] || 'fertility trying to conceive';
     } else {
-      const weekTopics = { 4: 'implantation early pregnancy hCG progesterone', 6: 'fetal heartbeat embryo development viability scan', 8: 'organogenesis teratogens embryo development', 10: 'luteal placental shift first trimester nuchal', 12: 'first trimester nuchal translucency combined screening', 16: 'second trimester fetal movement anatomy scan', 20: 'anomaly scan fetal anatomy ultrasound', 24: 'viability gestational diabetes OGTT fetal movements', 28: 'third trimester preeclampsia monitoring iron anaemia', 32: 'growth scan doppler monitoring third trimester', 36: 'term delivery preparation labour signs birth plan', 38: 'full term labour onset delivery' };
+      const weekTopics = {
+        4: 'implantation early pregnancy hCG progesterone',
+        6: 'fetal heartbeat embryo development viability scan',
+        8: 'organogenesis teratogens embryo development',
+        10: 'luteal placental shift first trimester nuchal',
+        12: 'first trimester nuchal translucency combined screening',
+        16: 'second trimester fetal movement anatomy scan iron supplements',
+        20: 'anomaly scan fetal anatomy ultrasound',
+        24: 'viability gestational diabetes OGTT fetal movements',
+        28: 'third trimester preeclampsia monitoring iron anaemia growth',
+        32: 'growth scan doppler monitoring third trimester',
+        36: 'term delivery preparation labour signs birth plan GBS',
+        38: 'full term labour onset delivery',
+      };
       const weeks = Object.keys(weekTopics).map(Number);
       const closest = weeks.reduce((prev, curr) => Math.abs(curr - week) < Math.abs(prev - week) ? curr : prev);
-      query = weekTopics[closest] || 'pregnancy prenatal care';
+      query = weekTopics[closest] || 'pregnancy prenatal care antenatal';
     }
 
     const syms = profile.symptoms || [];
@@ -604,42 +887,183 @@ Specify which vaccines are due at ${ppStageLabel}. Explain what each protects ag
       ? `\nPATIENT CHECK-IN THIS WEEK: ${checkin.chips.join(', ')}${checkin.notes ? '\nNotes: ' + checkin.notes : ''}`
       : '';
 
-    // ── SECTION PROMPTS ── //
+    // Build a comprehensive ANC context string for the AI
+    const ancSummary = [];
+    if (profile.ancHb1 || profile.ancHb2 || profile.ancHb3) {
+      const hbVals = [profile.ancHb1 && `1st trim: ${profile.ancHb1}`, profile.ancHb2 && `2nd trim: ${profile.ancHb2}`, profile.ancHb3 && `3rd trim: ${profile.ancHb3}`].filter(Boolean);
+      ancSummary.push(`Hb: ${hbVals.join(', ')} g/dL`);
+    }
+    if (profile.ancTlc) ancSummary.push(`TLC: ${profile.ancTlc}`);
+    if (profile.ancPlateletCount) ancSummary.push(`Platelets: ${profile.ancPlateletCount}`);
+    if (profile.ancRbs) ancSummary.push(`RBS: ${profile.ancRbs} mg/dL`);
+    if (profile.ancSgpt || profile.ancSgot) ancSummary.push(`LFT: SGPT ${profile.ancSgpt||'?'}, SGOT ${profile.ancSgot||'?'} U/L`);
+    if (profile.ancUrea || profile.ancCreatinine) ancSummary.push(`RFT: Urea ${profile.ancUrea||'?'} mg/dL, Creatinine ${profile.ancCreatinine||'?'} mg/dL`);
+    if (profile.ancUricAcid) ancSummary.push(`Uric acid: ${profile.ancUricAcid} mg/dL`);
+    if (profile.ancAplaLupus || profile.ancAnticardiolipin || profile.ancBeta2Gp1) {
+      ancSummary.push(`APLA: LA=${profile.ancAplaLupus||'?'}, aCL=${profile.ancAnticardiolipin||'?'}, β2GP1=${profile.ancBeta2Gp1||'?'}`);
+    }
+    if (profile.ancTsh) ancSummary.push(`TSH: ${profile.ancTsh} mIU/L`);
+    if (profile.ancAntiTpo) ancSummary.push(`Anti-TPO: ${profile.ancAntiTpo} IU/mL`);
+    if (profile.ancOgttFasting) ancSummary.push(`OGTT: F=${profile.ancOgttFasting}, 1h=${profile.ancOgtt1hr||'?'}, 2h=${profile.ancOgtt2hr||'?'} mg/dL`);
+    const ancContext = ancSummary.length ? `\nANC investigations done:\n${ancSummary.join('\n')}` : '';
+
     const sectionPrompts = {
 
       overview: journey === 'pregnancy'
         ? `Generate a personalised clinical overview for WEEK ${week} of PREGNANCY.
-This is a PREGNANCY journey -- do NOT reference TTC or trying to conceive.
+This is an ACTIVE PREGNANCY — do NOT mention TTC, fertility investigations, HSG, semen analysis, or trying to conceive.
 Trimester: ${week <= 13 ? 'First' : week <= 26 ? 'Second' : 'Third'} trimester.
 ${checkinContext}
-Address what is happening at Week ${week} of pregnancy, what the patient should focus on this week, and any personalised notes based on her profile and ANC results.`
-        : `Generate a personalised clinical overview.
+
+Cover:
+→ What is happening with baby and mother's body at Week ${week}
+→ Key focus areas this week
+→ Any personalised notes based on her ANC results and obstetric history
+→ What to watch out for this specific week
+
+Patient obstetric history: G${profile.obsGravida||'?'}P${profile.obsPara||'?'}A${profile.obsAbortions||'?'}L${profile.obsLiving||'?'}
+${ancContext}
+High risk factors: ${profile.pregHighRisk && profile.pregHighRisk.length ? profile.pregHighRisk.join(', ') : 'none documented'}`
+
+        : `Generate a personalised clinical overview for TTC.
 STAGE: ${stageDescriptions[clinicalStage]}
-TIME: TTC journey
 ${checkinContext}
 Address her specific stage, conditions, and results directly. What is the priority right now?`,
 
-      lifestyle: journey === 'ttc'
-        ? `Generate lifestyle and ovulation timing guidance combined.
-STAGE: ${stageDescriptions[clinicalStage]}
-${checkinContext}
-SECTION 1 -- LIFESTYLE: Indian-friendly diet for her conditions, exercise (type and frequency), sleep, stress. Specific to her profile.
-SECTION 2 -- TIMING & OPK: Fertile window calculation for ${profile.cycleLength || 28}-day cycle, OPK strip use, intercourse timing, cervical mucus tracking. PCOS irregular cycle advice if relevant. Treatment monitoring tips if on OI/IUI.`
-        : `Generate lifestyle and monitoring guidance combined for Week ${week} of PREGNANCY.
-This is a PREGNANCY journey -- do NOT reference TTC or trying to conceive.
+      lifestyle: journey === 'pregnancy'
+        ? `Generate lifestyle and monitoring guidance for Week ${week} of PREGNANCY.
+This is an ACTIVE PREGNANCY — no TTC references.
 Trimester: ${week <= 13 ? 'First' : week <= 26 ? 'Second' : 'Third'} trimester.
 ${checkinContext}
-SECTION 1 -- LIFESTYLE: Diet, exercise, sleep, stress for this trimester. Indian foods.
-SECTION 2 -- MONITORING: Scans/tests due this week, warning signs, upcoming appointments.`,
 
-      timing: journey === 'ttc'
-        ? `Generate fertile window and ovulation timing guidance.
-Cycle: ${profile.cycleRegularity || 'unknown'}, ${profile.cycleLength || 28} days.
-Cover OPK timing, intercourse timing, PCOS irregular cycle advice, OI monitoring if on treatment.`
-        : `Generate pregnancy monitoring guidance for Week ${week} of PREGNANCY.
-This is a PREGNANCY journey -- do NOT reference TTC or trying to conceive.
+Cover:
+→ Diet for this trimester (Indian foods) — include specific foods for anaemia if Hb low
+→ Safe exercise (walking, prenatal yoga — what to avoid)
+→ Sleep (left lateral position from Week 20 onwards and why)
+→ Work and activity restrictions if any
+→ Emotional wellbeing and stress management
+→ Sexual activity — what is safe/unsafe at this stage
+→ Travel — what is allowed at this week`
+
+        : `Generate lifestyle and ovulation timing guidance for TTC.
+STAGE: ${stageDescriptions[clinicalStage]}
 ${checkinContext}
-What scans/tests are due, what to track, warning signs, upcoming appointments.`,
+Cover diet, exercise, sleep, stress, fertile window for ${profile.cycleLength||28}-day cycle, OPK use, PCOS irregular cycle advice if relevant.`,
+
+      supplements: (function(){
+        let p = journey === 'pregnancy'
+          ? `Generate supplement guidance for WEEK ${week} of PREGNANCY.
+This is an ACTIVE PREGNANCY — do NOT reference TTC.
+Trimester: ${week <= 13 ? 'First' : week <= 26 ? 'Second' : 'Third'} trimester.
+${ancContext}
+`
+          : `Generate specific supplement protocol for TTC.
+STAGE: ${stageDescriptions[clinicalStage]||clinicalStage}
+`;
+        if(checkinContext) p += 'CHECK-IN SYMPTOMS: ' + (checkin && checkin.chips ? checkin.chips.join(', ') : '') + '\nAddress each symptom with supplement/dietary advice. Flag bleeding/reduced movements/headache/swelling as URGENT first.\n';
+        if(journey === 'pregnancy' && (profile.bpReading1 || profile.bpReading2)) {
+          const bp1 = profile.bpReading1 || '';
+          const sys = parseInt(bp1.split('/')[0]) || 0;
+          const dia = parseInt(bp1.split('/')[1]) || 0;
+          p += `BP READINGS: ${bp1}${profile.bpReading2 ? ' / '+profile.bpReading2 : ''}\n`;
+          if (sys >= 140 || dia >= 90) p += 'ALERT: BP is above 140/90 — flag pre-eclampsia risk prominently. Advise: rest, reduce salt, avoid NSAIDs, contact doctor urgently.\n';
+        }
+        if(journey === 'pregnancy') {
+          p += `STRICT PREGNANCY SUPPLEMENT RULES:
+→ Folic acid 5mg: Weeks 1-12 ONLY (neural tube protection)
+→ Iron 60mg: Week 14+ (elemental iron, take with Vitamin C on empty stomach)
+→ Calcium 500mg BD: Week 16+
+→ Vitamin D 1000 IU: Safe throughout
+→ DHA 200mg: Week 16+ (brain development)
+→ Aspirin 75-150mg: only if pre-eclampsia risk factors present, from 12-16 weeks
+Current week: ${week}
+If Hb is low — emphasise iron-rich Indian foods (green leafy vegetables, til, jaggery, meat) and iron supplement timing.`;
+        } else {
+          p += 'TTC SUPPLEMENTS:\n';
+          if(syms.includes('pcos_diagnosed')) p += '→ PCOS: Myo-inositol 2g + D-chiro-inositol 50mg BD, Vitamin D, NAC 600mg, Omega-3\n';
+          if(profile.amh && profile.amh < 1.5) p += '→ Low AMH: CoQ10 ubiquinol 400-600mg, DHEA 25mg (doctor supervised), Vitamin D\n';
+          if(profile.vitaminD && profile.vitaminD < 30) p += `→ Vitamin D ${profile.vitaminD} ng/mL (deficient): 60,000 IU weekly x 8 weeks\n`;
+          p += '→ Universal TTC: Folic acid 5mg, Vitamin D 1000 IU, Omega-3 1g';
+        }
+        p += '\nInclude Indian brand names. Format: → Supplement — Dose — Timing — Why';
+        return p;
+      })(),
+
+      // ── INVESTIGATIONS TAB — FULLY PREGNANCY-AWARE ──
+      pretreatment: journey === 'pregnancy'
+        ? `Generate a PREGNANCY INVESTIGATIONS guide specifically for WEEK ${week}.
+
+This is an ACTIVE PREGNANCY. Do NOT mention HSG, semen analysis, AMH, FSH, or fertility investigations.
+The Investigations tab should only show ANTENATAL (ANC) tests relevant to pregnancy.
+
+Patient: G${profile.obsGravida||'?'}P${profile.obsPara||'?'}A${profile.obsAbortions||'?'}L${profile.obsLiving||'?'}
+Week: ${week}, Trimester: ${week <= 13 ? 'First' : week <= 26 ? 'Second' : 'Third'}
+High risk: ${profile.pregHighRisk && profile.pregHighRisk.length ? profile.pregHighRisk.join(', ') : 'none'}
+${ancContext}
+
+Structure your response as:
+
+SECTION 1 — TESTS DUE THIS WEEK (Week ${week}):
+List ONLY investigations appropriate for Week ${week}. For each test:
+→ Test name — why it's done at this stage — what a normal result looks like — what to do if abnormal
+
+IMPORTANT WEEK-SPECIFIC GUIDANCE:
+- Weeks 6-10: viability scan, booking bloods (blood group, Rh, CBC, VDRL, HIV, HBsAg, HCV, TSH, urine)
+- Weeks 11-13: Nuchal translucency scan, combined first trimester screening (PAPP-A, free β-hCG)
+- Week 16: CBC (Hb check), TSH, ferritin, urine routine
+- Weeks 18-22: Anomaly scan (level II USG) — detailed anatomy
+- Weeks 24-28: OGTT (75g — fasting, 1hr, 2hr), CBC, urine protein
+- Week 28+: Anti-D if Rh negative
+- Weeks 28-32: Growth scan, Doppler if indicated
+- Weeks 32-36: CBC, urine protein, LFT, RFT (urea, creatinine, uric acid) if preeclampsia risk
+- Weeks 35-37: Group B Strep swab (GBS)
+- APLA profile: if recurrent miscarriage history, prior preeclampsia, IUGR, antiphospholipid syndrome suspected
+
+SECTION 2 — RESULTS INTERPRETATION:
+Based on her actual ANC values entered, interpret any abnormal results and give specific advice.
+${ancContext}
+
+SECTION 3 — UPCOMING INVESTIGATIONS:
+Next 4 weeks — what to plan and book.
+
+SECTION 4 — HIGH RISK MONITORING:
+If she has any high risk factors (${profile.pregHighRisk && profile.pregHighRisk.length ? profile.pregHighRisk.join(', ') : 'none'}), what additional monitoring is needed.`
+
+        : `Generate investigation and pre-treatment guidance for TTC.
+WORKUP: ${profile.workupStatus || 'not specified'}
+DONE: ${profile.investigationsDone && profile.investigationsDone.length ? profile.investigationsDone.join(', ') : 'none'}
+${!profile.workupStatus || profile.workupStatus === 'no_workup' ? 'No investigations done. Give prioritised list of what to get done, cycle day timing, and why.' : 'What is still missing? What happens in next 4-8 weeks?'}
+Format each investigation as: → Test name — When to do it — Why it matters — Normal range`,
+
+      immunization: journey === 'pregnancy'
+        ? `Generate pregnancy immunization guidance for Week ${week} of PREGNANCY.
+This is a PREGNANCY — do NOT reference TTC.
+
+INDIA PREGNANCY IMMUNIZATION SCHEDULE:
+→ TT-1: At first ANC contact (before 26 weeks if unimmunized)
+→ TT-2: 4 weeks after TT-1
+→ TT Booster: If previously immunized within 3 years
+→ Td (Tetanus + Diphtheria): Preferred over TT in many centres
+→ Flu vaccine: Recommended in all trimesters during flu season
+→ COVID booster: Safe in 2nd/3rd trimester
+
+VACCINES TO AVOID in pregnancy (live vaccines): MMR, Varicella, BCG
+
+Immunization status from profile:
+TT-1: ${profile.immTt1Date || 'not recorded'}
+TT-2/Td: ${profile.immTdDate || 'not recorded'}
+Flu: ${profile.immFluDate || 'not recorded'}
+
+Specify what is due at Week ${week}. Why each vaccine matters. What to plan for post-delivery.`
+        : `Generate pre-conception immunization guidance for TTC.
+Check: rubella immunity, Hepatitis B, Varicella, HPV, flu, COVID. Why pre-conception immunization matters. What CANNOT be given once pregnant.
+Format: → Vaccine — Who needs it — When — Why`,
+
+      // TTC-specific sections
+      lifestyle_ttc: `Generate lifestyle and ovulation timing guidance for TTC.
+STAGE: ${stageDescriptions[clinicalStage]}
+${checkinContext}
+Cover: Indian diet for her conditions, exercise, sleep, stress, fertile window, OPK use.`,
 
       hormones: (function(){
         const vals = [];
@@ -653,78 +1077,48 @@ What scans/tests are due, what to track, warning signs, upcoming appointments.`,
         if(profile.ferritin) vals.push('Ferritin ' + profile.ferritin + ' ng/mL');
         if(profile.afc) vals.push('AFC ' + profile.afc);
         const valsText = vals.length ? 'Interpret her values:\n' + vals.join('\n') : 'No hormone tests done yet. Explain which tests she needs and when.';
-        return 'Generate a My Results summary for this patient.\nSTAGE: ' + (stageDescriptions[clinicalStage]||clinicalStage) + '\n' + valsText + '\nFor each value: what is normal, is hers normal, what does it mean for her fertility/health. Be direct.';
+        return `Generate a My Results summary for this patient.
+STAGE: ${stageDescriptions[clinicalStage]||clinicalStage}
+${valsText}
+For each value: what is normal, is hers normal, what does it mean for her fertility/health.
+Format: → Test — Her value — Normal range — What it means — Action needed`;
       })(),
-
-      supplements: (function(){
-        let p = journey === 'pregnancy'
-          ? `Generate supplement guidance for WEEK ${week} of PREGNANCY.\nThis is a PREGNANCY journey -- do NOT reference TTC.\nTrimester: ${week <= 13 ? 'First' : week <= 26 ? 'Second' : 'Third'} trimester.\n`
-          : `Generate specific supplement protocol.\nSTAGE: ${stageDescriptions[clinicalStage]||clinicalStage}\n`;
-        if(checkinContext) p += 'CHECK-IN SYMPTOMS: ' + (checkin && checkin.chips ? checkin.chips.join(', ') : '') + '\nAddress each symptom with supplement/dietary advice. Flag bleeding/reduced movements/headache/swelling as URGENT first.\n';
-        if(journey === 'pregnancy' && (profile.bpReading1 || profile.bpReading2)) {
-          p += 'BP READINGS: ' + (profile.bpReading1||'') + (profile.bpReading2 ? ' / '+profile.bpReading2 : '') + '\nIf systolic >= 140 or diastolic >= 90 -- flag pre-eclampsia risk at top. Advise: rest, reduce salt, avoid NSAIDs, contact doctor urgently.\n';
-        }
-        if(journey === 'pregnancy') {
-          p += 'STRICT PREGNANCY SUPPLEMENT RULES:\n- Folic acid 5mg: weeks 1-12 ONLY\n- Iron 60mg: Week 14+ ONLY\n- Calcium: Week 16+ only\n- Vitamin D: safe throughout\nCurrent week: ' + week;
-        } else {
-          p += 'TTC SUPPLEMENTS:\n';
-          if(syms.includes('pcos_diagnosed')) p += '- PCOS: Myo-inositol 2g + D-chiro 50mg BD, Vitamin D, NAC 600mg, Omega-3\n';
-          if(profile.amh && profile.amh < 1.5) p += '- Low AMH: CoQ10 ubiquinol 400-600mg, DHEA 25mg (doctor supervised), Vitamin D\n';
-          if(profile.vitaminD && profile.vitaminD < 30) p += '- Vitamin D ' + profile.vitaminD + ' ng/mL (deficient): 60,000 IU weekly x 8 weeks\n';
-          p += '- Universal TTC: Folic acid 5mg, Vitamin D 1000 IU, Omega-3 1g';
-        }
-        p += '\nInclude Indian brand names. Format: * Supplement -- Dose -- Timing -- Why';
-        return p;
-      })(),
-
-      pretreatment: `Generate investigation and pre-treatment guidance.
-WORKUP: ${profile.workupStatus || 'not specified'}
-DONE: ${profile.investigationsDone && profile.investigationsDone.length ? profile.investigationsDone.join(', ') : 'none'}
-${!profile.workupStatus || profile.workupStatus === 'no_workup' ? 'No investigations done. Prioritised list of what to get done, cycle day timing, why.' : 'What is still missing? What happens in next 4-8 weeks?'}`,
-
-      immunization: journey === 'pregnancy'
-        ? `Generate pregnancy immunization guidance for Week ${week} of PREGNANCY.
-This is a PREGNANCY journey -- do NOT reference TTC.
-
-INDIA PREGNANCY IMMUNIZATION SCHEDULE:
-- TT-1: At first ANC contact (before 26 weeks if unimmunized)
-- TT-2: 4 weeks after TT-1
-- TT Booster: If previously immunized within 3 years
-- Td: Preferred over TT in many centres (tetanus + diphtheria)
-- Flu vaccine: Recommended in all trimesters during flu season
-- COVID booster: Safe in 2nd/3rd trimester
-
-VACCINES TO AVOID in pregnancy: MMR, Varicella, BCG (live vaccines)
-
-Specify what is due at Week ${week}. Why each vaccine matters. What to plan for post-delivery.`
-        : `Generate pre-conception immunization guidance.
-Check: rubella immunity, Hepatitis B, Varicella, HPV, flu, COVID. Why pre-conception immunization matters. What CANNOT be given once pregnant.`,
-
     };
 
-    const prompt = sectionPrompts[section] || sectionPrompts.overview;
+    // Map 'pretreatment' section for TTC
+    let prompt = sectionPrompts[section] || sectionPrompts.overview;
 
-    const systemMsg = `You are Bloom's clinical content engine -- specialist in reproductive medicine and obstetrics, created by a licensed Indian gynaecologist, grounded in evidence-based clinical guidelines.
+    const systemMsg = `You are Bloom's clinical content engine — specialist in reproductive medicine and obstetrics, created by a licensed Indian gynaecologist, grounded in evidence-based clinical guidelines.
 
-Patient clinical profile:\n${clinicalContext}
+Patient clinical profile:
+${clinicalContext}
 
-FORMATTING RULES -- STRICTLY FOLLOW:
-- Use bullet points (*) for all multi-item content
-- Each bullet on its own line with blank line between bullets  
-- main_content: intro sentence\\n\\n* Point one\\n\\n* Point two\\n\\n* Point three
-- key_points: each a single clear sentence
-- action_items: starts with action verb, specific and short
-- NO long paragraphs -- max 2 sentences then bullets
-- Simple language -- explain medical terms in brackets
+FORMATTING RULES — STRICTLY FOLLOW:
+- Use → (arrow) for ALL bullet points throughout the response
+- Leave ONE blank line between each → point for readability
+- main_content format: intro sentence\n\n→ Point one\n\n→ Point two\n\n→ Point three
+- key_points: each a single clear sentence, start with →
+- action_items: start with →, be specific and actionable
+- NO long paragraphs — max 2 sentences then arrows
+- Simple language — explain medical terms in brackets immediately after
+- Adequate spacing between different topics/sections
 
 Format as JSON:
-{"main_content":"intro\\n\\n* Point one\\n\\n* Point two","key_points":["Point 1","Point 2","Point 3","Point 4","Point 5"],"personalised_tip":"Specific to THIS patient's conditions and results","clinical_note":"One important warning or clinical note","action_items":["Action 1","Action 2","Action 3"]}
+{"main_content":"intro\n\n→ Point one\n\n→ Point two","key_points":["→ Point 1","→ Point 2","→ Point 3","→ Point 4","→ Point 5"],"personalised_tip":"Specific to THIS patient based on her actual results and history","clinical_note":"One important warning or urgent clinical note","action_items":["→ Action 1","→ Action 2","→ Action 3"]}
 
 Return ONLY valid JSON. No markdown, no preamble.
 
---- CLINICAL KNOWLEDGE ---\n${relevantKnowledge}\n--- END ---`;
+--- CLINICAL KNOWLEDGE ---
+${relevantKnowledge}
+--- END ---`;
 
-    const response = await groq.chat.completions.create({ model: "llama-3.3-70b-versatile", messages: [{ role: "system", content: systemMsg }, { role: "user", content: prompt }], max_tokens: 1200, temperature: 0.3 });
+    const response = await groq.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
+      messages: [{ role: "system", content: systemMsg }, { role: "user", content: prompt }],
+      max_tokens: 1400,
+      temperature: 0.3,
+    });
+
     const rawText = response.choices[0].message.content.trim();
     let parsed;
     try {
