@@ -23,6 +23,28 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 .container{max-width:100%;padding:1.25rem 1.5rem;overflow-x:hidden;width:100%;}
 .grid{display:grid;grid-template-columns:65fr 35fr;gap:1rem;min-width:0;}
 @media(max-width:900px){.grid{grid-template-columns:1fr;}}
+@media(max-width:700px){
+  .topbar{padding:0 1rem;}
+  .topbar-logo{font-size:26px;}
+  .back-btn{font-size:12px;padding:5px 10px;}
+  .journey-tabs{gap:0;}
+  .jtab{padding:12px 14px;font-size:14px;}
+  .container{padding:1rem;}
+  .sec-tabs{gap:5px;}
+  .stab{padding:8px 13px;font-size:14px;}
+  .week-nav{gap:4px;}
+  .wk-btn{padding:5px 10px;font-size:12px;}
+  .stage-path{flex-wrap:wrap;gap:8px;}
+  .sp-line{display:none;}
+  .sp-dot{width:36px;height:36px;font-size:14px;}
+  .ai-main{font-size:16px;}
+  .key-point,.action-item,.tip-text{font-size:16px;}
+  .week-title{font-size:28px;}
+  .stage-card-title{font-size:26px;}
+  .pf-grid2,.pf-grid3{grid-template-columns:1fr;}
+  .pp-tab{font-size:13px;padding:8px 12px;}
+  #pp-stage-tabs{gap:5px;}
+}
 .section{display:none;}
 .section.active{display:block;}
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1rem;}
