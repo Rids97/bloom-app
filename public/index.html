@@ -1466,6 +1466,7 @@ function calcPregLmpFromEdd(){
   document.getElementById('pf-preg-lmp').value=d.toISOString().split('T')[0];
 }
 
+function openProfileModal(){
   pfBuildChips();
   let attempts=0;
   function tryLoad(){
@@ -1475,6 +1476,7 @@ function calcPregLmpFromEdd(){
   }
   setTimeout(tryLoad,30);
 }
+  
 </script>
 <nav class="mobile-bottom-nav" id="mobileNav">
   <a class="mbn-item active" href="/app"><span class="mbn-icon">🏠</span><span class="mbn-label">Home</span></a>
