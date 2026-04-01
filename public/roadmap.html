@@ -236,32 +236,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
           <div class="tip-label">Clinical Tip</div>
           <div class="tip-text" id="ttc-tip">Loading...</div>
         </div>
-        <div class="inv-card">
-          <div class="inv-card-title" style="color:var(--sage-d);">🧪 Log Investigation Results</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
-            <div><div style="font-size:11px;color:var(--muted);margin-bottom:3px;">AMH (ng/mL)</div><input type="number" id="ttc-log-amh" placeholder="e.g. 1.2" step="0.01" class="inv-input-sm"/></div>
-            <div><div style="font-size:11px;color:var(--muted);margin-bottom:3px;">FSH (IU/L)</div><input type="number" id="ttc-log-fsh" placeholder="e.g. 7.5" step="0.1" class="inv-input-sm"/></div>
-            <div><div style="font-size:11px;color:var(--muted);margin-bottom:3px;">LH (IU/L)</div><input type="number" id="ttc-log-lh" placeholder="e.g. 6.2" step="0.1" class="inv-input-sm"/></div>
-            <div><div style="font-size:11px;color:var(--muted);margin-bottom:3px;">TSH (mIU/L)</div><input type="number" id="ttc-log-tsh" placeholder="e.g. 2.1" step="0.01" min="0" max="20" class="inv-input-sm"/></div>
-            <div><div style="font-size:11px;color:var(--muted);margin-bottom:3px;">AFC</div><input type="number" id="ttc-log-afc" placeholder="e.g. 8" class="inv-input-sm"/></div>
-            <div><div style="font-size:11px;color:var(--muted);margin-bottom:3px;">ET in mm</div><input type="number" id="ttc-log-et" placeholder="e.g. 9" step="0.1" min="0" max="30" class="inv-input-sm"/></div>
-          </div>
-          <div style="margin-bottom:8px;"><div style="font-size:11px;color:var(--muted);margin-bottom:3px;">USG finding</div>
-            <select id="ttc-log-usg" class="inv-input-sm">
-              <option value="">Select…</option>
-              <option value="normal">Normal scan</option>
-              <option value="pcos_morphology">PCOS morphology</option>
-              <option value="low_afc">Low AFC (&lt;5)</option>
-              <option value="fibroid">Fibroid(s)</option>
-              <option value="endometrioma">Endometrioma / cyst</option>
-              <option value="thin_endo">Thin endometrium (&lt;7mm)</option>
-              <option value="dominant_follicle">Dominant follicle present</option>
-              <option value="ovulated">Post-ovulation appearance</option>
-            </select>
-          </div>
-          <button class="inv-save-btn" onclick="saveTTCInvestigations()">Save &amp; Refresh Guidance</button>
-          <div id="ttc-inv-saved" style="display:none;font-size:12px;color:var(--sage-d);text-align:center;margin-top:6px;">✓ Saved — roadmap updated</div>
-        </div>
+        
         <div class="profile-summary-card" id="profile-summary-card"></div>
         <div class="checklist-card">
           <div class="checklist-title">Right Now Checklist</div>
@@ -296,6 +271,18 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
     <div id="preg-main" style="display:none;">
       <div class="grid">
         <div>
+          <div class="stage-detector fade-up" style="margin-bottom:1rem;">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <div class="stage-detector-title" style="margin-bottom:0;">Your Pregnancy</div>
+              <button onclick="openRoadmapProfile()" style="display:flex;align-items:center;gap:12px;font-size:18px;font-weight:600;padding:14px 24px;border-radius:12px;border:none;background:#6b4f42;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background 0.15s;box-shadow:0 3px 12px rgba(61,35,24,0.2);" onmouseover="this.style.background='#4e3328'" onmouseout="this.style.background='#6b4f42'">
+                <span style="font-size:24px;">✏️</span>
+                <div style="text-align:left;">
+                  <div style="font-size:22px;">Update My Profile</div>
+                  <div style="font-size:16px;font-weight:400;opacity:0.8;margin-top:3px;">New scan or test result? Tap to update — roadmap refreshes</div>
+                </div>
+              </button>
+            </div>
+          </div>
           <div class="week-header">
             <div class="week-badge" id="week-badge">Week 1</div>
             <div class="week-title" id="week-title">—</div>
@@ -380,8 +367,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
             <button class="inv-save-btn" onclick="savePregInvestigation()">Save &amp; Get Advice</button>
             <div id="preg-inv-saved" style="display:none;font-size:12px;color:var(--sage-d);text-align:center;margin-top:6px;">✓ Saved</div>
             <div id="preg-inv-advice" style="display:none;margin-top:10px;background:var(--gold-l);border:1px solid #E8D5AF;border-radius:10px;padding:14px 16px;"></div>
-            <div id="preg-inv-log" style="margin-top:10px;"></div>
-          </div>
+         </div>
           <div class="milestone-card">
             <div class="milestone-title">🗓 Milestones</div>
             <div id="preg-milestones"></div>
@@ -406,11 +392,24 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
     </div>
     <div class="grid">
       <div>
+        <div class="stage-detector fade-up" style="margin-bottom:1rem;">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div class="stage-detector-title" style="margin-bottom:0;">Your Postpartum</div>
+            <button onclick="openRoadmapProfile()" style="display:flex;align-items:center;gap:12px;font-size:18px;font-weight:600;padding:14px 24px;border-radius:12px;border:none;background:#6b4f42;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background 0.15s;box-shadow:0 3px 12px rgba(61,35,24,0.2);" onmouseover="this.style.background='#4e3328'" onmouseout="this.style.background='#6b4f42'">
+              <span style="font-size:24px;">✏️</span>
+              <div style="text-align:left;">
+                <div style="font-size:22px;">Update My Profile</div>
+                <div style="font-size:16px;font-weight:400;opacity:0.8;margin-top:3px;">New baby update? Tap to update — guidance refreshes</div>
+              </div>
+            </button>
+          </div>
+        </div>
         <div class="week-header">
           <div class="week-badge" id="pp-badge">Day 1–3</div>
           <div class="week-title" id="pp-title">Hospital Recovery</div>
           <div class="week-sub" id="pp-sub">Your first days after birth — recovery, feeding, and bonding.</div>
         </div>
+        
         <div class="sec-tabs" id="pp-sec-tabs">
           <div class="stab active" onclick="loadPPSection('overview',this)">Overview</div>
           <div class="stab" onclick="loadPPSection('breastfeeding',this)">Breastfeeding</div>
@@ -458,7 +457,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
             <button class="inv-save-btn" style="background:var(--sage-d);" onclick="saveBabyInvestigation()">Save &amp; Get Advice</button>
             <div id="baby-inv-saved" style="display:none;font-size:12px;color:var(--sage-d);text-align:center;margin-top:6px;">✓ Saved</div>
             <div id="baby-inv-advice" style="display:none;margin-top:10px;background:var(--gold-l);border:1px solid #E8D5AF;border-radius:10px;padding:14px 16px;"></div>
-            <div id="baby-inv-log" style="margin-top:10px;"></div>
         </div>
         <div class="inv-card">
           <div class="inv-card-title" style="color:var(--terra-d);">👩 Mother Update</div>
