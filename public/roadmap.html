@@ -1846,7 +1846,7 @@ function buildRoadmapProfileModal(){pfBuildChips();pfLoad();document.getElementB
         <button class="pf-tab" onclick="pfSwitchTab('postpartum',this)">👶 Postpartum</button>
       </div>
     </div>
-    <div style="flex:1;overflow-y:auto;padding:1.25rem 1.75rem;max-height:calc(96vh - 200px);">
+    <div style="flex:1;overflow-y:auto;padding:1.25rem 1.75rem;min-height:0;" id="pf-body">
       <!-- BASIC TAB -->
       <div id="pf-tab-basic" class="pf-tab-panel">
         <div class="pf-grid2" style="margin-bottom:10px;">
@@ -2333,7 +2333,6 @@ function buildRoadmapProfileModal(){pfBuildChips();pfLoad();document.getElementB
           <div><label class="pf-label">Flu vaccine date</label><input type="date" id="pf-flu" class="pf-input pf-input-sm"/></div>
         </div>
       </div>
-    </div>
     <!-- POSTPARTUM TAB -->
       <div id="pf-tab-postpartum" class="pf-tab-panel" style="display:none;">
         <div class="pf-section-intro">👶 Postpartum details — mother's recovery and baby's progress — help Bloom give you the most relevant guidance.</div>
@@ -2462,7 +2461,7 @@ function buildRoadmapProfileModal(){pfBuildChips();pfLoad();document.getElementB
           <textarea id="pf-pp-baby-notes" rows="2" placeholder="e.g. Phototherapy given for 2 days, discharged day 4, feeding every 2 hours…" class="pf-input" style="resize:vertical;font-size:14px;"></textarea>
         </div>
       </div>
-    </div>
+    </div><!-- end pf-body -->
     <div style="padding:1rem 1.75rem;border-top:1px solid #F0E8E2;flex-shrink:0;display:flex;align-items:center;gap:12px;">
       <button onclick="pfSave()" style="flex:1;padding:14px;background:#C4704F;color:#fff;border:none;border-radius:10px;font-size:18px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;">Save Profile 🌸</button>
       <div id="pf-saved-msg" style="display:none;font-size:13px;color:#4F7A5E;">✓ Saved!</div>
