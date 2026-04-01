@@ -141,8 +141,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 .content-error{padding:1rem;background:#FFF5F5;border-radius:10px;border:1px solid #F0C8C8;font-size:13px;color:#9E2020;display:flex;align-items:center;gap:10px;}
 .retry-btn{padding:6px 14px;background:var(--terra);color:#fff;border:none;border-radius:8px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;}
 .fade-up{animation:fadeUp 0.4s ease both;}
-.action-plan-tab{background:linear-gradient(135deg,#C4704F,#9E5238)!important;color:#fff!important;border-color:#9E5238!important;position:relative;}
-.action-plan-tab:hover{background:linear-gradient(135deg,#9E5238,#7A3D25)!important;}
+.action-plan-tab{position:relative;}
 .ap-dot{position:absolute;top:-4px;right:-4px;width:12px;height:12px;border-radius:50%;background:#E8303A;border:2px solid #fff;display:none;}
 .ap-section{padding:0;}
 .ap-empty{text-align:center;padding:2rem;color:var(--muted);font-size:16px;}
@@ -1430,8 +1429,8 @@ function buildAndSaveActionPlan(profile,checkinAlerts,specificJourney){
     {name:'Baby bilirubin',val:profile.ppBilirubin,unit:'mg/dL',low:0,high:15},
     {name:'Baby Hb',val:profile.ppBabyHb,unit:'g/dL',low:14,high:22},
   ];
-  function computeForJourney(checks,alerts){
-    const abnormal=[],normal=[];
+  function computeForJourney(checks,alerts,extraAbnormal){
+    const abnormal=[...(extraAbnormal||[])],normal=[];
     checks.forEach(c=>{
       if(c.val===null||c.val===undefined) return;
       const isHigh=c.val>c.high,isLow=c.val<c.low;
@@ -1444,16 +1443,108 @@ function buildAndSaveActionPlan(profile,checkinAlerts,specificJourney){
     });
     return{abnormal,normal,checkinAlerts:alerts||[],date:new Date().toLocaleDateString('en-IN')};
   }
+
+  // TTC profile flags
+  function getTTCProfileFlags(profile){
+    const flags=[];
+    const syms=profile.symptoms||[];
+    const conds=profile.fertilityConditions||[];
+    const meds=profile.medications||[];
+    if(syms.includes('pcos_diagnosed')||conds.includes('pcos'))
+      flags.push({name:'PCOS Diagnosed',value:'Active',unit:'',isHigh:true,why:'PCOS affects ovulation, insulin sensitivity, and egg quality. Needs active management before and during TTC.',action:'Get fasting insulin, testosterone, pelvic USG. Discuss Metformin/Inositol with your doctor.'});
+    if(syms.includes('thyroid_disorder')||conds.includes('thyroid_disorder'))
+      flags.push({name:'Thyroid Disorder',value:'Noted',unit:'',isHigh:true,why:'Thyroid dysfunction impairs ovulation and increases miscarriage risk. TSH should be <2.5 for TTC.',action:'Check TSH if not done recently. Target TSH <2.5 before conception.'});
+    if(conds.includes('endometriosis'))
+      flags.push({name:'Endometriosis',value:'Diagnosed',unit:'',isHigh:true,why:'Endometriosis affects implantation and ovarian reserve. Requires fertility-focused management.',action:'Discuss laparoscopy status and fertility treatment plan with your specialist.'});
+    if(conds.includes('low_amh'))
+      flags.push({name:'Low AMH (diagnosed)',value:'Noted',unit:'',isHigh:false,why:'Low ovarian reserve means fewer eggs. Time-sensitive — early fertility treatment gives best outcomes.',action:'See a fertility specialist soon. Discuss CoQ10 400mg, DHEA, and IVF timeline.'});
+    if(conds.includes('tubal_factor'))
+      flags.push({name:'Tubal Factor',value:'Noted',unit:'',isHigh:true,why:'Blocked or damaged tubes prevent natural conception. IVF bypasses tubal factor.',action:'Confirm HSG result with specialist. IVF is likely the recommended path.'});
+    if(conds.includes('unexplained'))
+      flags.push({name:'Unexplained Infertility',value:'Diagnosed',unit:'',isHigh:true,why:'Unexplained infertility after full workup — empirical treatment is the next step.',action:'Discuss IUI (3-4 cycles) or move to IVF if over 35 or >12 months TTC.'});
+    if(profile.pregnancyOutcomes&&profile.pregnancyOutcomes.includes('recurrent_loss'))
+      flags.push({name:'Recurrent Pregnancy Loss',value:'2+ losses',unit:'',isHigh:true,why:'Recurrent loss needs APLA profile, karyotyping, uterine assessment, and thrombophilia screening.',action:'Get APLA panel, karyotype (both partners), saline sonography. See recurrent loss specialist.'});
+    if(syms.includes('prev_ntd_baby')||syms.includes('epilepsy')||syms.includes('diabetes_preexisting')||syms.includes('mthfr_mutation'))
+      flags.push({name:'High-Risk — Folic Acid 5mg',value:'Required',unit:'',isHigh:true,why:'Your risk profile requires high-dose folic acid 5mg/day, not the standard 400mcg.',action:'Start folic acid 5mg daily immediately if not already. Continue through first 12 weeks.'});
+    if(profile.hsgResult==='one_blocked')
+      flags.push({name:'One Tube Blocked',value:'HSG result',unit:'',isHigh:true,why:'One blocked tube reduces monthly conception chances by ~50%. Ovulation from the affected side is missed.',action:'Discuss IUI (timed to ovulation from open-tube side) or IVF with your specialist.'});
+    if(profile.hsgResult==='both_blocked')
+      flags.push({name:'Both Tubes Blocked',value:'HSG result',unit:'',isHigh:true,why:'Both tubes blocked means natural conception is not possible. IVF is required.',action:'See a fertility specialist urgently. IVF is the recommended treatment.'});
+    if(profile.semenAnalysis&&profile.semenAnalysis.includes('abnormal'))
+      flags.push({name:'Abnormal Semen Analysis',value:'Partner',unit:'',isHigh:true,why:'Male factor affects ~50% of infertility cases. Needs full evaluation and treatment.',action:'Partner to see urologist/andrologist. Antioxidant supplements (zinc, selenium, CoQ10) while awaiting review.'});
+    return flags;
+  }
+
+  // Pregnancy profile flags
+  function getPregProfileFlags(profile){
+    const flags=[];
+    const highRisk=profile.pregHighRisk||[];
+    if(highRisk.includes('diabetes'))
+      flags.push({name:'Gestational Diabetes / GDM',value:'High Risk',unit:'',isHigh:true,why:'GDM increases risk of macrosomia, shoulder dystocia, and neonatal hypoglycaemia.',action:'Strict dietary control. Monitor fasting + post-meal sugars. Insulin if targets not met. Growth scan at 32w and 36w.'});
+    if(highRisk.includes('hypertension'))
+      flags.push({name:'Hypertension in Pregnancy',value:'High Risk',unit:'',isHigh:true,why:'Hypertension increases risk of pre-eclampsia, placental abruption, and preterm birth.',action:'Monitor BP twice weekly. Low-dose aspirin if prescribed. Attend all ANC checkups. Report headache or visual changes immediately.'});
+    if(highRisk.includes('placenta_praevia'))
+      flags.push({name:'Placenta Praevia',value:'Noted',unit:'',isHigh:true,why:'Low-lying placenta can cause severe antepartum haemorrhage. Vaginal delivery not safe.',action:'Pelvic rest. No intercourse. Planned LSCS at 37-38 weeks. Go to hospital immediately if any bleeding.'});
+    if(highRisk.includes('short_cervix'))
+      flags.push({name:'Short Cervix',value:'Noted',unit:'',isHigh:true,why:'Short cervix increases risk of preterm birth.',action:'Discuss cervical cerclage or progesterone pessary with your doctor. Serial cervical length monitoring.'});
+    if(highRisk.includes('apla'))
+      flags.push({name:'Antiphospholipid Syndrome',value:'Noted',unit:'',isHigh:true,why:'APLA increases risk of recurrent miscarriage, pre-eclampsia, and thrombosis in pregnancy.',action:'Low-dose aspirin 75mg + Heparin/Clexane as prescribed. Do not miss doses. Regular monitoring.'});
+    if(highRisk.includes('twins'))
+      flags.push({name:'Twin / Multiple Pregnancy',value:'Noted',unit:'',isHigh:true,why:'Multiple pregnancy increases risk of preterm birth, IUGR, gestational diabetes, and pre-eclampsia.',action:'More frequent ANC visits. Growth scans every 4 weeks. Discuss birth plan and delivery timing with specialist.'});
+    if(profile.ancUrineProtein&&['2plus','3plus'].includes(profile.ancUrineProtein))
+      flags.push({name:'Urine Protein 2+/3+',value:profile.ancUrineProtein,unit:'',isHigh:true,why:'Significant proteinuria in pregnancy is a warning sign of pre-eclampsia.',action:'Check BP immediately. If BP >140/90 with proteinuria — go to hospital now. This may be pre-eclampsia.'});
+    if(profile.ancAnomalyScan&&['abnormal_minor','abnormal_major'].includes(profile.ancAnomalyScan))
+      flags.push({name:'Anomaly Scan — Abnormal Finding',value:'Noted',unit:'',isHigh:true,why:'Structural finding on anomaly scan needs specialist review and possibly further investigation.',action:'See fetal medicine specialist. Discuss amniocentesis if chromosomal concern. Do not delay follow-up.'});
+    if(profile.ancGrowthScan==='iugr')
+      flags.push({name:'IUGR — Small for Dates',value:'Growth scan',unit:'',isHigh:true,why:'IUGR increases risk of stillbirth and neonatal complications. Needs close monitoring.',action:'Doppler study urgently if not done. Twice weekly CTG from 32 weeks. Discuss delivery timing with specialist.'});
+    if(profile.ancDoppler==='abnormal')
+      flags.push({name:'Abnormal Doppler',value:'Noted',unit:'',isHigh:true,why:'Abnormal umbilical artery Doppler indicates placental insufficiency.',action:'Immediate specialist review. Twice weekly monitoring. Delivery may need to be planned early.'});
+    if(profile.ancNuchalResult==='high_risk')
+      flags.push({name:'High Risk Nuchal Scan',value:'Noted',unit:'',isHigh:true,why:'High risk NT result increases probability of chromosomal abnormality.',action:'Discuss NIPT or amniocentesis with your fetal medicine specialist urgently.'});
+    return flags;
+  }
+
+  // Postpartum profile flags
+  function getPPProfileFlags(profile){
+    const flags=[];
+    const motherComplaints=profile.ppMotherComplaints||[];
+    const babyComplaints=profile.ppBabyComplaints||[];
+    if(motherComplaints.includes('wound_infection'))
+      flags.push({name:'Wound Infection',value:'Mother',unit:'',isHigh:true,why:'Wound infection after delivery needs prompt treatment to prevent sepsis.',action:'See your doctor today. Wound swab and antibiotics needed. Keep wound clean and dry.'});
+    if(motherComplaints.includes('heavy_bleeding'))
+      flags.push({name:'Heavy Postpartum Bleeding',value:'Mother',unit:'',isHigh:true,why:'Excessive postpartum bleeding (PPH) is a medical emergency.',action:'Go to hospital immediately if soaking >1 pad/hour. Do not wait.'});
+    if(motherComplaints.includes('fever'))
+      flags.push({name:'Postpartum Fever',value:'Mother',unit:'',isHigh:true,why:'Fever after delivery can indicate uterine infection, wound infection, or mastitis.',action:'See your doctor today. Temperature >38°C needs immediate assessment.'});
+    if(motherComplaints.includes('ppd'))
+      flags.push({name:'Postpartum Depression',value:'Mother',unit:'',isHigh:true,why:'PPD affects 1 in 7 mothers. It is very common and very treatable.',action:'Tell your doctor at your next visit. Edinburgh scale screening. Counselling and/or medication very effective.'});
+    if(motherComplaints.includes('mastitis'))
+      flags.push({name:'Mastitis',value:'Mother',unit:'',isHigh:true,why:'Mastitis can progress to breast abscess if untreated.',action:'Continue breastfeeding frequently. Antibiotics within 24 hours of fever onset. See your doctor today.'});
+    if(babyComplaints.includes('jaundice'))
+      flags.push({name:'Baby Jaundice',value:'Baby',unit:'',isHigh:true,why:'Jaundice persisting beyond 14 days or worsening needs urgent assessment.',action:'Check bilirubin level. If >15mg/dL — phototherapy needed. See paediatrician today.'});
+    if(babyComplaints.includes('low_weight'))
+      flags.push({name:'Poor Weight Gain',value:'Baby',unit:'',isHigh:true,why:'Baby should regain birth weight by Day 10-14. Poor gain indicates feeding problem.',action:'See lactation consultant. Check feeding technique and frequency. Paediatrician review if weight loss >10%.'});
+    if(babyComplaints.includes('feeding_issues'))
+      flags.push({name:'Feeding Issues',value:'Baby',unit:'',isHigh:true,why:'Feeding problems early on affect weight gain and bonding.',action:'See lactation consultant. Check latch position. Formula top-up may be needed temporarily.'});
+    if(profile.ppBabyVaccines&&!profile.ppBabyVaccines.includes('bcg'))
+      flags.push({name:'BCG Vaccine Pending',value:'Baby',unit:'',isHigh:true,why:'BCG should be given at birth. Delay increases TB risk.',action:'Get BCG done at nearest immunisation centre as soon as possible.'});
+    return flags;
+  }
   // If specificJourney passed (from checkin), only update that journey
   if(specificJourney){
     const checksMap={ttc:ttcChecks,pregnancy:pregChecks,postpartum:ppChecks};
-    const data=computeForJourney(checksMap[specificJourney],checkinAlerts);
+    const flagsMap={ttc:getTTCProfileFlags(profile),pregnancy:getPregProfileFlags(profile),postpartum:getPPProfileFlags(profile)};
+    const existing=loadActionPlan_data(specificJourney);
+    const existingAlerts=existing?existing.checkinAlerts||[]:[];
+    const data=computeForJourney(checksMap[specificJourney],checkinAlerts||existingAlerts,flagsMap[specificJourney]);
     saveActionPlan(specificJourney,data);
   } else {
-    // Profile save — update all 3 independently
-    saveActionPlan('ttc',computeForJourney(ttcChecks,[]));
-    saveActionPlan('pregnancy',computeForJourney(pregChecks,[]));
-    saveActionPlan('postpartum',computeForJourney(ppChecks,[]));
+    ['ttc','pregnancy','postpartum'].forEach((j,i)=>{
+      const checksMap=[ttcChecks,pregChecks,ppChecks];
+      const flagsMap=[getTTCProfileFlags(profile),getPregProfileFlags(profile),getPPProfileFlags(profile)];
+      const existing=loadActionPlan_data(j);
+      const existingAlerts=existing?existing.checkinAlerts||[]:[];
+      saveActionPlan(j,computeForJourney(checksMap[i],existingAlerts,flagsMap[i]));
+    });
   }
 }
  
