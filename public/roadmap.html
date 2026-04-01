@@ -141,6 +141,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 .content-error{padding:1rem;background:#FFF5F5;border-radius:10px;border:1px solid #F0C8C8;font-size:13px;color:#9E2020;display:flex;align-items:center;gap:10px;}
 .retry-btn{padding:6px 14px;background:var(--terra);color:#fff;border:none;border-radius:8px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;}
 .fade-up{animation:fadeUp 0.4s ease both;}
+.golden-box{background:linear-gradient(135deg,#FDF3DC,#FEF9F0);border:1.5px solid #C9A96E;border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1rem;}
+.golden-box-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:#9A6B20;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.golden-normal-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #E8D5AF;font-size:16px;}
+.golden-normal-row:last-child{border:none;}
+.golden-abnormal-block{margin-top:10px;padding:12px 14px;background:#FFFBF0;border:1.5px solid #E8C87A;border-radius:10px;margin-bottom:8px;}
+.golden-abnormal-title{font-size:15px;font-weight:600;color:#9A6B20;margin-bottom:5px;}
+.golden-abnormal-why{font-size:15px;color:#2C2420;line-height:1.75;margin-bottom:6px;}
+.golden-abnormal-action{font-size:14px;color:#9E5238;font-weight:500;line-height:1.6;}
 .inv-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.1rem;overflow:hidden;box-sizing:border-box;}
 .inv-card-title{font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;}
 .inv-input-sm{width:100%;padding:8px 11px;border:1.5px solid var(--border);border-radius:7px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);outline:none;box-sizing:border-box;}
@@ -220,6 +228,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
           <div class="stage-card-title" id="stage-title">Your Journey</div>
           <div class="stage-card-sub" id="stage-sub"></div>
         </div>
+        <div class="golden-box" id="ttc-golden-box" style="display:none;"></div>
         <div class="sec-tabs" id="ttc-sec-tabs">
           <div class="stab active" onclick="loadTTCSection('overview',this)">Overview</div>
           <div class="stab" onclick="loadTTCSection('lifestyle',this)">Lifestyle &amp; Timing</div>
@@ -288,6 +297,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
             <div class="week-title" id="week-title">—</div>
             <div class="week-sub" id="week-sub">—</div>
           </div>
+          <div class="golden-box" id="preg-golden-box" style="display:none;"></div>
           <div class="preg-progress-card">
             <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:8px;">
               <span>Week 1</span><span id="preg-week-label">Week 20</span><span>Week 40</span>
@@ -409,7 +419,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
           <div class="week-title" id="pp-title">Hospital Recovery</div>
           <div class="week-sub" id="pp-sub">Your first days after birth — recovery, feeding, and bonding.</div>
         </div>
-        
+        <div class="golden-box" id="pp-golden-box" style="display:none;"></div>
         <div class="sec-tabs" id="pp-sec-tabs">
           <div class="stab active" onclick="loadPPSection('overview',this)">Overview</div>
           <div class="stab" onclick="loadPPSection('breastfeeding',this)">Breastfeeding</div>
@@ -584,6 +594,7 @@ async function init(){
     const res=await fetch('/me',{headers:{Authorization:token}});
     userData=await res.json();
     userProfile=userData.profile||{};
+    renderAllGoldenBoxes();
     const mainCont=document.getElementById('main-container');
     if(userData.plan!=='complete'){
       mainCont.style.display='block';
@@ -1194,6 +1205,137 @@ function renderBabyInvLog(){
     log.slice(0,3).map(function(l){return '<div style="font-size:12px;padding:5px 0;border-bottom:1px solid var(--border-l);display:flex;justify-content:space-between;"><span>'+l.test.replace(/_/g,' ')+'</span><span style="color:'+(statusColors[l.result]||'var(--muted)')+';font-weight:500;">'+(l.result||'—')+'</span></div>';}).join('');
 }
 
+// ── GOLDEN BOX ──────────────────────────────────────────────
+const GOLDEN_KEY='bloom_golden_advice';
+
+function saveGoldenBox(data){
+  localStorage.setItem(GOLDEN_KEY,JSON.stringify(data));
+}
+
+function loadGoldenBox(){
+  const raw=localStorage.getItem(GOLDEN_KEY);
+  if(!raw) return null;
+  try{return JSON.parse(raw);}catch(e){return null;}
+}
+
+function buildGoldenHTML(data){
+  if(!data||!data.results||!data.results.length) return '';
+  let html=`<div class="golden-box-title">💛 Your Latest Results & Advice</div>`;
+  const normal=data.results.filter(r=>r.status==='normal');
+  const abnormal=data.results.filter(r=>r.status!=='normal');
+  normal.forEach(r=>{
+    html+=`<div class="golden-normal-row"><span style="color:#2C2420;">${r.name}</span><span style="color:#4F7A5E;font-weight:600;">${r.value} ${r.unit} — Normal ✓</span></div>`;
+  });
+  if(data.usg){
+    const usgNormal=['normal','dominant_follicle','ovulated'].includes(data.usg.val);
+    html+=`<div class="golden-normal-row"><span style="color:#2C2420;">USG</span><span style="color:${usgNormal?'#4F7A5E':'#9E5238'};font-weight:600;">${data.usg.label} ${usgNormal?'✓':'⚠️'}</span></div>`;
+  }
+  abnormal.forEach(r=>{
+    html+=`<div class="golden-abnormal-block">
+      <div class="golden-abnormal-title">⚠️ ${r.name} — ${r.value} ${r.unit} (${r.isHigh?'High':'Low'})</div>
+      <div class="golden-abnormal-why">${r.why}</div>
+      <div class="golden-abnormal-action">→ ${r.action}</div>
+    </div>`;
+  });
+  html+=`<div style="font-size:12px;color:#B8A060;margin-top:10px;font-style:italic;">Last updated: ${data.date||'—'}</div>`;
+  return html;
+}
+
+function renderAllGoldenBoxes(){
+  const data=loadGoldenBox();
+  if(!data) return;
+  const html=buildGoldenHTML(data);
+  ['ttc-golden-box','preg-golden-box','pp-golden-box'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){el.innerHTML=html;el.style.display='block';}
+  });
+}
+
+function computeAndSaveGoldenBox(profile){
+  const checks=[
+    {name:'AMH',val:profile.amh,unit:'ng/mL',low:1.0,high:3.5},
+    {name:'FSH',val:profile.fsh,unit:'IU/L',low:3,high:10},
+    {name:'LH',val:profile.lh,unit:'IU/L',low:2,high:8},
+    {name:'TSH',val:profile.tsh,unit:'mIU/L',low:0.5,high:2.5},
+    {name:'AFC',val:profile.afc,unit:'follicles',low:10,high:20},
+    {name:'Endometrial thickness',val:profile.endometrialThickness,unit:'mm',low:8,high:14},
+    {name:'Haemoglobin',val:profile.hb,unit:'g/dL',low:12,high:16},
+    {name:'Vitamin D',val:profile.vitaminD,unit:'ng/mL',low:30,high:100},
+    {name:'Prolactin',val:profile.prolactin,unit:'ng/mL',low:0,high:25},
+  ];
+  const results=[];
+  checks.forEach(c=>{
+    if(c.val===null||c.val===undefined) return;
+    const isHigh=c.val>c.high;
+    const isLow=c.val<c.low;
+    if(!isHigh&&!isLow){
+      results.push({name:c.name,value:c.val,unit:c.unit,status:'normal'});
+    } else {
+      const adv=getTTCAdvice(c.name,c.val,isHigh);
+      results.push({name:c.name,value:c.val,unit:c.unit,status:isHigh?'high':'low',isHigh,why:adv.why,action:adv.action});
+    }
+  });
+  // ANC values if pregnant
+  if(profile.ancHb1){
+    const isLow=profile.ancHb1<11;
+    results.push({name:'Hb (1st trim)',value:profile.ancHb1,unit:'g/dL',status:isLow?'low':'normal',isHigh:false,why:isLow?'Anaemia in first trimester increases risk of preterm birth and low birth weight.':null,action:isLow?'Start iron 60mg daily with vitamin C. Recheck Hb in 4 weeks.':null});
+  }
+  if(profile.ancTsh){
+    const isHigh=profile.ancTsh>2.5;
+    results.push({name:'ANC TSH',value:profile.ancTsh,unit:'mIU/L',status:isHigh?'high':'normal',isHigh,why:isHigh?'TSH above 2.5 in pregnancy increases miscarriage and preterm risk.':null,action:isHigh?'Discuss Levothyroxine dose adjustment with your doctor immediately.':null});
+  }
+  const usgVal=profile.usgFindings&&profile.usgFindings.length?profile.usgFindings[0]:null;
+  const usgLabels={'normal':'Normal','pcos_morphology':'PCOS morphology','low_afc':'Low AFC (<5)','fibroid':'Fibroid','endometrioma':'Endometrioma / cyst','thin_endo':'Thin endometrium','dominant_follicle':'Dominant follicle','ovulated':'Post-ovulation','not_done_usg':'Not done'};
+  const usgData=usgVal?{val:usgVal,label:usgLabels[usgVal]||usgVal}:null;
+  saveGoldenBox({results,usg:usgData,date:new Date().toLocaleDateString('en-IN')});
+  renderAllGoldenBoxes();
+}
+
+function getTTCAdvice(name,value,isHigh){
+  const advice={
+    'AMH':{
+      low:{why:'Low AMH indicates reduced ovarian reserve — fewer eggs remaining. This does not mean you cannot conceive, but time and treatment planning matter more.',action:'See a fertility specialist soon. Discuss CoQ10 400mg and DHEA with your doctor.'},
+      high:{why:'Very high AMH can indicate PCOS or high ovarian reserve. Ovulation quality and regularity need assessment.',action:'Get a pelvic USG to check for PCOS morphology. Discuss with your gynaecologist before starting ovulation induction.'}
+    },
+    'FSH':{
+      low:{why:'Low FSH on day 2/3 is generally not a concern on its own.',action:'Check in context of LH and AMH for full ovarian reserve picture.'},
+      high:{why:'High FSH (>10 IU/L on day 2/3) suggests reduced ovarian reserve — the pituitary is working harder to stimulate the ovaries.',action:'Repeat FSH on next cycle day 2/3. Get AMH if not done. See fertility specialist if FSH >15.'}
+    },
+    'LH':{
+      low:{why:'Low LH may affect ovulation trigger.',action:'Track ovulation with OPK strips. Discuss with your doctor.'},
+      high:{why:'High LH on day 2/3 (LH:FSH >2:1) is a classic PCOS marker. Can impair egg quality and ovulation.',action:'Get pelvic USG and testosterone checked. PCOS management may be needed.'}
+    },
+    'TSH':{
+      low:{why:'TSH below 0.5 can indicate hyperthyroidism which disrupts ovulation and increases miscarriage risk.',action:'See your doctor or endocrinologist. Thyroid function needs treatment before TTC.'},
+      high:{why:'TSH above 2.5 mIU/L is above optimal TTC range. Subclinical hypothyroidism can impair ovulation and increase miscarriage risk.',action:'Discuss Levothyroxine with your doctor. Target TSH <2.5 before conception.'}
+    },
+    'AFC':{
+      low:{why:'Low AFC (<10 total) suggests reduced ovarian reserve. Fewer eggs available.',action:'Get AMH done. See a fertility specialist. Discuss mini-IVF or other protocols.'},
+      high:{why:'High AFC (>20) is associated with PCOS. Good egg numbers but ovulation may be irregular.',action:'Discuss with your doctor. Ovulation induction with careful monitoring needed to avoid OHSS.'}
+    },
+    'Endometrial thickness':{
+      low:{why:'Thin endometrium (<8mm) can impair implantation.',action:'Discuss oestrogen supplementation with your doctor. Avoid timed intercourse this cycle.'},
+      high:{why:'Very thick endometrium (>14mm) may indicate polyp or hyperplasia.',action:'Get SIS or hysteroscopy to rule out polyp before proceeding.'}
+    },
+    'Haemoglobin':{
+      low:{why:'Low haemoglobin (anaemia) reduces oxygen to developing follicles and affects egg quality.',action:'Start iron 60mg daily with vitamin C on empty stomach. Avoid tea/coffee with iron. Recheck in 6 weeks.'},
+      high:{why:'Haemoglobin above normal range is uncommon — may need further evaluation.',action:'Discuss with your doctor.'}
+    },
+    'Vitamin D':{
+      low:{why:'Vitamin D deficiency is linked to PCOS, poor ovarian response, and implantation failure. Very common in India.',action:'Start Vitamin D3 60,000 IU weekly for 8 weeks then 1000 IU daily. Recheck in 3 months.'},
+      high:{why:'Very high Vitamin D is rare but possible with excess supplementation.',action:'Stop supplements and recheck in 6 weeks.'}
+    },
+    'Prolactin':{
+      low:{why:'Low prolactin is generally not clinically significant.',action:'No action needed.'},
+      high:{why:'High prolactin (hyperprolactinaemia) suppresses ovulation by inhibiting GnRH. Can cause irregular or absent periods.',action:'Get MRI pituitary if prolactin >100. Discuss Cabergoline with your doctor.'}
+    },
+  };
+  const entry=advice[name];
+  if(!entry) return{why:'Value outside normal range.',action:'Discuss with your doctor.'};
+  return isHigh?entry.high:entry.low;
+}
+// ── END GOLDEN BOX ───────────────────────────────────────────
+
 init();
 
 // PROFILE MODAL FUNCTIONS
@@ -1346,6 +1488,7 @@ async function pfSave(){
       userData=await res.json();
       var msg=document.getElementById('pf-saved-msg');if(msg) msg.style.display='block';
       userProfile=userData.profile||{};contentCache={};
+      computeAndSaveGoldenBox(userProfile);
       setTimeout(function(){
         if(msg) msg.style.display='none';
         var modal=document.getElementById('profileModal');if(modal) modal.style.display='none';
