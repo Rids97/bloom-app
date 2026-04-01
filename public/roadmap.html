@@ -246,9 +246,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
           <div class="stage-card-title" id="stage-title">Your Journey</div>
           <div class="stage-card-sub" id="stage-sub"></div>
         </div>
-        <div class="golden-box" id="ttc-golden-box" style="display:none;"></div>
         
-        <div class="checkin-panel" id="ttc-checkin-panel">
+          <div class="checkin-panel" id="ttc-checkin-panel">
           <div class="checkin-panel-title">🌱 This Week's Update</div>
           <div class="checkin-panel-sub">How are things going? Bloom personalises your guidance based on what you share.</div>
           <div class="checkin-chips" id="ttc-checkin-chips">
@@ -336,8 +335,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
             <div class="week-title" id="week-title">—</div>
             <div class="week-sub" id="week-sub">—</div>
           </div>
-          <div class="golden-box" id="preg-golden-box" style="display:none;"></div>
-          <div class="preg-progress-card">
+            <div class="preg-progress-card">
             <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:8px;">
               <span>Week 1</span><span id="preg-week-label">Week 20</span><span>Week 40</span>
             </div>
@@ -426,7 +424,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
           <div class="week-title" id="pp-title">Hospital Recovery</div>
           <div class="week-sub" id="pp-sub">Your first days after birth — recovery, feeding, and bonding.</div>
         </div>
-        <div class="golden-box" id="pp-golden-box" style="display:none;"></div>
        
         <div class="checkin-panel-pp">
           <div class="checkin-panel-title">👩‍👶 This Week's Update</div>
@@ -571,7 +568,6 @@ async function init(){
     const res=await fetch('/me',{headers:{Authorization:token}});
     userData=await res.json();
     userProfile=userData.profile||{};
-    renderAllGoldenBoxes();
     updateAllAPDots();
     const mainCont=document.getElementById('main-container');
     if(userData.plan!=='complete'){
@@ -888,6 +884,8 @@ function saveCheckin(){
   if(triggered.length>0){
     showCheckinAlert(triggered);
   } else {
+    const pregCheckinAlerts=[];
+    buildAndSaveActionPlan(userProfile,pregCheckinAlerts,'pregnancy');
     contentCache={};
     const activeTab=document.querySelector('#preg-sec-tabs .stab.active');
     loadPregSection(currentPregSection||'overview',activeTab);
@@ -1318,52 +1316,50 @@ function getTTCAdvice(name,value,isHigh){
 const AP_KEY='bloom_action_plan';
 const AP_SEEN_KEY='bloom_ap_seen';
 
-function saveActionPlan(data){
+function saveActionPlan(journey,data){
+  const key='bloom_ap_'+journey;
+  const seenKey='bloom_ap_seen_'+journey;
   const payload={...data,savedAt:Date.now()};
-  localStorage.setItem(AP_KEY,JSON.stringify(payload));
-  // Mark as unseen
-  localStorage.removeItem(AP_SEEN_KEY);
+  localStorage.setItem(key,JSON.stringify(payload));
+  localStorage.removeItem(seenKey);
   updateAllAPDots();
 }
 
-function loadActionPlan_data(){
-  const raw=localStorage.getItem(AP_KEY);
+function loadActionPlan_data(journey){
+  const raw=localStorage.getItem('bloom_ap_'+journey);
   if(!raw) return null;
   try{return JSON.parse(raw);}catch(e){return null;}
 }
 
-function markAPSeen(){
-  const data=loadActionPlan_data();
-  if(data) localStorage.setItem(AP_SEEN_KEY,data.savedAt+'');
+function markAPSeen(journey){
+  const data=loadActionPlan_data(journey);
+  if(data) localStorage.setItem('bloom_ap_seen_'+journey,data.savedAt+'');
 }
 
-function hasUnseenAP(){
-  const data=loadActionPlan_data();
+function hasUnseenAP(journey){
+  const data=loadActionPlan_data(journey);
   if(!data) return false;
   const hasAbnormal=(data.abnormal&&data.abnormal.length>0)||(data.checkinAlerts&&data.checkinAlerts.length>0);
   if(!hasAbnormal) return false;
-  const seen=localStorage.getItem(AP_SEEN_KEY);
+  const seen=localStorage.getItem('bloom_ap_seen_'+journey);
   return seen!==data.savedAt+'';
 }
 
 function updateAllAPDots(){
-  const unseen=hasUnseenAP();
-  ['ttc-ap-dot','preg-ap-dot','pp-ap-dot'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el) el.style.display=unseen?'block':'none';
+  [['ttc','ttc-ap-dot'],['pregnancy','preg-ap-dot'],['postpartum','pp-ap-dot']].forEach(([journey,dotId])=>{
+    const el=document.getElementById(dotId);
+    if(el) el.style.display=hasUnseenAP(journey)?'block':'none';
   });
 }
 
 function loadActionPlan(journey,btn){
-  // Mark as seen
-  markAPSeen();
+  markAPSeen(journey);
   updateAllAPDots();
-  // Set active tab
   const tabsId=journey==='ttc'?'ttc-sec-tabs':journey==='pregnancy'?'preg-sec-tabs':'pp-sec-tabs';
   const contentId=journey==='ttc'?'ttc-ai-content':journey==='pregnancy'?'preg-ai-content':'pp-ai-content';
   document.querySelectorAll('#'+tabsId+' .stab').forEach(b=>b.classList.remove('active'));
   if(btn) btn.classList.add('active');
-  const data=loadActionPlan_data();
+  const data=loadActionPlan_data(journey);
   const el=document.getElementById(contentId);
   if(!el) return;
   if(!data||((!data.abnormal||!data.abnormal.length)&&(!data.normal||!data.normal.length)&&(!data.checkinAlerts||!data.checkinAlerts.length))){
@@ -1403,8 +1399,8 @@ function loadActionPlan(journey,btn){
   el.innerHTML=html;
 }
 
-function buildAndSaveActionPlan(profile,checkinAlerts){
-  const checks=[
+function buildAndSaveActionPlan(profile,checkinAlerts,specificJourney){
+  const ttcChecks=[
     {name:'AMH',val:profile.amh,unit:'ng/mL',low:1.0,high:3.5},
     {name:'FSH',val:profile.fsh,unit:'IU/L',low:3,high:10},
     {name:'LH',val:profile.lh,unit:'IU/L',low:2,high:8},
@@ -1414,24 +1410,53 @@ function buildAndSaveActionPlan(profile,checkinAlerts){
     {name:'Haemoglobin',val:profile.hb,unit:'g/dL',low:12,high:16},
     {name:'Vitamin D',val:profile.vitaminD,unit:'ng/mL',low:30,high:100},
     {name:'Prolactin',val:profile.prolactin,unit:'ng/mL',low:0,high:25},
-    {name:'Hb 1st trim',val:profile.ancHb1,unit:'g/dL',low:11,high:16},
-    {name:'ANC TSH',val:profile.ancTsh,unit:'mIU/L',low:0.5,high:2.5},
-    {name:'Postpartum Hb',val:profile.ppHb,unit:'g/dL',low:10,high:16},
   ];
-  const abnormal=[],normal=[];
-  checks.forEach(c=>{
-    if(c.val===null||c.val===undefined) return;
-    const isHigh=c.val>c.high,isLow=c.val<c.low;
-    if(!isHigh&&!isLow){
-      normal.push({name:c.name,value:c.val,unit:c.unit});
-    } else {
-      const adv=getTTCAdvice(c.name,c.val,isHigh);
-      abnormal.push({name:c.name,value:c.val,unit:c.unit,isHigh,why:adv.why,action:adv.action});
-    }
-  });
-  saveActionPlan({abnormal,normal,checkinAlerts:checkinAlerts||[],date:new Date().toLocaleDateString('en-IN')});
+  const pregChecks=[
+    {name:'Hb 1st trimester',val:profile.ancHb1,unit:'g/dL',low:11,high:16},
+    {name:'Hb 2nd trimester',val:profile.ancHb2,unit:'g/dL',low:10.5,high:16},
+    {name:'Hb 3rd trimester',val:profile.ancHb3,unit:'g/dL',low:11,high:16},
+    {name:'ANC TSH',val:profile.ancTsh,unit:'mIU/L',low:0.5,high:2.5},
+    {name:'OGTT Fasting',val:profile.ancOgttFasting,unit:'mg/dL',low:0,high:92},
+    {name:'OGTT 2hr',val:profile.ancOgtt2hr,unit:'mg/dL',low:0,high:153},
+    {name:'Creatinine',val:profile.ancCreatinine,unit:'mg/dL',low:0,high:0.9},
+    {name:'Uric acid',val:profile.ancUricAcid,unit:'mg/dL',low:0,high:5.5},
+    {name:'Nuchal NT',val:profile.ancNuchalNt,unit:'mm',low:0,high:3.5},
+    {name:'Cervical length',val:profile.ancCervixLength,unit:'mm',low:25,high:50},
+    {name:'ANC Ferritin',val:profile.ancFerritin,unit:'ng/mL',low:30,high:300},
+  ];
+  const ppChecks=[
+    {name:'Postpartum Hb',val:profile.ppHb,unit:'g/dL',low:10,high:16},
+    {name:'Postpartum TSH',val:profile.ppTsh,unit:'mIU/L',low:0.5,high:4.0},
+    {name:'Baby bilirubin',val:profile.ppBilirubin,unit:'mg/dL',low:0,high:15},
+    {name:'Baby Hb',val:profile.ppBabyHb,unit:'g/dL',low:14,high:22},
+  ];
+  function computeForJourney(checks,alerts){
+    const abnormal=[],normal=[];
+    checks.forEach(c=>{
+      if(c.val===null||c.val===undefined) return;
+      const isHigh=c.val>c.high,isLow=c.val<c.low;
+      if(!isHigh&&!isLow){
+        normal.push({name:c.name,value:c.val,unit:c.unit});
+      } else {
+        const adv=getTTCAdvice(c.name,c.val,isHigh);
+        abnormal.push({name:c.name,value:c.val,unit:c.unit,isHigh,why:adv.why,action:adv.action});
+      }
+    });
+    return{abnormal,normal,checkinAlerts:alerts||[],date:new Date().toLocaleDateString('en-IN')};
+  }
+  // If specificJourney passed (from checkin), only update that journey
+  if(specificJourney){
+    const checksMap={ttc:ttcChecks,pregnancy:pregChecks,postpartum:ppChecks};
+    const data=computeForJourney(checksMap[specificJourney],checkinAlerts);
+    saveActionPlan(specificJourney,data);
+  } else {
+    // Profile save — update all 3 independently
+    saveActionPlan('ttc',computeForJourney(ttcChecks,[]));
+    saveActionPlan('pregnancy',computeForJourney(pregChecks,[]));
+    saveActionPlan('postpartum',computeForJourney(ppChecks,[]));
+  }
 }
-
+ 
 // TTC Check-in
 function saveTTCCheckin(){
   const chips=[...document.querySelectorAll('#ttc-checkin-chips .cc-chip.selected')].map(c=>c.dataset.val);
@@ -1449,7 +1474,7 @@ function saveTTCCheckin(){
   // Save checkin to localStorage
   localStorage.setItem('bloom_ttc_checkin',JSON.stringify({chips,notes,date:new Date().toISOString()}));
   // Rebuild action plan with new checkin alerts
-  buildAndSaveActionPlan(userProfile,checkinAlerts);
+  buildAndSaveActionPlan(userProfile,checkinAlerts,'ttc');
   // Refresh content
   contentCache={};
   const activeTab=document.querySelector('#ttc-sec-tabs .stab.active');
@@ -1494,7 +1519,7 @@ function savePPCheckin(){
     document.body.appendChild(modal);
   }
   localStorage.setItem('bloom_pp_checkin_'+currentPPStage,JSON.stringify({motherChips,babyChips,notes,date:new Date().toISOString()}));
-  buildAndSaveActionPlan(userProfile,checkinAlerts);
+  buildAndSaveActionPlan(userProfile,checkinAlerts,'postpartum');
   contentCache={};
   loadPPSection('overview',document.querySelector('#pp-sec-tabs .stab'));
   const btn=document.querySelector('.checkin-panel-pp .checkin-save-btn');
