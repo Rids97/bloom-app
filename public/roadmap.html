@@ -176,7 +176,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 </head>
 <body>
 <nav class="topbar">
-  <div class="topbar-logo"><span style="font-size:38px;font-style:normal;">🌸</span> bloom</div>
+  <a href="/app" class="topbar-logo" style="text-decoration:none;"><span style="font-size:38px;font-style:normal;">🌸</span> bloom</a>
   <div class="topbar-right">
     <span id="planBadgeRm" class="plan-badge">Bloom Complete</span>
     <a href="/app" class="back-btn">← Dashboard</a>
@@ -229,7 +229,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
           <div class="stab" onclick="loadTTCSection('immunization',this)">Immunization</div>
         </div>
         <div id="ttc-ai-content"><div class="loading-dots"><span></span><span></span><span></span></div></div>
-        <div style="margin-top:1rem;padding:1rem 1.25rem;background:var(--cream);border-radius:var(--radius);border:1px solid var(--border-l);font-size:11px;color:var(--muted);font-style:italic;">📚 Evidence-based · Built by a licensed gynaecologist · Personalised to your profile</div>
+        <div style="margin-top:1rem;padding:1rem 1.25rem;background:var(--cream);border-radius:var(--radius);border:1px solid var(--border-l);font-size:11px;color:var(--muted);font-style:italic;">📚 Evidence-based · Built by a gynaecologist · Personalised to your profile</div>
       </div>
       <div class="sidebar">
         <div class="tip-card">
@@ -1125,7 +1125,7 @@ function renderAIContent(content,containerId){
     content.action_items.forEach(function(a){var clean=a.replace(/^→\s*/,'');html+='<div class="action-item" style="font-size:18px;line-height:1.8;"> '+clean+'</div>';});
     html+='</div>';
   }
-  html+='<div class="ai-source">📚 Evidence-based · Built by a licensed gynaecologist · Personalised to your profile</div></div>';
+  html+='<div class="ai-source">📚 Evidence-based · Built by a gynaecologist · Personalised to your profile</div></div>';
   document.getElementById(containerId).innerHTML=html;
 }
 
