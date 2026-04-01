@@ -187,6 +187,28 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 }
 input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
 input[type=number]{-moz-appearance:textfield;appearance:textfield;}
+.mobile-bottom-nav{display:none;}
+@media(max-width:700px){
+  .mobile-bottom-nav{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(250,246,241,0.97);backdrop-filter:blur(12px);border-top:1px solid var(--border);padding:8px 0 calc(8px + env(safe-area-inset-bottom));justify-content:space-around;align-items:center;}
+  .mbn-item{display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;padding:4px 12px;border-radius:10px;transition:background 0.15s;}
+  .mbn-item.active{background:var(--terra-l);}
+  .mbn-icon{font-size:20px;line-height:1;}
+  .mbn-label{font-size:10px;color:var(--muted);letter-spacing:0.04em;}
+  .mbn-item.active .mbn-label{color:var(--terra-d);font-weight:500;}
+  .main{padding-bottom:80px;}
+  .sidebar{display:none;}
+  .topbar{padding:0 1rem;}
+  .topbar-logo{font-size:24px;}
+  .plan-badge{display:none;}
+  .logout-btn{font-size:13px;padding:4px 6px;}
+  .greeting-title{font-size:28px;}
+  .cycle-day-big{font-size:44px;}
+  .stat-row{grid-template-columns:1fr 1fr;}
+  .chat-section{height:420px;}
+  .period-input-row{flex-wrap:wrap;}
+  .paywall-plans{grid-template-columns:1fr;}
+  .pf-grid2,.pf-grid3{grid-template-columns:1fr;}
+}
 </style>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
@@ -1454,5 +1476,12 @@ function openProfileModal(){
   setTimeout(tryLoad,30);
 }
 </script>
+<nav class="mobile-bottom-nav" id="mobileNav">
+  <a class="mbn-item active" href="/app"><span class="mbn-icon">🏠</span><span class="mbn-label">Home</span></a>
+  <a class="mbn-item" href="#" onclick="openModal('cycleCalcModal');return false;"><span class="mbn-icon">📅</span><span class="mbn-label">Cycle</span></a>
+  <a class="mbn-item" href="#" onclick="if(userPlan==='free'){openPaywall();return false;}window.location.href='/report';return false;"><span class="mbn-icon">🧪</span><span class="mbn-label">Reports</span></a>
+  <a class="mbn-item" href="#" onclick="if(userPlan!=='complete'){openPaywall();return false;}window.location.href='/roadmap';return false;"><span class="mbn-icon">🗺️</span><span class="mbn-label">Roadmap</span></a>
+  <a class="mbn-item" href="#" onclick="openProfileModal();return false;"><span class="mbn-icon">👤</span><span class="mbn-label">Profile</span></a>
+</nav>
 </body>
 </html>
