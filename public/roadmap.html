@@ -1311,6 +1311,15 @@ function getTTCAdvice(name,value,isHigh){
 }
 // ── END GOLDEN BOX ───────────────────────────────────────────
 
+function resolveAPItem(journey, name){
+  const key = 'bloom_ap_resolved_'+journey;
+  const resolved = JSON.parse(localStorage.getItem(key)||'[]');
+  if(!resolved.includes(name)) resolved.push(name);
+  localStorage.setItem(key, JSON.stringify(resolved));
+  const tabId = journey==='ttc'?'ttc-ap-tab':journey==='pregnancy'?'preg-ap-tab':'pp-ap-tab';
+  loadActionPlan(journey, document.getElementById(tabId));
+}
+
 // ── ACTION PLAN ──────────────────────────────────────────────
 const AP_KEY='bloom_action_plan';
 const AP_SEEN_KEY='bloom_ap_seen';
@@ -1361,7 +1370,9 @@ function loadActionPlan(journey,btn){
   const data=loadActionPlan_data(journey);
   const el=document.getElementById(contentId);
   if(!el) return;
-  if(!data||((!data.abnormal||!data.abnormal.length)&&(!data.normal||!data.normal.length)&&(!data.checkinAlerts||!data.checkinAlerts.length))){
+ const resolvedItems = JSON.parse(localStorage.getItem('bloom_ap_resolved_'+journey)||'[]');
+  const filteredAbnormal = (data.abnormal||[]).filter(r => !resolvedItems.includes(r.name));
+  if(!data||((!filteredAbnormal.length)&&(!data.normal||!data.normal.length)&&(!data.checkinAlerts||!data.checkinAlerts.length))){
     el.innerHTML='<div class="ap-empty"><div style="font-size:40px;margin-bottom:12px;">📋</div><div style="font-family:Cormorant Garamond,serif;font-size:24px;font-weight:600;color:var(--text);margin-bottom:8px;">Your Action Plan</div><p style="color:var(--muted);font-size:15px;line-height:1.7;">Update your profile with your latest test results or check-in to see personalised actions here.</p></div>';
     return;
   }
@@ -1374,13 +1385,14 @@ function loadActionPlan(journey,btn){
     });
   }
   // Abnormal values
-  if(data.abnormal&&data.abnormal.length){
-    html+='<div style="font-size:14px;font-weight:600;color:#9A6B20;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;margin-top:4px;">⚠️ Values Needing Attention ('+data.abnormal.length+')</div>';
-    data.abnormal.forEach(r=>{
+  if(filteredAbnormal&&filteredAbnormal.length){
+    html+='<div style="font-size:14px;font-weight:600;color:#9A6B20;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;margin-top:4px;">⚠️ Values Needing Attention ('+filteredAbnormal.length+')</div>';
+    filteredAbnormal.forEach(r=>{
       html+=`<div class="ap-abnormal-card">
         <div class="ap-abnormal-header">⚠️ ${r.name} — ${r.value} ${r.unit} <span style="font-size:13px;background:${r.isHigh?'#FAECE7':'#E6F1FB'};color:${r.isHigh?'#993C1D':'#185FA5'};padding:2px 8px;border-radius:20px;">${r.isHigh?'High':'Low'}</span></div>
         <div class="ap-abnormal-why">${r.why}</div>
         <div class="ap-abnormal-action">→ ${r.action}</div>
+        <div style="margin-top:10px;"><button onclick="resolveAPItem('${journey}','${r.name}')" style="font-size:13px;padding:6px 14px;background:none;border:1.5px solid var(--sage);color:var(--sage-d);border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;">✓ Mark as Resolved</button></div>
       </div>`;
     });
   }
