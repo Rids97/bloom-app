@@ -1454,8 +1454,8 @@ async function pfSave(){
       const msg=document.getElementById('pf-saved-msg');
       msg.style.display='block';setTimeout(()=>msg.style.display='none',2000);
       renderProfile();renderCycle();renderTip();renderInsight();
-      buildDashboardActionPlan(userData.profile||{});
-    }
+      
+  }
   }catch(e){alert('Could not save profile. Please try again.');}
 }
 
