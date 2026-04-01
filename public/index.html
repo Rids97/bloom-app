@@ -388,10 +388,11 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
       </div>
       <!-- TABS: Tests and Treatment removed — merged into Fertility -->
       <div style="display:flex;gap:4px;flex-wrap:wrap;" id="pf-tabs">
-        <button class="pf-tab active" onclick="pfSwitchTab('basic',this)">🌸 Basic</button>
+       <button class="pf-tab active" onclick="pfSwitchTab('basic',this)">🌸 Basic</button>
         <button class="pf-tab" onclick="pfSwitchTab('menstrual',this)">📅 Menstrual</button>
         <button class="pf-tab" onclick="pfSwitchTab('fertility',this)">🌱 Fertility &amp; Tests</button>
         <button class="pf-tab" onclick="pfSwitchTab('pregnancy',this)">🤰 Pregnancy</button>
+        <button class="pf-tab" onclick="pfSwitchTab('postpartum',this)">👶 Postpartum</button>
       </div>
     </div>
     <div style="flex:1;overflow-y:auto;padding:1.25rem 1.75rem;" id="pf-body">
@@ -973,6 +974,133 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
       </div>
 
     </div>
+    <!-- POSTPARTUM TAB -->
+      <div id="pf-tab-postpartum" class="pf-tab-panel" style="display:none;">
+        <div class="pf-section-intro">👶 Postpartum details — mother's recovery and baby's progress — help Bloom give you the most relevant guidance.</div>
+        <div class="pf-sep">👩 Mother — Delivery & Recovery</div>
+        <div class="pf-grid2" style="margin-bottom:10px;">
+          <div><label class="pf-label">Delivery date</label><input type="date" id="pf-pp-delivery-date" class="pf-input"/></div>
+          <div><label class="pf-label">Mode of delivery</label>
+            <select id="pf-pp-delivery-mode" class="pf-input">
+              <option value="">Select…</option>
+              <option value="normal_vaginal">Normal vaginal delivery</option>
+              <option value="lscs_elective">Elective LSCS</option>
+              <option value="lscs_emergency">Emergency LSCS</option>
+              <option value="instrumental">Instrumental (forceps/vacuum)</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-bottom:10px;"><label class="pf-label">Current mother complaints</label>
+          <div class="pf-chip-row" id="pf-pp-mother-complaints">
+            <div class="pf-chip" data-val="recovering_well">Recovering well</div>
+            <div class="pf-chip" data-val="wound_pain">Wound pain</div>
+            <div class="pf-chip" data-val="wound_infection">Wound infection</div>
+            <div class="pf-chip" data-val="heavy_bleeding">Heavy bleeding / PPH</div>
+            <div class="pf-chip" data-val="fever">Fever / infection</div>
+            <div class="pf-chip" data-val="mastitis">Mastitis / breast pain</div>
+            <div class="pf-chip" data-val="mood_low">Low mood / baby blues</div>
+            <div class="pf-chip" data-val="ppd">Postpartum depression</div>
+            <div class="pf-chip" data-val="urinary_issues">Urinary issues</div>
+            <div class="pf-chip" data-val="constipation">Constipation</div>
+            <div class="pf-chip" data-val="fatigue">Severe fatigue</div>
+          </div>
+        </div>
+        <div class="pf-grid2" style="margin-bottom:10px;">
+          <div><label class="pf-label">6-week postnatal check done?</label>
+            <select id="pf-pp-6wk-check" class="pf-input">
+              <option value="">Select…</option>
+              <option value="done_normal">Done — all normal</option>
+              <option value="done_issues">Done — issues found</option>
+              <option value="pending">Not done yet</option>
+            </select>
+          </div>
+          <div><label class="pf-label">Contraception started?</label>
+            <select id="pf-pp-contraception" class="pf-input">
+              <option value="">Select…</option>
+              <option value="none_yet">Not started</option>
+              <option value="barrier">Barrier (condom)</option>
+              <option value="pip">Progestogen-only pill</option>
+              <option value="iud">IUD / copper coil</option>
+              <option value="implant">Implant</option>
+              <option value="injectable">Injectable (Depo)</option>
+              <option value="combined_pill">Combined pill</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-bottom:10px;"><label class="pf-label">Mother's current medications</label>
+          <div class="pf-chip-row" id="pf-pp-mother-meds">
+            <div class="pf-chip" data-val="iron">Iron tablets</div>
+            <div class="pf-chip" data-val="calcium">Calcium</div>
+            <div class="pf-chip" data-val="vitamins">Multivitamins</div>
+            <div class="pf-chip" data-val="antibiotics">Antibiotics</div>
+            <div class="pf-chip" data-val="pain_relief">Pain relief</div>
+            <div class="pf-chip" data-val="antidepressants">Antidepressants</div>
+            <div class="pf-chip" data-val="levothyroxine">Levothyroxine</div>
+            <div class="pf-chip" data-val="none">None</div>
+          </div>
+        </div>
+        <div class="pf-grid3" style="margin-bottom:10px;">
+          <div><label class="pf-label">Mother's Hb (g/dL)</label><input type="number" id="pf-pp-hb" placeholder="e.g. 9.5" step="0.1" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: &gt;10</div></div>
+          <div><label class="pf-label">Mother's BP (mmHg)</label><input type="text" id="pf-pp-bp" placeholder="e.g. 120/78" class="pf-input pf-input-sm"/></div>
+          <div><label class="pf-label">TSH postpartum</label><input type="number" id="pf-pp-tsh" placeholder="e.g. 2.8" step="0.01" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: 0.5–4.0</div></div>
+        </div>
+        <div class="pf-sep">👶 Baby Details</div>
+        <div class="pf-grid3" style="margin-bottom:10px;">
+          <div><label class="pf-label">Birth weight (kg)</label><input type="number" id="pf-pp-birth-weight" placeholder="e.g. 2.9" step="0.01" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: 2.5–4.0kg</div></div>
+          <div><label class="pf-label">Current weight (kg)</label><input type="number" id="pf-pp-current-weight" placeholder="e.g. 3.2" step="0.01" class="pf-input pf-input-sm"/></div>
+          <div><label class="pf-label">Baby's age (weeks)</label><input type="number" id="pf-pp-baby-age-weeks" placeholder="e.g. 4" min="0" max="52" class="pf-input pf-input-sm"/></div>
+        </div>
+        <div style="margin-bottom:10px;"><label class="pf-label">Feeding type</label>
+          <div class="pf-chip-row" id="pf-pp-feeding">
+            <div class="pf-chip" data-val="exclusive_bf">Exclusive breastfeeding</div>
+            <div class="pf-chip" data-val="mixed">Mixed — breast + formula</div>
+            <div class="pf-chip" data-val="formula">Formula only</div>
+            <div class="pf-chip" data-val="expressed">Expressed breast milk</div>
+          </div>
+        </div>
+        <div style="margin-bottom:10px;"><label class="pf-label">Baby complaints / concerns</label>
+          <div class="pf-chip-row" id="pf-pp-baby-complaints">
+            <div class="pf-chip" data-val="all_well">All well 🌸</div>
+            <div class="pf-chip" data-val="jaundice">Jaundice (treated)</div>
+            <div class="pf-chip" data-val="low_weight">Low weight gain</div>
+            <div class="pf-chip" data-val="colic">Colic / gassy</div>
+            <div class="pf-chip" data-val="rash">Skin rash</div>
+            <div class="pf-chip" data-val="feeding_issues">Feeding issues</div>
+          </div>
+        </div>
+        <div class="pf-sep">💉 Baby Vaccinations Done</div>
+        <div style="margin-bottom:10px;">
+          <div class="pf-chip-row" id="pf-pp-baby-vaccines">
+            <div class="pf-chip" data-val="bcg">BCG (birth)</div>
+            <div class="pf-chip" data-val="hepb0">Hepatitis B (birth)</div>
+            <div class="pf-chip" data-val="opv0">OPV 0 (birth)</div>
+            <div class="pf-chip" data-val="6wk_vaccines">6-week vaccines</div>
+            <div class="pf-chip" data-val="10wk_vaccines">10-week vaccines</div>
+            <div class="pf-chip" data-val="14wk_vaccines">14-week vaccines</div>
+            <div class="pf-chip" data-val="6mo_vaccines">6-month vaccines</div>
+          </div>
+        </div>
+        <div class="pf-sep">🔬 Baby Investigations</div>
+        <div class="pf-grid3" style="margin-bottom:10px;">
+          <div><label class="pf-label">Bilirubin peak (mg/dL)</label><input type="number" id="pf-pp-bilirubin" placeholder="e.g. 14.5" step="0.1" class="pf-input pf-input-sm"/><div class="pf-ref">Phototherapy: &gt;15</div></div>
+          <div><label class="pf-label">Baby Hb (g/dL)</label><input type="number" id="pf-pp-baby-hb" placeholder="e.g. 16" step="0.1" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: 14–20</div></div>
+        </div>
+        <div style="margin-bottom:10px;"><label class="pf-label">Baby screenings done</label>
+          <div class="pf-chip-row" id="pf-pp-baby-screens">
+            <div class="pf-chip" data-val="hearing_screen">Hearing screening</div>
+            <div class="pf-chip" data-val="newborn_screen">Newborn blood spot screening</div>
+            <div class="pf-chip" data-val="hip_usg">Hip USG</div>
+            <div class="pf-chip" data-val="echo">Cardiac echo</div>
+            <div class="pf-chip" data-val="eye_check">Eye / red reflex check</div>
+            <div class="pf-chip" data-val="paed_review">Paediatrician review done</div>
+          </div>
+        </div>
+        <div style="margin-bottom:10px;"><label class="pf-label">Any other notes about baby</label>
+          <textarea id="pf-pp-baby-notes" rows="2" placeholder="e.g. Phototherapy given for 2 days, discharged day 4…" class="pf-input" style="resize:vertical;font-size:14px;"></textarea>
+        </div>
+      </div>
+
+    </div>
     <div style="padding:1rem 1.75rem;border-top:1px solid #F0E8E2;flex-shrink:0;display:flex;align-items:center;gap:12px;">
       <button onclick="pfSave()" style="flex:1;padding:11px;background:#C4704F;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;">Save Profile 🌸</button>
       <div id="pf-saved-msg" style="display:none;font-size:13px;color:#4F7A5E;">✓ Saved!</div>
@@ -1291,7 +1419,7 @@ function pfBuildChips(){
       d.onclick=function(){this.classList.toggle('selected');pfUpdateCompletion();};medGrid.appendChild(d);
     });
   }
-  document.querySelectorAll('#pf-flow-chips .pf-chip, #pf-pain-chips .pf-chip, #pf-intermenstrual-chips .pf-chip, #pf-pms-chips .pf-chip, #pf-outcome-chips .pf-chip, #pf-fertility-conditions .pf-chip, #pf-surgeries .pf-chip, #pf-sa-chips .pf-chip, #pf-prev-tx-chips .pf-chip, #pf-inv-done-chips .pf-chip, #pf-usg-chips .pf-chip, #pf-doctor-chips .pf-chip, #pf-high-risk .pf-chip, #pf-delivery-mode-chips .pf-chip, #pf-lscs-reason-chips .pf-chip, #pf-obs-complications .pf-chip').forEach(chip=>{
+ document.querySelectorAll('#pf-flow-chips .pf-chip, #pf-pain-chips .pf-chip, #pf-intermenstrual-chips .pf-chip, #pf-pms-chips .pf-chip, #pf-outcome-chips .pf-chip, #pf-fertility-conditions .pf-chip, #pf-surgeries .pf-chip, #pf-sa-chips .pf-chip, #pf-prev-tx-chips .pf-chip, #pf-inv-done-chips .pf-chip, #pf-usg-chips .pf-chip, #pf-doctor-chips .pf-chip, #pf-high-risk .pf-chip, #pf-delivery-mode-chips .pf-chip, #pf-lscs-reason-chips .pf-chip, #pf-obs-complications .pf-chip, #pf-pp-mother-complaints .pf-chip, #pf-pp-mother-meds .pf-chip, #pf-pp-feeding .pf-chip, #pf-pp-baby-complaints .pf-chip, #pf-pp-baby-vaccines .pf-chip, #pf-pp-baby-screens .pf-chip').forEach(chip=>{
     if(!chip._wired){chip._wired=true;chip.onclick=function(){this.classList.toggle('selected');pfUpdateCompletion();};}
   });
 }
@@ -1383,6 +1511,19 @@ function pfLoad(){
   set('pf-tt1',p.immTt1Date);set('pf-tt2',p.immTt2Date||p.immTdDate);set('pf-flu',p.immFluDate);
   set('pf-bp1',p.bpReading1);set('pf-bp1-date',p.bpReading1Date);
   set('pf-bp2',p.bpReading2);set('pf-bp2-date',p.bpReading2Date);
+  set('pf-pp-delivery-date',p.ppDeliveryDate);set('pf-pp-delivery-mode',p.ppDeliveryMode);
+  setChipVals('pf-pp-mother-complaints',p.ppMotherComplaints);
+  set('pf-pp-6wk-check',p.pp6wkCheck);set('pf-pp-contraception',p.ppContraception);
+  setChipVals('pf-pp-mother-meds',p.ppMotherMeds);
+  set('pf-pp-hb',p.ppHb);set('pf-pp-bp',p.ppBp);set('pf-pp-tsh',p.ppTsh);
+  set('pf-pp-birth-weight',p.ppBirthWeight);set('pf-pp-current-weight',p.ppCurrentWeight);
+  set('pf-pp-baby-age-weeks',p.ppBabyAgeWeeks);
+  setChipVals('pf-pp-feeding',p.ppFeeding);
+  setChipVals('pf-pp-baby-complaints',p.ppBabyComplaints);
+  setChipVals('pf-pp-baby-vaccines',p.ppBabyVaccines);
+  set('pf-pp-bilirubin',p.ppBilirubin);set('pf-pp-baby-hb',p.ppBabyHb);
+  setChipVals('pf-pp-baby-screens',p.ppBabyScreens);
+  set('pf-pp-baby-notes',p.ppBabyNotes);
   pfUpdateCompletion();
 }
 
@@ -1442,8 +1583,20 @@ async function pfSave(){
     ancAnomalyScan:g('pf-anomaly-scan'),ancPlacentaPos:g('pf-placenta'),ancGrowthScan:g('pf-growth-scan'),
     ancCervixLength:gn('pf-cervix-length'),ancDoppler:g('pf-doppler'),
     immTt1Date:g('pf-tt1'),immTdDate:g('pf-tt2'),immFluDate:g('pf-flu'),
-    bpReading1:g('pf-bp1'),bpReading1Date:g('pf-bp1-date'),
+   bpReading1:g('pf-bp1'),bpReading1Date:g('pf-bp1-date'),
     bpReading2:g('pf-bp2'),bpReading2Date:g('pf-bp2-date'),
+    ppDeliveryDate:g('pf-pp-delivery-date'),ppDeliveryMode:g('pf-pp-delivery-mode'),
+    ppMotherComplaints:getChipVals('pf-pp-mother-complaints'),
+    pp6wkCheck:g('pf-pp-6wk-check'),ppContraception:g('pf-pp-contraception'),
+    ppMotherMeds:getChipVals('pf-pp-mother-meds'),
+    ppHb:gn('pf-pp-hb'),ppBp:g('pf-pp-bp'),ppTsh:gn('pf-pp-tsh'),
+    ppBirthWeight:gn('pf-pp-birth-weight'),ppCurrentWeight:gn('pf-pp-current-weight'),
+    ppBabyAgeWeeks:gi('pf-pp-baby-age-weeks'),
+    ppFeeding:getChipVals('pf-pp-feeding'),
+    ppBabyComplaints:getChipVals('pf-pp-baby-complaints'),
+    ppBabyVaccines:getChipVals('pf-pp-baby-vaccines'),
+    ppBilirubin:gn('pf-pp-bilirubin'),ppBabyHb:gn('pf-pp-baby-hb'),
+    ppBabyScreens:getChipVals('pf-pp-baby-screens'),ppBabyNotes:g('pf-pp-baby-notes'),
   };
   try{
     const res=await fetch('/profile',{method:'PUT',headers:{'Content-Type':'application/json',Authorization:TOKEN},body:JSON.stringify(profile)});
@@ -1454,7 +1607,7 @@ async function pfSave(){
       const msg=document.getElementById('pf-saved-msg');
       msg.style.display='block';setTimeout(()=>msg.style.display='none',2000);
       renderProfile();renderCycle();renderTip();renderInsight();
-      
+      buildDashboardActionPlan(userData.profile||{});
   }
   }catch(e){alert('Could not save profile. Please try again.');}
 }
@@ -1464,6 +1617,57 @@ function calcPregLmpFromEdd(){
   if(!edd) return;
   const d=new Date(edd);d.setDate(d.getDate()-280);
   document.getElementById('pf-preg-lmp').value=d.toISOString().split('T')[0];
+}
+
+function buildDashboardActionPlan(profile){
+  const ttcChecks=[
+    {name:'AMH',val:profile.amh,unit:'ng/mL',low:1.0,high:3.5},
+    {name:'FSH',val:profile.fsh,unit:'IU/L',low:3,high:10},
+    {name:'LH',val:profile.lh,unit:'IU/L',low:2,high:8},
+    {name:'TSH',val:profile.tsh,unit:'mIU/L',low:0.5,high:2.5},
+    {name:'AFC',val:profile.afc,unit:'follicles',low:10,high:20},
+    {name:'Endometrial thickness',val:profile.endometrialThickness,unit:'mm',low:8,high:14},
+    {name:'Haemoglobin',val:profile.hb,unit:'g/dL',low:12,high:16},
+    {name:'Vitamin D',val:profile.vitaminD,unit:'ng/mL',low:30,high:100},
+    {name:'Prolactin',val:profile.prolactin,unit:'ng/mL',low:0,high:25},
+  ];
+  const pregChecks=[
+    {name:'Hb 1st trimester',val:profile.ancHb1,unit:'g/dL',low:11,high:16},
+    {name:'Hb 2nd trimester',val:profile.ancHb2,unit:'g/dL',low:10.5,high:16},
+    {name:'Hb 3rd trimester',val:profile.ancHb3,unit:'g/dL',low:11,high:16},
+    {name:'ANC TSH',val:profile.ancTsh,unit:'mIU/L',low:0.5,high:2.5},
+    {name:'OGTT Fasting',val:profile.ancOgttFasting,unit:'mg/dL',low:0,high:92},
+    {name:'OGTT 2hr',val:profile.ancOgtt2hr,unit:'mg/dL',low:0,high:153},
+    {name:'Nuchal NT',val:profile.ancNuchalNt,unit:'mm',low:0,high:3.5},
+    {name:'Cervical length',val:profile.ancCervixLength,unit:'mm',low:25,high:50},
+    {name:'ANC Ferritin',val:profile.ancFerritin,unit:'ng/mL',low:30,high:300},
+  ];
+  const ppChecks=[
+    {name:'Postpartum Hb',val:profile.ppHb,unit:'g/dL',low:10,high:16},
+    {name:'Postpartum TSH',val:profile.ppTsh,unit:'mIU/L',low:0.5,high:4.0},
+    {name:'Baby bilirubin',val:profile.ppBilirubin,unit:'mg/dL',low:0,high:15},
+    {name:'Baby Hb',val:profile.ppBabyHb,unit:'g/dL',low:14,high:22},
+  ];
+  function compute(checks){
+    const abnormal=[],normal=[];
+    checks.forEach(c=>{
+      if(c.val===null||c.val===undefined) return;
+      const isHigh=c.val>c.high,isLow=c.val<c.low;
+      if(!isHigh&&!isLow){normal.push({name:c.name,value:c.val,unit:c.unit});}
+      else{abnormal.push({name:c.name,value:c.val,unit:c.unit,isHigh});}
+    });
+    return{abnormal,normal,checkinAlerts:[],date:new Date().toLocaleDateString('en-IN'),savedAt:Date.now()};
+  }
+  ['ttc','pregnancy','postpartum'].forEach((j,i)=>{
+    const checksMap=[ttcChecks,pregChecks,ppChecks];
+    const existing=localStorage.getItem('bloom_ap_'+j);
+    let existingAlerts=[];
+    if(existing){try{existingAlerts=JSON.parse(existing).checkinAlerts||[];}catch(e){}}
+    const data=compute(checksMap[i]);
+    data.checkinAlerts=existingAlerts;
+    localStorage.setItem('bloom_ap_'+j,JSON.stringify(data));
+    localStorage.removeItem('bloom_ap_seen_'+j);
+  });
 }
 
 init();
