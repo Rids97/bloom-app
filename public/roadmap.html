@@ -141,6 +141,24 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 .content-error{padding:1rem;background:#FFF5F5;border-radius:10px;border:1px solid #F0C8C8;font-size:13px;color:#9E2020;display:flex;align-items:center;gap:10px;}
 .retry-btn{padding:6px 14px;background:var(--terra);color:#fff;border:none;border-radius:8px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;}
 .fade-up{animation:fadeUp 0.4s ease both;}
+.action-plan-tab{background:linear-gradient(135deg,#C4704F,#9E5238)!important;color:#fff!important;border-color:#9E5238!important;position:relative;}
+.action-plan-tab:hover{background:linear-gradient(135deg,#9E5238,#7A3D25)!important;}
+.ap-dot{position:absolute;top:-4px;right:-4px;width:12px;height:12px;border-radius:50%;background:#E8303A;border:2px solid #fff;display:none;}
+.ap-section{padding:0;}
+.ap-empty{text-align:center;padding:2rem;color:var(--muted);font-size:16px;}
+.ap-abnormal-card{background:#FFFBF0;border:1.5px solid #E8C87A;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem;}
+.ap-abnormal-header{font-size:16px;font-weight:600;color:#9A6B20;margin-bottom:6px;display:flex;align-items:center;gap:8px;}
+.ap-abnormal-why{font-size:15px;color:#2C2420;line-height:1.75;margin-bottom:8px;}
+.ap-abnormal-action{font-size:15px;color:#9E5238;font-weight:600;line-height:1.6;padding:8px 12px;background:rgba(196,112,79,0.08);border-radius:8px;}
+.ap-normal-section{background:var(--sage-l);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem;}
+.ap-normal-title{font-size:14px;font-weight:600;color:var(--sage-d);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.06em;}
+.ap-normal-row{display:flex;justify-content:space-between;font-size:15px;padding:5px 0;border-bottom:1px solid rgba(75,120,90,0.15);}
+.ap-normal-row:last-child{border:none;}
+.ap-checkin-alert{background:#FEF0E7;border:1.5px solid var(--terra);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem;}
+.ap-checkin-title{font-size:15px;font-weight:600;color:var(--terra-d);margin-bottom:6px;}
+.ap-checkin-action{font-size:14px;color:#9E2020;font-weight:500;line-height:1.6;}
+.ap-date{font-size:12px;color:#B8A060;font-style:italic;margin-top:4px;}
+.checkin-panel-pp{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem;}
 .golden-box{background:linear-gradient(135deg,#FDF3DC,#FEF9F0);border:1.5px solid #C9A96E;border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1rem;}
 .golden-box-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:#9A6B20;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
 .golden-normal-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #E8D5AF;font-size:16px;}
@@ -229,6 +247,26 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
           <div class="stage-card-sub" id="stage-sub"></div>
         </div>
         <div class="golden-box" id="ttc-golden-box" style="display:none;"></div>
+        
+        <div class="checkin-panel" id="ttc-checkin-panel">
+          <div class="checkin-panel-title">🌱 This Week's Update</div>
+          <div class="checkin-panel-sub">How are things going? Bloom personalises your guidance based on what you share.</div>
+          <div class="checkin-chips" id="ttc-checkin-chips">
+            <div class="cc-chip" data-val="all_well" onclick="this.classList.toggle('selected')">All going well 🌸</div>
+            <div class="cc-chip" data-val="opk_positive" onclick="this.classList.toggle('selected')">OPK positive ✓</div>
+            <div class="cc-chip" data-val="scan_done" onclick="this.classList.toggle('selected')">Scan done</div>
+            <div class="cc-chip" data-val="new_result" onclick="this.classList.toggle('selected')">New test result</div>
+            <div class="cc-chip" data-val="medication_started" onclick="this.classList.toggle('selected')">Medication started</div>
+            <div class="cc-chip alert-chip" data-val="side_effects" onclick="this.classList.toggle('selected')">Medication side effects</div>
+            <div class="cc-chip alert-chip" data-val="pelvic_pain" onclick="this.classList.toggle('selected')">Pelvic pain / bloating</div>
+            <div class="cc-chip alert-chip" data-val="spotting" onclick="this.classList.toggle('selected')">Spotting</div>
+            <div class="cc-chip" data-val="tww" onclick="this.classList.toggle('selected')">In two-week wait</div>
+            <div class="cc-chip" data-val="period_arrived" onclick="this.classList.toggle('selected')">Period arrived</div>
+            <div class="cc-chip" data-val="positive_test" onclick="this.classList.toggle('selected')">Positive pregnancy test 🎉</div>
+          </div>
+          <textarea class="checkin-notes" id="ttc-checkin-notes" placeholder="Any notes for Bloom… e.g. follicle 18mm on Day 12, trigger given today" rows="2"></textarea>
+          <button class="checkin-save-btn" onclick="saveTTCCheckin()">Save Update ✓</button>
+        </div>
         <div class="sec-tabs" id="ttc-sec-tabs">
           <div class="stab active" onclick="loadTTCSection('overview',this)">Overview</div>
           <div class="stab" onclick="loadTTCSection('lifestyle',this)">Lifestyle &amp; Timing</div>
@@ -236,6 +274,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
           <div class="stab" onclick="loadTTCSection('supplements',this)">Supplements</div>
           <div class="stab" onclick="loadTTCSection('pretreatment',this)">Investigations</div>
           <div class="stab" onclick="loadTTCSection('immunization',this)">Immunization</div>
+          <div class="stab action-plan-tab" onclick="loadActionPlan('ttc',this)" id="ttc-ap-tab">📋 My Action Plan<span class="ap-dot" id="ttc-ap-dot"></span></div>
         </div>
         <div id="ttc-ai-content"><div class="loading-dots"><span></span><span></span><span></span></div></div>
         <div style="margin-top:1rem;padding:1rem 1.25rem;background:var(--cream);border-radius:var(--radius);border:1px solid var(--border-l);font-size:11px;color:var(--muted);font-style:italic;">📚 Evidence-based · Built by a gynaecologist · Personalised to your profile</div>
@@ -330,12 +369,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
             <textarea class="checkin-notes" id="preg-checkin-notes" placeholder="Any notes for Bloom… e.g. told placenta is low, iron started" rows="2"></textarea>
             <button class="checkin-save-btn" onclick="saveCheckin()">Save Check-in ✓</button>
           </div>
-          <div class="sec-tabs" id="preg-sec-tabs">
+         <div class="sec-tabs" id="preg-sec-tabs">
             <div class="stab active" onclick="loadPregSection('overview',this)">Overview</div>
             <div class="stab" onclick="loadPregSection('lifestyle',this)">Lifestyle &amp; Monitoring</div>
             <div class="stab" onclick="loadPregSection('supplements',this)">Supplements</div>
             <div class="stab" onclick="loadPregSection('pretreatment',this)">Investigations</div>
             <div class="stab" onclick="loadPregSection('immunization',this)">Immunization</div>
+            <div class="stab action-plan-tab" onclick="loadActionPlan('pregnancy',this)" id="preg-ap-tab">📋 My Action Plan<span class="ap-dot" id="preg-ap-dot"></span></div>
           </div>
           <div id="preg-ai-content"><div class="loading-dots"><span></span><span></span><span></span></div></div>
         </div>
@@ -344,41 +384,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
             <div class="tip-label">This Week's Tip</div>
             <div class="tip-text" id="preg-tip">Loading…</div>
           </div>
-          <div class="inv-card">
-            <div class="inv-card-title" style="color:var(--sage-d);">🔬 Log Scan / Test Result</div>
-            <div style="margin-bottom:8px;"><div style="font-size:11px;color:var(--muted);margin-bottom:3px;">What was done?</div>
-              <select id="preg-log-test" class="inv-input-sm">
-                <option value="">Select…</option>
-                <option value="dating_scan">Dating scan</option>
-                <option value="nuchal_scan">Nuchal scan (12w)</option>
-                <option value="anomaly_scan">Anomaly scan (20w)</option>
-                <option value="growth_scan">Growth scan</option>
-                <option value="ogtt">OGTT — diabetes test</option>
-                <option value="doppler">Doppler study</option>
-                <option value="blood_test">Blood test (Hb/ferritin/TSH)</option>
-                <option value="urine_test">Urine routine</option>
-              </select>
-            </div>
-            <div style="margin-bottom:8px;"><div style="font-size:11px;color:var(--muted);margin-bottom:3px;">Result</div>
-              <select id="preg-log-result" class="inv-input-sm">
-                <option value="">Select…</option>
-                <option value="normal">Normal ✓</option>
-                <option value="borderline">Borderline — follow-up</option>
-                <option value="abnormal">Abnormal — doctor advised</option>
-                <option value="pending">Result pending</option>
-              </select>
-            </div>
-           <div style="margin-bottom:4px;"><div style="font-size:11px;color:var(--muted);margin-bottom:3px;">Value (e.g. Hb 9.2, TSH 3.8, NT 1.4mm)</div>
-              <input type="text" id="preg-log-value" placeholder="e.g. 9.2 g/dL, 3.8 mIU/L, 1.4mm…" class="inv-input-sm"/>
-            </div>
-            <div style="margin-bottom:4px;"><div style="font-size:11px;color:var(--muted);margin-bottom:3px;">Notes (optional)</div>
-              <input type="text" id="preg-log-notes" placeholder="e.g. placenta low, rest advised…" class="inv-input-sm"/>
-            </div>
-            <button class="inv-save-btn" onclick="savePregInvestigation()">Save &amp; Get Advice</button>
-            <div id="preg-inv-saved" style="display:none;font-size:12px;color:var(--sage-d);text-align:center;margin-top:6px;">✓ Saved</div>
-            <div id="preg-inv-advice" style="display:none;margin-top:10px;background:var(--gold-l);border:1px solid #E8D5AF;border-radius:10px;padding:14px 16px;"></div>
-         </div>
-          <div class="milestone-card">
+        
+            <div class="milestone-card">
             <div class="milestone-title">🗓 Milestones</div>
             <div id="preg-milestones"></div>
           </div>
@@ -420,6 +427,40 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
           <div class="week-sub" id="pp-sub">Your first days after birth — recovery, feeding, and bonding.</div>
         </div>
         <div class="golden-box" id="pp-golden-box" style="display:none;"></div>
+       
+        <div class="checkin-panel-pp">
+          <div class="checkin-panel-title">👩‍👶 This Week's Update</div>
+          <div class="checkin-panel-sub">How are you and baby doing? Bloom uses this to personalise your guidance.</div>
+          <div style="font-size:13px;font-weight:600;color:var(--terra-d);margin-bottom:6px;">👩 Mother</div>
+          <div class="checkin-chips" id="pp-mother-checkin-chips" style="margin-bottom:12px;">
+            <div class="cc-chip" data-val="recovering_well" onclick="this.classList.toggle('selected')">Recovering well</div>
+            <div class="cc-chip" data-val="breastfeeding_ok" onclick="this.classList.toggle('selected')">Breastfeeding well</div>
+            <div class="cc-chip alert-chip" data-val="mood_low" onclick="this.classList.toggle('selected')">Low mood / crying</div>
+            <div class="cc-chip alert-chip" data-val="wound_pain" onclick="this.classList.toggle('selected')">Wound pain / infection</div>
+            <div class="cc-chip alert-chip" data-val="heavy_bleeding" onclick="this.classList.toggle('selected')">Heavy bleeding</div>
+            <div class="cc-chip alert-chip" data-val="fever" onclick="this.classList.toggle('selected')">Fever</div>
+            <div class="cc-chip alert-chip" data-val="breast_pain" onclick="this.classList.toggle('selected')">Breast pain / mastitis</div>
+            <div class="cc-chip" data-val="fatigue" onclick="this.classList.toggle('selected')">Fatigue</div>
+          </div>
+          <div style="font-size:13px;font-weight:600;color:var(--sage-d);margin-bottom:6px;">👶 Baby</div>
+          <div class="checkin-chips" id="pp-baby-checkin-chips" style="margin-bottom:10px;">
+            <div class="cc-chip" data-val="feeding_well" onclick="this.classList.toggle('selected')">Feeding well</div>
+            <div class="cc-chip" data-val="good_weight" onclick="this.classList.toggle('selected')">Good weight gain</div>
+            <div class="cc-chip" data-val="vaccinations_done" onclick="this.classList.toggle('selected')">Vaccinations done</div>
+            <div class="cc-chip alert-chip" data-val="not_feeding" onclick="this.classList.toggle('selected')">Not feeding / refusing</div>
+            <div class="cc-chip alert-chip" data-val="baby_fever" onclick="this.classList.toggle('selected')">Baby has fever</div>
+            <div class="cc-chip alert-chip" data-val="jaundice" onclick="this.classList.toggle('selected')">Jaundice / yellowing</div>
+            <div class="cc-chip alert-chip" data-val="excessive_crying" onclick="this.classList.toggle('selected')">Excessive crying</div>
+            <div class="cc-chip alert-chip" data-val="not_passing_urine" onclick="this.classList.toggle('selected')">Not passing urine (&lt;6 wet nappies)</div>
+            <div class="cc-chip alert-chip" data-val="projectile_vomiting" onclick="this.classList.toggle('selected')">Projectile vomiting</div>
+            <div class="cc-chip alert-chip" data-val="breathing_difficulty" onclick="this.classList.toggle('selected')">Fast / noisy breathing</div>
+            <div class="cc-chip alert-chip" data-val="blue_lips" onclick="this.classList.toggle('selected')">Blue lips / tongue 🚨</div>
+            <div class="cc-chip" data-val="colic" onclick="this.classList.toggle('selected')">Colic / gassy</div>
+            <div class="cc-chip" data-val="rash" onclick="this.classList.toggle('selected')">Skin rash</div>
+          </div>
+          <textarea class="checkin-notes" id="pp-checkin-notes" placeholder="Any notes… e.g. baby weight 3.4kg today, started formula top-up, stitches removed" rows="2"></textarea>
+          <button class="checkin-save-btn" onclick="savePPCheckin()">Save Update ✓</button>
+        </div>
         <div class="sec-tabs" id="pp-sec-tabs">
           <div class="stab active" onclick="loadPPSection('overview',this)">Overview</div>
           <div class="stab" onclick="loadPPSection('breastfeeding',this)">Breastfeeding</div>
@@ -427,6 +468,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
           <div class="stab" onclick="loadPPSection('baby_care',this)">Baby Care</div>
           <div class="stab" onclick="loadPPSection('immunization',this)">Immunization</div>
           <div class="stab" onclick="loadPPSection('supplements',this)">Nutrition</div>
+          <div class="stab action-plan-tab" onclick="loadActionPlan('postpartum',this)" id="pp-ap-tab">📋 My Action Plan<span class="ap-dot" id="pp-ap-dot"></span></div>
         </div>
         <div id="pp-ai-content"><div class="loading-dots"><span></span><span></span><span></span></div></div>
       </div>
@@ -435,72 +477,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
           <div class="tip-label">Postpartum Tip</div>
           <div class="tip-text" id="pp-tip">Loading…</div>
         </div>
-        <div class="inv-card">
-          <div class="inv-card-title" style="color:var(--sage-d);">🍼 Baby Investigation Log</div>
-          <div style="margin-bottom:8px;"><div style="font-size:11px;color:var(--muted);margin-bottom:3px;">What was done?</div>
-            <select id="baby-log-test" class="inv-input-sm">
-              <option value="">Select…</option>
-              <option value="weight_check">Weight check</option>
-              <option value="jaundice_test">Jaundice / bilirubin test</option>
-              <option value="hearing_screen">Hearing screening</option>
-              <option value="vaccination">Vaccination given</option>
-              <option value="paed_review">Paediatrician review</option>
-              <option value="blood_test">Blood test</option>
-              <option value="hip_usg">Hip USG</option>
-            </select>
-          </div>
-          <div style="margin-bottom:8px;"><div style="font-size:11px;color:var(--muted);margin-bottom:3px;">Result</div>
-            <select id="baby-log-result" class="inv-input-sm">
-              <option value="">Select…</option>
-              <option value="normal">Normal ✓</option>
-              <option value="borderline">Borderline — follow-up needed</option>
-              <option value="abnormal">Abnormal — treatment started</option>
-              <option value="pending">Pending</option>
-            </select>
-          </div>
-          <div style="margin-bottom:4px;"><div style="font-size:11px;color:var(--muted);margin-bottom:3px;">Value (e.g. weight 3.2kg, bilirubin 14.5, Hb 16)</div>
-              <input type="text" id="baby-log-value" placeholder="e.g. 3.2 kg, 14.5 mg/dL…" class="inv-input-sm"/>
-            </div>
-            <div style="margin-bottom:4px;"><div style="font-size:11px;color:var(--muted);margin-bottom:3px;">Notes</div>
-              <input type="text" id="baby-log-notes" placeholder="e.g. mild jaundice, feeding well…" class="inv-input-sm"/>
-            </div>
-            <button class="inv-save-btn" style="background:var(--sage-d);" onclick="saveBabyInvestigation()">Save &amp; Get Advice</button>
-            <div id="baby-inv-saved" style="display:none;font-size:12px;color:var(--sage-d);text-align:center;margin-top:6px;">✓ Saved</div>
-            <div id="baby-inv-advice" style="display:none;margin-top:10px;background:var(--gold-l);border:1px solid #E8D5AF;border-radius:10px;padding:14px 16px;"></div>
-        </div>
-        <div class="inv-card">
-          <div class="inv-card-title" style="color:var(--terra-d);">👩 Mother Update</div>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">How are you feeling?</div>
-          <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;" id="pp-mother-chips">
-            <div class="pp-log-chip" data-val="recovering_well" onclick="this.classList.toggle('selected')">Recovering well</div>
-            <div class="pp-log-chip" data-val="breastfeeding_ok" onclick="this.classList.toggle('selected')">Breastfeeding well</div>
-            <div class="pp-log-chip pp-log-alert" data-val="mood_low" onclick="this.classList.toggle('selected')">Low mood / crying</div>
-            <div class="pp-log-chip pp-log-alert" data-val="wound_pain" onclick="this.classList.toggle('selected')">Wound pain / infection</div>
-            <div class="pp-log-chip pp-log-alert" data-val="heavy_bleeding" onclick="this.classList.toggle('selected')">Heavy bleeding</div>
-            <div class="pp-log-chip pp-log-alert" data-val="fever" onclick="this.classList.toggle('selected')">Fever</div>
-          </div>
-          <div class="inv-card-title" style="color:var(--sage-d);margin-top:4px;">👶 Baby Update</div>
-          <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;" id="pp-baby-chips">
-            <div class="pp-log-chip" data-val="feeding_well" onclick="this.classList.toggle('selected')">Feeding well</div>
-            <div class="pp-log-chip" data-val="good_weight" onclick="this.classList.toggle('selected')">Good weight gain</div>
-            <div class="pp-log-chip" data-val="vaccinations_done" onclick="this.classList.toggle('selected')">Vaccinations done</div>
-            <div class="pp-log-chip pp-log-alert" data-val="not_feeding" onclick="this.classList.toggle('selected')">Not feeding / refusing</div>
-            <div class="pp-log-chip pp-log-alert" data-val="baby_fever" onclick="this.classList.toggle('selected')">Baby has fever</div>
-            <div class="pp-log-chip pp-log-alert" data-val="jaundice" onclick="this.classList.toggle('selected')">Jaundice / yellowing</div>
-            <div class="pp-log-chip pp-log-alert" data-val="excessive_crying" onclick="this.classList.toggle('selected')">Excessive / inconsolable crying</div>
-            <div class="pp-log-chip pp-log-alert" data-val="not_passing_urine" onclick="this.classList.toggle('selected')">Not passing urine (&lt;6 wet nappies)</div>
-            <div class="pp-log-chip pp-log-alert" data-val="projectile_vomiting" onclick="this.classList.toggle('selected')">Projectile vomiting</div>
-            <div class="pp-log-chip pp-log-alert" data-val="blood_in_stool" onclick="this.classList.toggle('selected')">Blood in stool</div>
-            <div class="pp-log-chip pp-log-alert" data-val="breathing_difficulty" onclick="this.classList.toggle('selected')">Fast / noisy breathing</div>
-            <div class="pp-log-chip pp-log-alert" data-val="blue_lips" onclick="this.classList.toggle('selected')">Blue lips / tongue 🚨</div>
-            <div class="pp-log-chip" data-val="colic" onclick="this.classList.toggle('selected')">Colic / gassy</div>
-            <div class="pp-log-chip" data-val="rash" onclick="this.classList.toggle('selected')">Skin rash</div>
-            <div class="pp-log-chip" data-val="congestion" onclick="this.classList.toggle('selected')">Nasal congestion / cold</div>
-            <div class="pp-log-chip" data-val="cradle_cap" onclick="this.classList.toggle('selected')">Cradle cap</div>
-          </div>
-          <button onclick="savePPUpdate()" style="width:100%;padding:8px;background:var(--terra);color:#fff;border:none;border-radius:8px;font-size:12.5px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;">Save &amp; Get Advice</button>
-          <div id="pp-update-saved" style="display:none;font-size:12px;color:var(--sage-d);text-align:center;margin-top:6px;">✓ Saved</div>
-        </div>
+      
         <div class="checklist-card">
           <div class="checklist-title">Today's Checklist</div>
           <div id="pp-checklist"></div>
@@ -595,6 +572,7 @@ async function init(){
     userData=await res.json();
     userProfile=userData.profile||{};
     renderAllGoldenBoxes();
+    updateAllAPDots();
     const mainCont=document.getElementById('main-container');
     if(userData.plan!=='complete'){
       mainCont.style.display='block';
@@ -1336,6 +1314,194 @@ function getTTCAdvice(name,value,isHigh){
 }
 // ── END GOLDEN BOX ───────────────────────────────────────────
 
+// ── ACTION PLAN ──────────────────────────────────────────────
+const AP_KEY='bloom_action_plan';
+const AP_SEEN_KEY='bloom_ap_seen';
+
+function saveActionPlan(data){
+  const payload={...data,savedAt:Date.now()};
+  localStorage.setItem(AP_KEY,JSON.stringify(payload));
+  // Mark as unseen
+  localStorage.removeItem(AP_SEEN_KEY);
+  updateAllAPDots();
+}
+
+function loadActionPlan_data(){
+  const raw=localStorage.getItem(AP_KEY);
+  if(!raw) return null;
+  try{return JSON.parse(raw);}catch(e){return null;}
+}
+
+function markAPSeen(){
+  const data=loadActionPlan_data();
+  if(data) localStorage.setItem(AP_SEEN_KEY,data.savedAt+'');
+}
+
+function hasUnseenAP(){
+  const data=loadActionPlan_data();
+  if(!data) return false;
+  const hasAbnormal=(data.abnormal&&data.abnormal.length>0)||(data.checkinAlerts&&data.checkinAlerts.length>0);
+  if(!hasAbnormal) return false;
+  const seen=localStorage.getItem(AP_SEEN_KEY);
+  return seen!==data.savedAt+'';
+}
+
+function updateAllAPDots(){
+  const unseen=hasUnseenAP();
+  ['ttc-ap-dot','preg-ap-dot','pp-ap-dot'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.style.display=unseen?'block':'none';
+  });
+}
+
+function loadActionPlan(journey,btn){
+  // Mark as seen
+  markAPSeen();
+  updateAllAPDots();
+  // Set active tab
+  const tabsId=journey==='ttc'?'ttc-sec-tabs':journey==='pregnancy'?'preg-sec-tabs':'pp-sec-tabs';
+  const contentId=journey==='ttc'?'ttc-ai-content':journey==='pregnancy'?'preg-ai-content':'pp-ai-content';
+  document.querySelectorAll('#'+tabsId+' .stab').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  const data=loadActionPlan_data();
+  const el=document.getElementById(contentId);
+  if(!el) return;
+  if(!data||((!data.abnormal||!data.abnormal.length)&&(!data.normal||!data.normal.length)&&(!data.checkinAlerts||!data.checkinAlerts.length))){
+    el.innerHTML='<div class="ap-empty"><div style="font-size:40px;margin-bottom:12px;">📋</div><div style="font-family:Cormorant Garamond,serif;font-size:24px;font-weight:600;color:var(--text);margin-bottom:8px;">Your Action Plan</div><p style="color:var(--muted);font-size:15px;line-height:1.7;">Update your profile with your latest test results or check-in to see personalised actions here.</p></div>';
+    return;
+  }
+  let html='<div class="ap-section ai-content fade-up">';
+  // Checkin alerts first
+  if(data.checkinAlerts&&data.checkinAlerts.length){
+    html+='<div style="font-size:14px;font-weight:600;color:#9E2020;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;">🚨 Symptoms Flagged</div>';
+    data.checkinAlerts.forEach(a=>{
+      html+=`<div class="ap-checkin-alert"><div class="ap-checkin-title">⚠️ ${a.label}</div><div class="ap-checkin-action">→ ${a.action}</div></div>`;
+    });
+  }
+  // Abnormal values
+  if(data.abnormal&&data.abnormal.length){
+    html+='<div style="font-size:14px;font-weight:600;color:#9A6B20;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;margin-top:4px;">⚠️ Values Needing Attention ('+data.abnormal.length+')</div>';
+    data.abnormal.forEach(r=>{
+      html+=`<div class="ap-abnormal-card">
+        <div class="ap-abnormal-header">⚠️ ${r.name} — ${r.value} ${r.unit} <span style="font-size:13px;background:${r.isHigh?'#FAECE7':'#E6F1FB'};color:${r.isHigh?'#993C1D':'#185FA5'};padding:2px 8px;border-radius:20px;">${r.isHigh?'High':'Low'}</span></div>
+        <div class="ap-abnormal-why">${r.why}</div>
+        <div class="ap-abnormal-action">→ ${r.action}</div>
+      </div>`;
+    });
+  }
+  // Normal values
+  if(data.normal&&data.normal.length){
+    html+='<div class="ap-normal-section"><div class="ap-normal-title">✅ All Normal ('+data.normal.length+')</div>';
+    data.normal.forEach(r=>{
+      html+=`<div class="ap-normal-row"><span>${r.name}</span><span style="color:var(--sage-d);font-weight:600;">${r.value} ${r.unit} ✓</span></div>`;
+    });
+    html+='</div>';
+  }
+  if(data.date) html+=`<div class="ap-date">Last updated: ${data.date}</div>`;
+  html+='<div style="margin-top:1rem;padding:1rem 1.25rem;background:var(--cream);border-radius:var(--radius);border:1px solid var(--border-l);font-size:11px;color:var(--muted);font-style:italic;">📚 Evidence-based · Built by a gynaecologist · Personalised to your profile</div>';
+  html+='</div>';
+  el.innerHTML=html;
+}
+
+function buildAndSaveActionPlan(profile,checkinAlerts){
+  const checks=[
+    {name:'AMH',val:profile.amh,unit:'ng/mL',low:1.0,high:3.5},
+    {name:'FSH',val:profile.fsh,unit:'IU/L',low:3,high:10},
+    {name:'LH',val:profile.lh,unit:'IU/L',low:2,high:8},
+    {name:'TSH',val:profile.tsh,unit:'mIU/L',low:0.5,high:2.5},
+    {name:'AFC',val:profile.afc,unit:'follicles',low:10,high:20},
+    {name:'Endometrial thickness',val:profile.endometrialThickness,unit:'mm',low:8,high:14},
+    {name:'Haemoglobin',val:profile.hb,unit:'g/dL',low:12,high:16},
+    {name:'Vitamin D',val:profile.vitaminD,unit:'ng/mL',low:30,high:100},
+    {name:'Prolactin',val:profile.prolactin,unit:'ng/mL',low:0,high:25},
+    {name:'Hb 1st trim',val:profile.ancHb1,unit:'g/dL',low:11,high:16},
+    {name:'ANC TSH',val:profile.ancTsh,unit:'mIU/L',low:0.5,high:2.5},
+    {name:'Postpartum Hb',val:profile.ppHb,unit:'g/dL',low:10,high:16},
+  ];
+  const abnormal=[],normal=[];
+  checks.forEach(c=>{
+    if(c.val===null||c.val===undefined) return;
+    const isHigh=c.val>c.high,isLow=c.val<c.low;
+    if(!isHigh&&!isLow){
+      normal.push({name:c.name,value:c.val,unit:c.unit});
+    } else {
+      const adv=getTTCAdvice(c.name,c.val,isHigh);
+      abnormal.push({name:c.name,value:c.val,unit:c.unit,isHigh,why:adv.why,action:adv.action});
+    }
+  });
+  saveActionPlan({abnormal,normal,checkinAlerts:checkinAlerts||[],date:new Date().toLocaleDateString('en-IN')});
+}
+
+// TTC Check-in
+function saveTTCCheckin(){
+  const chips=[...document.querySelectorAll('#ttc-checkin-chips .cc-chip.selected')].map(c=>c.dataset.val);
+  const notes=document.getElementById('ttc-checkin-notes').value;
+  const alertMap={
+    pelvic_pain:{label:'Pelvic pain / bloating',action:'If on OI or IVF stimulation — contact your doctor today. Could be early OHSS.'},
+    spotting:{label:'Spotting',action:'Note cycle day. Mid-cycle spotting can be ovulatory. Post-intercourse spotting needs cervical assessment.'},
+    side_effects:{label:'Medication side effects',action:'Document symptoms. Contact your doctor if hot flushes, visual changes, or severe mood changes occur on Clomiphene.'},
+    positive_test:{label:'Positive pregnancy test 🎉',action:'Book an early viability scan at 6-7 weeks. Start folic acid if not already taking it.'},
+  };
+  const alertChips=['pelvic_pain','spotting','side_effects'];
+  const checkinAlerts=chips.filter(c=>alertChips.includes(c)).map(c=>alertMap[c]).filter(Boolean);
+  // Add positive test as good news
+  if(chips.includes('positive_test')) checkinAlerts.push(alertMap.positive_test);
+  // Save checkin to localStorage
+  localStorage.setItem('bloom_ttc_checkin',JSON.stringify({chips,notes,date:new Date().toISOString()}));
+  // Rebuild action plan with new checkin alerts
+  buildAndSaveActionPlan(userProfile,checkinAlerts);
+  // Refresh content
+  contentCache={};
+  const activeTab=document.querySelector('#ttc-sec-tabs .stab.active');
+  if(activeTab&&!activeTab.classList.contains('action-plan-tab')){
+    loadTTCSection(currentTTCSection,activeTab);
+  }
+  const btn=document.querySelector('#ttc-checkin-panel .checkin-save-btn');
+  if(btn){btn.textContent='Saved ✓';setTimeout(()=>btn.textContent='Save Update ✓',2000);}
+}
+
+// PP Check-in
+function savePPCheckin(){
+  const motherChips=[...document.querySelectorAll('#pp-mother-checkin-chips .cc-chip.selected')].map(c=>c.dataset.val);
+  const babyChips=[...document.querySelectorAll('#pp-baby-checkin-chips .cc-chip.selected')].map(c=>c.dataset.val);
+  const notes=document.getElementById('pp-checkin-notes').value;
+  const alertSymptoms=['wound_pain','heavy_bleeding','fever','breast_pain','not_feeding','baby_fever','jaundice','excessive_crying','not_passing_urine','projectile_vomiting','breathing_difficulty','blue_lips','mood_low'];
+  const ppAlerts={
+    wound_pain:{label:'Wound pain / infection',action:'See your doctor today. Signs of wound infection need early treatment.'},
+    heavy_bleeding:{label:'Heavy postpartum bleeding',action:'Go to hospital now if soaking more than 1 pad per hour. This is a medical emergency.'},
+    fever:{label:'Fever after delivery',action:'See your doctor today. Can indicate uterine infection, mastitis, or wound infection.'},
+    breast_pain:{label:'Breast pain / mastitis',action:'Frequent feeding empties the breast. If fever with breast pain — start antibiotics within 24 hours. See your doctor.'},
+    mood_low:{label:'Low mood / baby blues',action:'If persisting beyond 2 weeks, speak to your doctor. Postpartum depression is common and very treatable.'},
+    not_feeding:{label:'Baby not feeding',action:'If less than 6 wet nappies/day after Day 5 — see lactation consultant or paediatrician today.'},
+    baby_fever:{label:'Baby has fever',action:'Any fever in a newborn under 3 months is a medical emergency — go to hospital immediately.'},
+    jaundice:{label:'Baby jaundice / yellowing',action:'If worsening or persisting beyond 14 days — urgent paediatric assessment needed.'},
+    excessive_crying:{label:'Excessive / inconsolable crying',action:'Inconsolable high-pitched crying can indicate pain — see your paediatrician today.'},
+    not_passing_urine:{label:'Not passing urine (<6 wet nappies)',action:'See a doctor or lactation consultant today — may indicate dehydration or insufficient feeding.'},
+    projectile_vomiting:{label:'Projectile vomiting',action:'After every feed may indicate pyloric stenosis — see your paediatrician today.'},
+    breathing_difficulty:{label:'Fast / noisy breathing',action:'Respiratory emergency — go to hospital now.'},
+    blue_lips:{label:'Blue lips / tongue 🚨',action:'Cardiac/respiratory emergency — call an ambulance immediately.'},
+  };
+  const allChips=[...motherChips,...babyChips];
+  const checkinAlerts=allChips.filter(c=>alertSymptoms.includes(c)).map(c=>ppAlerts[c]).filter(Boolean);
+  // Show urgent modal if needed
+  const urgentAlerts=['heavy_bleeding','baby_fever','breathing_difficulty','blue_lips'];
+  const triggered=allChips.filter(c=>urgentAlerts.includes(c));
+  if(triggered.length>0){
+    const alertHtml=triggered.map(t=>ppAlerts[t]?'<div style="padding:8px 0;border-bottom:1px solid #F0E8E2;font-size:14px;color:#9E2020;line-height:1.6;">⚠️ '+ppAlerts[t].action+'</div>':'').join('');
+    const modal=document.createElement('div');
+    modal.style.cssText='position:fixed;inset:0;z-index:400;background:rgba(44,36,32,0.6);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
+    modal.innerHTML='<div style="background:#fff;border-radius:18px;width:480px;max-width:95vw;max-height:90vh;overflow-y:auto;padding:1.75rem;border:1px solid #E8DDD5;"><div style="font-family:Cormorant Garamond,serif;font-size:22px;font-weight:600;color:#2C2420;margin-bottom:4px;">Urgent Action Needed</div><p style="font-size:13px;color:#8C7468;margin-bottom:1rem;">Please act on these immediately.</p>'+alertHtml+'<button onclick="this.closest(\'div[style]\').remove();" style="width:100%;margin-top:1rem;padding:11px;background:#C4704F;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;font-family:DM Sans,sans-serif;">I understand</button></div>';
+    document.body.appendChild(modal);
+  }
+  localStorage.setItem('bloom_pp_checkin_'+currentPPStage,JSON.stringify({motherChips,babyChips,notes,date:new Date().toISOString()}));
+  buildAndSaveActionPlan(userProfile,checkinAlerts);
+  contentCache={};
+  loadPPSection('overview',document.querySelector('#pp-sec-tabs .stab'));
+  const btn=document.querySelector('.checkin-panel-pp .checkin-save-btn');
+  if(btn){btn.textContent='Saved ✓';setTimeout(()=>btn.textContent='Save Update ✓',2000);}
+}
+// ── END ACTION PLAN ──────────────────────────────────────────
+
 init();
 
 // PROFILE MODAL FUNCTIONS
@@ -1348,7 +1514,7 @@ function pfBuildChips(){
   if(symGrid&&!symGrid.children.length){SYM_OPTIONS.forEach(function(v){var d=document.createElement('div');d.className='pf-chip';d.dataset.val=v;d.textContent=SYM_LABELS[v]||v;d.onclick=function(){this.classList.toggle('selected');pfUpdateCompletion();};symGrid.appendChild(d);});}
   var medGrid=document.getElementById('pf-med-grid');
   if(medGrid&&!medGrid.children.length){MED_OPTIONS.forEach(function(v){var d=document.createElement('div');d.className='pf-chip';d.dataset.val=v;d.textContent=v;d.onclick=function(){this.classList.toggle('selected');pfUpdateCompletion();};medGrid.appendChild(d);});}
-  document.querySelectorAll('#pf-flow-chips .pf-chip,#pf-pain-chips .pf-chip,#pf-outcome-chips .pf-chip,#pf-fertility-conditions .pf-chip,#pf-surgeries .pf-chip,#pf-sa-chips .pf-chip,#pf-prev-tx-chips .pf-chip,#pf-inv-done-chips .pf-chip,#pf-usg-chips .pf-chip,#pf-doctor-chips .pf-chip,#pf-high-risk .pf-chip,#pf-delivery-mode-chips .pf-chip,#pf-lscs-reason-chips .pf-chip,#pf-obs-complications .pf-chip').forEach(function(chip){if(!chip._wired){chip._wired=true;chip.onclick=function(){this.classList.toggle('selected');pfUpdateCompletion();};}});
+  document.querySelectorAll('#pf-flow-chips .pf-chip,#pf-pain-chips .pf-chip,#pf-outcome-chips .pf-chip,#pf-fertility-conditions .pf-chip,#pf-surgeries .pf-chip,#pf-sa-chips .pf-chip,#pf-prev-tx-chips .pf-chip,#pf-inv-done-chips .pf-chip,#pf-usg-chips .pf-chip,#pf-doctor-chips .pf-chip,#pf-high-risk .pf-chip,#pf-delivery-mode-chips .pf-chip,#pf-lscs-reason-chips .pf-chip,#pf-obs-complications .pf-chip,#pf-pp-mother-complaints .pf-chip,#pf-pp-mother-meds .pf-chip,#pf-pp-feeding .pf-chip,#pf-pp-baby-complaints .pf-chip,#pf-pp-baby-vaccines .pf-chip,#pf-pp-baby-screens .pf-chip').forEach(function(chip){if(!chip._wired){chip._wired=true;chip.onclick=function(){this.classList.toggle('selected');pfUpdateCompletion();};}});
 }
 
 function pfSwitchTab(name,btn){
@@ -1426,6 +1592,20 @@ function pfLoad(){
   set('pf-tt1',p.immTt1Date);set('pf-tt2',p.immTt2Date||p.immTdDate);set('pf-flu',p.immFluDate);
   set('pf-bp1',p.bpReading1);set('pf-bp1-date',p.bpReading1Date);
   set('pf-bp2',p.bpReading2);set('pf-bp2-date',p.bpReading2Date);
+  // Postpartum
+  set('pf-pp-delivery-date',p.ppDeliveryDate);set('pf-pp-delivery-mode',p.ppDeliveryMode);
+  setChipVals('pf-pp-mother-complaints',p.ppMotherComplaints);
+  set('pf-pp-6wk-check',p.pp6wkCheck);set('pf-pp-contraception',p.ppContraception);
+  setChipVals('pf-pp-mother-meds',p.ppMotherMeds);
+  set('pf-pp-hb',p.ppHb);set('pf-pp-bp',p.ppBp);set('pf-pp-tsh',p.ppTsh);
+  set('pf-pp-birth-weight',p.ppBirthWeight);set('pf-pp-current-weight',p.ppCurrentWeight);
+  set('pf-pp-baby-age-weeks',p.ppBabyAgeWeeks);
+  setChipVals('pf-pp-feeding',p.ppFeeding);
+  setChipVals('pf-pp-baby-complaints',p.ppBabyComplaints);
+  setChipVals('pf-pp-baby-vaccines',p.ppBabyVaccines);
+  set('pf-pp-bilirubin',p.ppBilirubin);set('pf-pp-baby-hb',p.ppBabyHb);
+  setChipVals('pf-pp-baby-screens',p.ppBabyScreens);
+  set('pf-pp-baby-notes',p.ppBabyNotes);
   pfUpdateCompletion();
 }
 
@@ -1479,8 +1659,20 @@ async function pfSave(){
     ancAnomalyScan:g('pf-anomaly-scan'),ancPlacentaPos:g('pf-placenta'),ancGrowthScan:g('pf-growth-scan'),
     ancCervixLength:gn('pf-cervix-length'),ancDoppler:g('pf-doppler'),
     immTt1Date:g('pf-tt1'),immTdDate:g('pf-tt2'),immFluDate:g('pf-flu'),
-    bpReading1:g('pf-bp1'),bpReading1Date:g('pf-bp1-date'),
+   bpReading1:g('pf-bp1'),bpReading1Date:g('pf-bp1-date'),
     bpReading2:g('pf-bp2'),bpReading2Date:g('pf-bp2-date'),
+    ppDeliveryDate:g('pf-pp-delivery-date'),ppDeliveryMode:g('pf-pp-delivery-mode'),
+    ppMotherComplaints:getChipVals('pf-pp-mother-complaints'),
+    pp6wkCheck:g('pf-pp-6wk-check'),ppContraception:g('pf-pp-contraception'),
+    ppMotherMeds:getChipVals('pf-pp-mother-meds'),
+    ppHb:gn('pf-pp-hb'),ppBp:g('pf-pp-bp'),ppTsh:gn('pf-pp-tsh'),
+    ppBirthWeight:gn('pf-pp-birth-weight'),ppCurrentWeight:gn('pf-pp-current-weight'),
+    ppBabyAgeWeeks:gi('pf-pp-baby-age-weeks'),
+    ppFeeding:getChipVals('pf-pp-feeding'),
+    ppBabyComplaints:getChipVals('pf-pp-baby-complaints'),
+    ppBabyVaccines:getChipVals('pf-pp-baby-vaccines'),
+    ppBilirubin:gn('pf-pp-bilirubin'),ppBabyHb:gn('pf-pp-baby-hb'),
+    ppBabyScreens:getChipVals('pf-pp-baby-screens'),ppBabyNotes:g('pf-pp-baby-notes'),
   };
   try{
     var res=await fetch('/profile',{method:'PUT',headers:{'Content-Type':'application/json',Authorization:TOKEN},body:JSON.stringify(profile)});
@@ -1489,6 +1681,7 @@ async function pfSave(){
       var msg=document.getElementById('pf-saved-msg');if(msg) msg.style.display='block';
       userProfile=userData.profile||{};contentCache={};
       computeAndSaveGoldenBox(userProfile);
+      buildAndSaveActionPlan(userProfile,[]);
       setTimeout(function(){
         if(msg) msg.style.display='none';
         var modal=document.getElementById('profileModal');if(modal) modal.style.display='none';
@@ -1529,11 +1722,12 @@ function buildRoadmapProfileModal(){pfBuildChips();pfLoad();document.getElementB
           </div>
         </div>
       </div>
-      <div style="display:flex;gap:4px;flex-wrap:wrap;">
+     <div style="display:flex;gap:4px;flex-wrap:wrap;">
         <button class="pf-tab active" onclick="pfSwitchTab('basic',this)">🌸 Basic</button>
         <button class="pf-tab" onclick="pfSwitchTab('menstrual',this)">📅 Menstrual</button>
         <button class="pf-tab" onclick="pfSwitchTab('fertility',this)">🌱 Fertility &amp; Tests</button>
         <button class="pf-tab" onclick="pfSwitchTab('pregnancy',this)">🤰 Pregnancy</button>
+        <button class="pf-tab" onclick="pfSwitchTab('postpartum',this)">👶 Postpartum</button>
       </div>
     </div>
     <div style="flex:1;overflow-y:auto;padding:1.25rem 1.75rem;">
@@ -2021,6 +2215,135 @@ function buildRoadmapProfileModal(){pfBuildChips();pfLoad();document.getElementB
           <div><label class="pf-label">TT-1 date</label><input type="date" id="pf-tt1" class="pf-input pf-input-sm"/></div>
           <div><label class="pf-label">TT-2 / Td date</label><input type="date" id="pf-tt2" class="pf-input pf-input-sm"/></div>
           <div><label class="pf-label">Flu vaccine date</label><input type="date" id="pf-flu" class="pf-input pf-input-sm"/></div>
+        </div>
+      </div>
+    </div>
+    <!-- POSTPARTUM TAB -->
+      <div id="pf-tab-postpartum" class="pf-tab-panel" style="display:none;">
+        <div class="pf-section-intro">👶 Postpartum details — mother's recovery and baby's progress — help Bloom give you the most relevant guidance.</div>
+        <div class="pf-sep">👩 Mother — Delivery & Recovery</div>
+        <div class="pf-grid2" style="margin-bottom:10px;">
+          <div><label class="pf-label">Delivery date</label><input type="date" id="pf-pp-delivery-date" class="pf-input"/></div>
+          <div><label class="pf-label">Mode of delivery</label>
+            <select id="pf-pp-delivery-mode" class="pf-input">
+              <option value="">Select…</option>
+              <option value="normal_vaginal">Normal vaginal delivery</option>
+              <option value="lscs_elective">Elective LSCS</option>
+              <option value="lscs_emergency">Emergency LSCS</option>
+              <option value="instrumental">Instrumental (forceps/vacuum)</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-bottom:10px;"><label class="pf-label">Current mother complaints</label>
+          <div class="pf-chip-row" id="pf-pp-mother-complaints">
+            <div class="pf-chip" data-val="recovering_well">Recovering well</div>
+            <div class="pf-chip" data-val="wound_pain">Wound pain</div>
+            <div class="pf-chip" data-val="wound_infection">Wound infection</div>
+            <div class="pf-chip" data-val="heavy_bleeding">Heavy bleeding / PPH</div>
+            <div class="pf-chip" data-val="fever">Fever / infection</div>
+            <div class="pf-chip" data-val="mastitis">Mastitis / breast pain</div>
+            <div class="pf-chip" data-val="mood_low">Low mood / baby blues</div>
+            <div class="pf-chip" data-val="ppd">Postpartum depression</div>
+            <div class="pf-chip" data-val="urinary_issues">Urinary issues</div>
+            <div class="pf-chip" data-val="constipation">Constipation</div>
+            <div class="pf-chip" data-val="fatigue">Severe fatigue</div>
+          </div>
+        </div>
+        <div class="pf-grid2" style="margin-bottom:10px;">
+          <div><label class="pf-label">6-week postnatal check done?</label>
+            <select id="pf-pp-6wk-check" class="pf-input">
+              <option value="">Select…</option>
+              <option value="done_normal">Done — all normal</option>
+              <option value="done_issues">Done — issues found</option>
+              <option value="pending">Not done yet</option>
+            </select>
+          </div>
+          <div><label class="pf-label">Contraception started?</label>
+            <select id="pf-pp-contraception" class="pf-input">
+              <option value="">Select…</option>
+              <option value="none_yet">Not started</option>
+              <option value="barrier">Barrier (condom)</option>
+              <option value="pip">Progestogen-only pill</option>
+              <option value="iud">IUD / copper coil</option>
+              <option value="iucd_mirena">Mirena IUS</option>
+              <option value="implant">Implant</option>
+              <option value="injectable">Injectable (Depo)</option>
+              <option value="combined_pill">Combined pill</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-bottom:10px;"><label class="pf-label">Mother's current medications</label>
+          <div class="pf-chip-row" id="pf-pp-mother-meds">
+            <div class="pf-chip" data-val="iron">Iron tablets</div>
+            <div class="pf-chip" data-val="calcium">Calcium</div>
+            <div class="pf-chip" data-val="vitamins">Multivitamins</div>
+            <div class="pf-chip" data-val="antibiotics">Antibiotics</div>
+            <div class="pf-chip" data-val="pain_relief">Pain relief</div>
+            <div class="pf-chip" data-val="antidepressants">Antidepressants</div>
+            <div class="pf-chip" data-val="levothyroxine">Levothyroxine</div>
+            <div class="pf-chip" data-val="none">None</div>
+          </div>
+        </div>
+        <div class="pf-grid3" style="margin-bottom:10px;">
+          <div><label class="pf-label">Mother's Hb postpartum (g/dL)</label><input type="number" id="pf-pp-hb" placeholder="e.g. 9.5" step="0.1" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: &gt;10</div></div>
+          <div><label class="pf-label">Mother's BP (mmHg)</label><input type="text" id="pf-pp-bp" placeholder="e.g. 120/78" class="pf-input pf-input-sm"/></div>
+          <div><label class="pf-label">TSH postpartum</label><input type="number" id="pf-pp-tsh" placeholder="e.g. 2.8" step="0.01" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: 0.5–4.0</div></div>
+        </div>
+        <div class="pf-sep">👶 Baby Details</div>
+        <div class="pf-grid3" style="margin-bottom:10px;">
+          <div><label class="pf-label">Birth weight (kg)</label><input type="number" id="pf-pp-birth-weight" placeholder="e.g. 2.9" step="0.01" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: 2.5–4.0kg</div></div>
+          <div><label class="pf-label">Current weight (kg)</label><input type="number" id="pf-pp-current-weight" placeholder="e.g. 3.2" step="0.01" class="pf-input pf-input-sm"/></div>
+          <div><label class="pf-label">Baby's age (weeks)</label><input type="number" id="pf-pp-baby-age-weeks" placeholder="e.g. 4" min="0" max="52" class="pf-input pf-input-sm"/></div>
+        </div>
+        <div style="margin-bottom:10px;"><label class="pf-label">Feeding type</label>
+          <div class="pf-chip-row" id="pf-pp-feeding">
+            <div class="pf-chip" data-val="exclusive_bf">Exclusive breastfeeding</div>
+            <div class="pf-chip" data-val="mixed">Mixed — breast + formula</div>
+            <div class="pf-chip" data-val="formula">Formula only</div>
+            <div class="pf-chip" data-val="expressed">Expressed breast milk</div>
+          </div>
+        </div>
+        <div style="margin-bottom:10px;"><label class="pf-label">Baby complaints / concerns</label>
+          <div class="pf-chip-row" id="pf-pp-baby-complaints">
+            <div class="pf-chip" data-val="all_well">All well 🌸</div>
+            <div class="pf-chip" data-val="jaundice">Jaundice (treated)</div>
+            <div class="pf-chip" data-val="low_weight">Low weight gain</div>
+            <div class="pf-chip" data-val="colic">Colic / gassy</div>
+            <div class="pf-chip" data-val="rash">Skin rash</div>
+            <div class="pf-chip" data-val="congestion">Nasal congestion</div>
+            <div class="pf-chip" data-val="cradle_cap">Cradle cap</div>
+            <div class="pf-chip" data-val="feeding_issues">Feeding issues</div>
+          </div>
+        </div>
+        <div class="pf-sep">💉 Baby Vaccinations Done</div>
+        <div style="margin-bottom:10px;">
+          <div class="pf-chip-row" id="pf-pp-baby-vaccines">
+            <div class="pf-chip" data-val="bcg">BCG (birth)</div>
+            <div class="pf-chip" data-val="hepb0">Hepatitis B (birth)</div>
+            <div class="pf-chip" data-val="opv0">OPV 0 (birth)</div>
+            <div class="pf-chip" data-val="6wk_vaccines">6-week vaccines (DTwP/IPV/Hib/HepB/PCV/Rota)</div>
+            <div class="pf-chip" data-val="10wk_vaccines">10-week vaccines</div>
+            <div class="pf-chip" data-val="14wk_vaccines">14-week vaccines</div>
+            <div class="pf-chip" data-val="6mo_vaccines">6-month vaccines</div>
+          </div>
+        </div>
+        <div class="pf-sep">🔬 Baby Investigations</div>
+        <div class="pf-grid3" style="margin-bottom:10px;">
+          <div><label class="pf-label">Bilirubin peak (mg/dL)</label><input type="number" id="pf-pp-bilirubin" placeholder="e.g. 14.5" step="0.1" class="pf-input pf-input-sm"/><div class="pf-ref">Phototherapy: &gt;15</div></div>
+          <div><label class="pf-label">Baby Hb (g/dL)</label><input type="number" id="pf-pp-baby-hb" placeholder="e.g. 16" step="0.1" class="pf-input pf-input-sm"/><div class="pf-ref">Normal: 14–20</div></div>
+        </div>
+        <div style="margin-bottom:10px;"><label class="pf-label">Baby screenings done</label>
+          <div class="pf-chip-row" id="pf-pp-baby-screens">
+            <div class="pf-chip" data-val="hearing_screen">Hearing screening</div>
+            <div class="pf-chip" data-val="newborn_screen">Newborn blood spot screening</div>
+            <div class="pf-chip" data-val="hip_usg">Hip USG</div>
+            <div class="pf-chip" data-val="echo">Cardiac echo</div>
+            <div class="pf-chip" data-val="eye_check">Eye / red reflex check</div>
+            <div class="pf-chip" data-val="paed_review">Paediatrician review done</div>
+          </div>
+        </div>
+        <div style="margin-bottom:10px;"><label class="pf-label">Any other notes about baby</label>
+          <textarea id="pf-pp-baby-notes" rows="2" placeholder="e.g. Phototherapy given for 2 days, discharged day 4, feeding every 2 hours…" class="pf-input" style="resize:vertical;font-size:14px;"></textarea>
         </div>
       </div>
     </div>
