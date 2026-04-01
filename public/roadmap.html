@@ -387,7 +387,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
             <div id="preg-milestones"></div>
           </div>
           <div class="checklist-card">
-            <div class="checklist-title">This Week's Action Plan</div>
+            <div class="checklist-title">Your Action Plan</div>
             <div id="preg-checklist"></div>
           </div>
         </div>
@@ -475,7 +475,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
         </div>
       
         <div class="checklist-card">
-          <div class="checklist-title">Today's Action Plan</div>
+          <div class="checklist-title">Your Action Plan</div>
           <div id="pp-checklist"></div>
         </div>
         <div class="milestone-card">
@@ -1311,7 +1311,9 @@ function getTTCAdvice(name,value,isHigh){
 }
 // ── END GOLDEN BOX ───────────────────────────────────────────
 
-function resolveAPItem(journey, name){
+function resolveAPItem(btn){
+  const journey = btn.dataset.journey;
+  const name = btn.dataset.name;
   const key = 'bloom_ap_resolved_'+journey;
   const resolved = JSON.parse(localStorage.getItem(key)||'[]');
   if(!resolved.includes(name)) resolved.push(name);
@@ -1392,7 +1394,7 @@ function loadActionPlan(journey,btn){
         <div class="ap-abnormal-header">⚠️ ${r.name} — ${r.value} ${r.unit} <span style="font-size:13px;background:${r.isHigh?'#FAECE7':'#E6F1FB'};color:${r.isHigh?'#993C1D':'#185FA5'};padding:2px 8px;border-radius:20px;">${r.isHigh?'High':'Low'}</span></div>
         <div class="ap-abnormal-why">${r.why}</div>
         <div class="ap-abnormal-action">→ ${r.action}</div>
-        <div style="margin-top:10px;"><button onclick="resolveAPItem('${journey}','${r.name}')" style="font-size:13px;padding:6px 14px;background:none;border:1.5px solid var(--sage);color:var(--sage-d);border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;">✓ Mark as Resolved</button></div>
+       <div style="margin-top:10px;"><button onclick="resolveAPItem(this)" data-journey="${journey}" data-name="${r.name}" style="font-size:13px;padding:6px 14px;background:none;border:1.5px solid var(--sage);color:var(--sage-d);border-radius:8px;cursor:pointer;font-family:DM Sans,sans-serif;">✓ Mark as Resolved</button></div>
       </div>`;
     });
   }
