@@ -1270,7 +1270,7 @@ function runBMI(){
 
 function logout(){localStorage.removeItem('bloom_token');localStorage.removeItem('bloom_last_period');window.location.href='/login';}
 
-init();
+
 
 const SYM_OPTIONS=['pcos_diagnosed','irregular_periods','acne','excess_hair','hair_loss','painful_periods','endometriosis_diagnosed','fibroids_diagnosed','thyroid_disorder','low_libido','mood_changes','bloating','breast_tenderness','spotting_between_periods','heavy_bleeding','night_sweats','hot_flushes'];
 const SYM_LABELS={'pcos_diagnosed':'PCOS diagnosed','irregular_periods':'Irregular periods','acne':'Acne / oily skin','excess_hair':'Excess hair (hirsutism)','hair_loss':'Hair thinning','painful_periods':'Painful periods','endometriosis_diagnosed':'Endometriosis','fibroids_diagnosed':'Fibroids','thyroid_disorder':'Thyroid disorder','low_libido':'Low libido','mood_changes':'Mood changes / anxiety','bloating':'Bloating','breast_tenderness':'Breast tenderness','spotting_between_periods':'Spotting between periods','heavy_bleeding':'Heavy periods','night_sweats':'Night sweats','hot_flushes':'Hot flushes'};
@@ -1454,6 +1454,7 @@ async function pfSave(){
       const msg=document.getElementById('pf-saved-msg');
       msg.style.display='block';setTimeout(()=>msg.style.display='none',2000);
       renderProfile();renderCycle();renderTip();renderInsight();
+      buildDashboardActionPlan(userData.profile||{});
     }
   }catch(e){alert('Could not save profile. Please try again.');}
 }
@@ -1464,7 +1465,59 @@ function calcPregLmpFromEdd(){
   const d=new Date(edd);d.setDate(d.getDate()-280);
   document.getElementById('pf-preg-lmp').value=d.toISOString().split('T')[0];
 }
-
+function buildDashboardActionPlan(profile){
+  const ttcChecks=[
+    {name:'AMH',val:profile.amh,unit:'ng/mL',low:1.0,high:3.5},
+    {name:'FSH',val:profile.fsh,unit:'IU/L',low:3,high:10},
+    {name:'LH',val:profile.lh,unit:'IU/L',low:2,high:8},
+    {name:'TSH',val:profile.tsh,unit:'mIU/L',low:0.5,high:2.5},
+    {name:'AFC',val:profile.afc,unit:'follicles',low:10,high:20},
+    {name:'Endometrial thickness',val:profile.endometrialThickness,unit:'mm',low:8,high:14},
+    {name:'Haemoglobin',val:profile.hb,unit:'g/dL',low:12,high:16},
+    {name:'Vitamin D',val:profile.vitaminD,unit:'ng/mL',low:30,high:100},
+    {name:'Prolactin',val:profile.prolactin,unit:'ng/mL',low:0,high:25},
+  ];
+  const pregChecks=[
+    {name:'Hb 1st trimester',val:profile.ancHb1,unit:'g/dL',low:11,high:16},
+    {name:'Hb 2nd trimester',val:profile.ancHb2,unit:'g/dL',low:10.5,high:16},
+    {name:'Hb 3rd trimester',val:profile.ancHb3,unit:'g/dL',low:11,high:16},
+    {name:'ANC TSH',val:profile.ancTsh,unit:'mIU/L',low:0.5,high:2.5},
+    {name:'OGTT Fasting',val:profile.ancOgttFasting,unit:'mg/dL',low:0,high:92},
+    {name:'OGTT 2hr',val:profile.ancOgtt2hr,unit:'mg/dL',low:0,high:153},
+    {name:'Nuchal NT',val:profile.ancNuchalNt,unit:'mm',low:0,high:3.5},
+    {name:'Cervical length',val:profile.ancCervixLength,unit:'mm',low:25,high:50},
+    {name:'ANC Ferritin',val:profile.ancFerritin,unit:'ng/mL',low:30,high:300},
+  ];
+  const ppChecks=[
+    {name:'Postpartum Hb',val:profile.ppHb,unit:'g/dL',low:10,high:16},
+    {name:'Postpartum TSH',val:profile.ppTsh,unit:'mIU/L',low:0.5,high:4.0},
+    {name:'Baby bilirubin',val:profile.ppBilirubin,unit:'mg/dL',low:0,high:15},
+    {name:'Baby Hb',val:profile.ppBabyHb,unit:'g/dL',low:14,high:22},
+  ];
+  function compute(checks){
+    const abnormal=[],normal=[];
+    checks.forEach(c=>{
+      if(c.val===null||c.val===undefined) return;
+      const isHigh=c.val>c.high,isLow=c.val<c.low;
+      if(!isHigh&&!isLow){
+        normal.push({name:c.name,value:c.val,unit:c.unit});
+      } else {
+        abnormal.push({name:c.name,value:c.val,unit:c.unit,isHigh});
+      }
+    });
+    return{abnormal,normal,checkinAlerts:[],date:new Date().toLocaleDateString('en-IN'),savedAt:Date.now()};
+  }
+  ['ttc','pregnancy','postpartum'].forEach((j,i)=>{
+    const checksMap=[ttcChecks,pregChecks,ppChecks];
+    const existing=localStorage.getItem('bloom_ap_'+j);
+    let existingAlerts=[];
+    if(existing){try{existingAlerts=JSON.parse(existing).checkinAlerts||[];}catch(e){}}
+    const data=compute(checksMap[i]);
+    data.checkinAlerts=existingAlerts;
+    localStorage.setItem('bloom_ap_'+j,JSON.stringify(data));
+    localStorage.removeItem('bloom_ap_seen_'+j);
+  });
+}
 function openProfileModal(){
   pfBuildChips();
   let attempts=0;
