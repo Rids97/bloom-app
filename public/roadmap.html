@@ -599,6 +599,10 @@ function switchJourney(name,btn){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('section-'+name).classList.add('active');
+  // Reset sec-tabs to overview when switching journeys
+  const tabsId=name==='ttc'?'ttc-sec-tabs':name==='pregnancy'?'preg-sec-tabs':'pp-sec-tabs';
+  document.querySelectorAll('#'+tabsId+' .stab').forEach(b=>b.classList.remove('active'));
+  document.querySelector('#'+tabsId+' .stab')?.classList.add('active');
   if(name==='ttc') initTTC();
   else if(name==='pregnancy') initPregnancy();
   else if(name==='postpartum') initPostpartum();
