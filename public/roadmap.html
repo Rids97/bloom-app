@@ -742,8 +742,13 @@ async function loadTTCSection(section,btn){
 }
 
 function initPregnancy(){
-  const saved=localStorage.getItem('bloom_preg_lmp');
-  if(saved) computeAndRenderPreg(saved);
+  const profileLmp=userProfile.pregLmp;
+  const savedLmp=localStorage.getItem('bloom_preg_lmp');
+  const lmpToUse=profileLmp||savedLmp;
+  if(lmpToUse){
+    localStorage.setItem('bloom_preg_lmp',lmpToUse);
+    computeAndRenderPreg(lmpToUse);
+  }
 }
 
 function savePregDate(){
@@ -1897,6 +1902,7 @@ async function pfSave(){
       userData=await res.json();
       var msg=document.getElementById('pf-saved-msg');if(msg) msg.style.display='block';
       userProfile=userData.profile||{};contentCache={};
+      if(userProfile.pregLmp) localStorage.setItem('bloom_preg_lmp',userProfile.pregLmp);
       computeAndSaveGoldenBox(userProfile);
       ['ttc','pregnancy','postpartum'].forEach(function(j){
         const existing=loadActionPlan_data(j);
