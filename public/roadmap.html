@@ -1322,6 +1322,17 @@ function resolveAPItem(btn){
   loadActionPlan(journey, document.getElementById(tabId));
 }
 
+function resolveCheckinAlert(btn){
+  const journey = btn.dataset.journey;
+  const index = parseInt(btn.dataset.index);
+  const data = loadActionPlan_data(journey);
+  if(!data||!data.checkinAlerts) return;
+  data.checkinAlerts.splice(index,1);
+  localStorage.setItem('bloom_ap_'+journey, JSON.stringify(data));
+  const tabId = journey==='ttc'?'ttc-ap-tab':journey==='pregnancy'?'preg-ap-tab':'pp-ap-tab';
+  loadActionPlan(journey, document.getElementById(tabId));
+}
+
 // ── ACTION PLAN ──────────────────────────────────────────────
 const AP_KEY='bloom_action_plan';
 const AP_SEEN_KEY='bloom_ap_seen';
@@ -1386,9 +1397,10 @@ function loadActionPlan(journey,btn){
   // Checkin alerts first
   if(data.checkinAlerts&&data.checkinAlerts.length){
     html+='<div style="font-size:14px;font-weight:600;color:#9E2020;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;">🚨 Symptoms Flagged</div>';
-    data.checkinAlerts.forEach(a=>{
-      html+=`<div class="ap-checkin-alert"><div class="ap-checkin-title">⚠️ ${a.label}</div><div class="ap-checkin-action">→ ${a.action}</div></div>`;
+    data.checkinAlerts.forEach((a,i)=>{
+      html+=`<div class="ap-checkin-alert"><div class="ap-checkin-title">⚠️ ${a.label}</div><div class="ap-checkin-action">→ ${a.action}</div><div style="margin-top:10px;"><button onclick="resolveCheckinAlert(this)" data-journey="${journey}" data-index="${i}" style="font-size:13px;padding:6px 14px;background:none;border:1.5px solid var(--sage);color:var(--sage-d);border-radius:8px;cursor:pointer;font-family:DM Sans,sans-serif;">✓ Mark as Resolved</button></div></div>`;
     });
+    
   }
   // Abnormal values
   if(filteredAbnormal&&filteredAbnormal.length){
