@@ -1554,6 +1554,14 @@ function buildAndSaveActionPlan(profile,checkinAlerts,specificJourney){
       flags.push({name:'Poor Weight Gain',value:'Baby',unit:'',isHigh:true,why:'Baby should regain birth weight by Day 10-14. Poor gain indicates feeding problem.',action:'See lactation consultant. Check feeding technique and frequency. Paediatrician review if weight loss >10%.'});
     if(babyComplaints.includes('feeding_issues'))
       flags.push({name:'Feeding Issues',value:'Baby',unit:'',isHigh:true,why:'Feeding problems early on affect weight gain and bonding.',action:'See lactation consultant. Check latch position. Formula top-up may be needed temporarily.'});
+    if(babyComplaints.includes('breathing_difficulty'))
+      flags.push({name:'Breathing Difficulty',value:'Baby',unit:'',isHigh:true,why:'Fast or noisy breathing in a newborn is a respiratory emergency.',action:'Go to hospital now. Do not wait.'});
+    if(babyComplaints.includes('blue_lips'))
+      flags.push({name:'Blue Lips / Cyanosis',value:'Baby',unit:'',isHigh:true,why:'Blue or purple lips indicate dangerously low oxygen levels — cardiac or respiratory emergency.',action:'Call an ambulance immediately. This is a life-threatening emergency.'});
+    if(babyComplaints.includes('excessive_crying'))
+      flags.push({name:'Excessive Crying',value:'Baby',unit:'',isHigh:true,why:'Inconsolable crying can indicate pain, infection, or colic needing assessment.',action:'See your paediatrician today if crying is high-pitched or inconsolable.'});
+    if(motherComplaints.includes('fever'))
+      flags.push({name:'Postpartum Fever',value:'Mother',unit:'',isHigh:true,why:'Fever after delivery indicates possible uterine infection, wound infection, or mastitis.',action:'See your doctor today. Temperature above 38°C needs immediate assessment.'});
     if(profile.ppBabyVaccines&&!profile.ppBabyVaccines.includes('bcg'))
       flags.push({name:'BCG Vaccine Pending',value:'Baby',unit:'',isHigh:true,why:'BCG should be given at birth. Delay increases TB risk.',action:'Get BCG done at nearest immunisation centre as soon as possible.'});
     return flags;
@@ -1640,9 +1648,37 @@ function savePPCheckin(){
   }
   localStorage.setItem('bloom_pp_checkin_'+currentPPStage,JSON.stringify({motherChips,babyChips,notes,date:new Date().toISOString()}));
   // Auto-sync checkin chips to profile so Care Checklist picks them up
-  const updatedProfile = {...userProfile};
-  if(motherChips.length) updatedProfile.ppMotherComplaints = motherChips;
-  if(babyChips.length) updatedProfile.ppBabyComplaints = babyChips;
+const updatedProfile = {...userProfile};
+  // Map checkin chips to profile complaint values
+  const motherChipMap = {
+    wound_pain:'wound_infection',
+    heavy_bleeding:'heavy_bleeding',
+    fever:'fever',
+    breast_pain:'mastitis',
+    mood_low:'ppd',
+    fatigue:'fatigue',
+    recovering_well:'recovering_well'
+  };
+  const babyChipMap = {
+    not_feeding:'feeding_issues',
+    baby_fever:'baby_fever',
+    jaundice:'jaundice',
+    excessive_crying:'excessive_crying',
+    not_passing_urine:'not_passing_urine',
+    projectile_vomiting:'projectile_vomiting',
+    breathing_difficulty:'breathing_difficulty',
+    blue_lips:'blue_lips',
+    colic:'colic',
+    rash:'rash'
+  };
+  if(motherChips.length){
+    const mapped = motherChips.map(c => motherChipMap[c]||c).filter(Boolean);
+    updatedProfile.ppMotherComplaints = [...new Set([...(userProfile.ppMotherComplaints||[]), ...mapped])];
+  }
+  if(babyChips.length){
+    const mapped = babyChips.map(c => babyChipMap[c]||c).filter(Boolean);
+    updatedProfile.ppBabyComplaints = [...new Set([...(userProfile.ppBabyComplaints||[]), ...mapped])];
+  }
   userProfile = updatedProfile;
   // Save to MongoDB silently
   fetch('/profile',{method:'PUT',headers:{'Content-Type':'application/json',Authorization:TOKEN},body:JSON.stringify(updatedProfile)}).then(r=>r.json()).then(d=>{userData=d;userProfile=d.profile||{};});
