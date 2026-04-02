@@ -1151,8 +1151,14 @@ function renderProfile(){
   if(upgradeBtn) upgradeBtn.style.display=userPlan==='complete'?'none':'inline-block';
   if(p.cycleLength) document.getElementById('ccCycleLen').value=p.cycleLength;
   if(p.periodLength) document.getElementById('ccPeriodLen').value=p.periodLength;
-  const saved=localStorage.getItem('bloom_last_period');
-  if(saved){document.getElementById('lastPeriodDate').value=saved;updateCycle();}
+  const profileLmp=p.lmp;
+  const savedLmp=localStorage.getItem('bloom_last_period');
+  const lmpToUse=profileLmp||savedLmp;
+  if(lmpToUse){
+    localStorage.setItem('bloom_last_period',lmpToUse);
+    document.getElementById('lastPeriodDate').value=lmpToUse;
+    updateCycle();
+  }
 }
 
 function renderInsight(){
