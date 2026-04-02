@@ -723,6 +723,7 @@ function renderProfileSummary(){
 }
 
 async function loadTTCSection(section,btn){
+  if(currentTTCSection==='action_plan') return;
   currentTTCSection=section;
   document.querySelectorAll('#ttc-sec-tabs .stab').forEach(b=>b.classList.remove('active'));
   if(btn) btn.classList.add('active');
@@ -842,6 +843,7 @@ function renderPregChecklist(w){
 }
 
 async function loadPregSection(section,btn){
+  if(currentPregSection==='action_plan') return;
   currentPregSection=section;
   document.querySelectorAll('#preg-sec-tabs .stab').forEach(b=>b.classList.remove('active'));
   if(btn) btn.classList.add('active');
@@ -1010,6 +1012,7 @@ function switchPPStage(stage,btn){
 }
 
 async function loadPPSection(section,btn){
+  if(currentPPSection==='action_plan') return;
   currentPPSection=section;
   document.querySelectorAll('#pp-sec-tabs .stab').forEach(b=>b.classList.remove('active'));
   if(btn) btn.classList.add('active');
