@@ -1691,7 +1691,13 @@ function buildDashboardActionPlan(profile){
     if(bc.includes('jaundice')) flags.push({name:'Baby Jaundice',value:'Baby',unit:'',isHigh:true,why:'Jaundice beyond 14 days needs urgent assessment.',action:'Check bilirubin. If above 15mg/dL phototherapy needed.'});
     if(bc.includes('low_weight')) flags.push({name:'Poor Weight Gain',value:'Baby',unit:'',isHigh:true,why:'Baby should regain birth weight by Day 10-14.',action:'See lactation consultant. Paediatrician review if weight loss above 10%.'});
     if(bc.includes('feeding_issues')) flags.push({name:'Feeding Issues',value:'Baby',unit:'',isHigh:true,why:'Feeding problems affect weight gain.',action:'See lactation consultant. Check latch position.'});
-    if(p.ppBabyVaccines&&!p.ppBabyVaccines.includes('bcg')) flags.push({name:'BCG Vaccine Pending',value:'Baby',unit:'',isHigh:true,why:'BCG should be given at birth.',action:'Get BCG done at nearest immunisation centre.'});
+   if(p.ppBabyVaccines&&!p.ppBabyVaccines.includes('bcg')) flags.push({name:'BCG Vaccine Pending',value:'Baby',unit:'',isHigh:true,why:'BCG should be given at birth.',action:'Get BCG done at nearest immunisation centre.'});
+    if(mc.includes('wound_pain')) flags.push({name:'Wound Pain',value:'Mother',unit:'',isHigh:true,why:'Wound pain after delivery needs assessment to rule out infection.',action:'Keep wound clean and dry. See doctor if pain is increasing or wound looks red.'});
+    if(mc.includes('mood_low')) flags.push({name:'Low Mood / Baby Blues',value:'Mother',unit:'',isHigh:true,why:'Low mood persisting beyond 2 weeks may be postpartum depression.',action:'Tell your doctor. Edinburgh scale screening recommended. PPD is very treatable.'});
+    if(mc.includes('urinary_issues')) flags.push({name:'Urinary Issues',value:'Mother',unit:'',isHigh:true,why:'Urinary problems after delivery can indicate infection or pelvic floor issues.',action:'See your doctor. Urine culture needed if burning or frequency present.'});
+    if(mc.includes('fatigue')) flags.push({name:'Severe Fatigue',value:'Mother',unit:'',isHigh:true,why:'Severe fatigue can indicate postpartum anaemia or thyroid issues.',action:'Check Hb and TSH if not done. Iron supplements if anaemic.'});
+    if(bc.includes('colic')) flags.push({name:'Colic / Gassy Baby',value:'Baby',unit:'',isHigh:true,why:'Colic affects 1 in 5 babies. Usually resolves by 3-4 months.',action:'Try 5 S technique — swaddle, side, shush, swing, suck. Avoid overfeeding.'});
+    if(bc.includes('rash')) flags.push({name:'Skin Rash',value:'Baby',unit:'',isHigh:true,why:'Rashes in newborns can be normal (milia, erythema toxicum) or need treatment (eczema, infection).',action:'Show your paediatrician. Most newborn rashes are harmless but need assessment.'});
     return flags;
   }
   function compute(checks,extraFlags){
