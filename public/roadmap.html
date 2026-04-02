@@ -1715,6 +1715,9 @@ function savePPCheckin(){
     const modal=document.createElement('div');
     modal.style.cssText='position:fixed;inset:0;z-index:400;background:rgba(44,36,32,0.6);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
     modal.innerHTML='<div style="background:#fff;border-radius:18px;width:480px;max-width:95vw;max-height:90vh;overflow-y:auto;padding:1.75rem;border:1px solid #E8DDD5;"><div style="font-family:Cormorant Garamond,serif;font-size:22px;font-weight:600;color:#2C2420;margin-bottom:4px;">Urgent Action Needed</div><p style="font-size:13px;color:#8C7468;margin-bottom:1rem;">Please act on these immediately.</p>'+alertHtml+'<button onclick="this.closest(\'div[style]\').remove();" style="width:100%;margin-top:1rem;padding:11px;background:#C4704F;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;font-family:DM Sans,sans-serif;">I understand</button></div>';
+    document.body.appendChild(modal);
+  }
+  localStorage.setItem(
   localStorage.setItem('bloom_pp_checkin_'+currentPPStage,JSON.stringify({motherChips,babyChips,notes,date:new Date().toISOString()}));
   // Auto-sync checkin chips to profile so Care Checklist picks them up
 const updatedProfile = {...userProfile};
