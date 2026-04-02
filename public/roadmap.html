@@ -1639,7 +1639,14 @@ function savePPCheckin(){
     document.body.appendChild(modal);
   }
   localStorage.setItem('bloom_pp_checkin_'+currentPPStage,JSON.stringify({motherChips,babyChips,notes,date:new Date().toISOString()}));
-  buildAndSaveActionPlan(userProfile,checkinAlerts,'postpartum');
+  // Auto-sync checkin chips to profile so Care Checklist picks them up
+  const updatedProfile = {...userProfile};
+  if(motherChips.length) updatedProfile.ppMotherComplaints = motherChips;
+  if(babyChips.length) updatedProfile.ppBabyComplaints = babyChips;
+  userProfile = updatedProfile;
+  // Save to MongoDB silently
+  fetch('/profile',{method:'PUT',headers:{'Content-Type':'application/json',Authorization:TOKEN},body:JSON.stringify(updatedProfile)}).then(r=>r.json()).then(d=>{userData=d;userProfile=d.profile||{};});
+  buildAndSaveActionPlan(updatedProfile,checkinAlerts,'postpartum');
   contentCache={};
   loadPPSection('overview',document.querySelector('#pp-sec-tabs .stab'));
   const btn=document.querySelector('.checkin-panel-pp .checkin-save-btn');
