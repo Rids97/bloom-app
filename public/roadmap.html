@@ -2229,10 +2229,6 @@ function buildRoadmapProfileModal(){pfBuildChips();pfLoad();document.getElementB
         <div class="pf-section-intro">🤰 Current pregnancy details, obstetric history, and ANC investigations.</div>
         <div class="pf-sep">🌸 Current Pregnancy</div>
         <div class="pf-grid2" style="margin-bottom:10px;">
-          <div><label class="pf-label">LMP</label><input type="date" id="pf-preg-lmp" class="pf-input"/></div>
-          <div><label class="pf-label">EDD</label><input type="date" id="pf-preg-edd" class="pf-input" onchange="calcPregLmpFromEdd()"/></div>
-        </div>
-        <div class="pf-grid2" style="margin-bottom:10px;">
           <div><label class="pf-label">Booking week</label><input type="number" id="pf-booking-week" placeholder="e.g. 8" min="4" max="40" class="pf-input"/></div>
           <div><label class="pf-label">How conceived</label>
             <select id="pf-preg-conception" class="pf-input">
@@ -2449,8 +2445,7 @@ function buildRoadmapProfileModal(){pfBuildChips();pfLoad();document.getElementB
         <div class="pf-section-intro">👶 Postpartum details — mother's recovery and baby's progress — help Bloom give you the most relevant guidance.</div>
         <div class="pf-sep">👩 Mother — Delivery & Recovery</div>
         <div class="pf-grid2" style="margin-bottom:10px;">
-          <div><label class="pf-label">Delivery date</label><input type="date" id="pf-pp-delivery-date" class="pf-input"/></div>
-          <div><label class="pf-label">Mode of delivery</label>
+        <div><label class="pf-label">Mode of delivery</label>
             <select id="pf-pp-delivery-mode" class="pf-input">
               <option value="">Select…</option>
               <option value="normal_vaginal">Normal vaginal delivery</option>
