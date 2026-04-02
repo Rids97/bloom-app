@@ -1372,9 +1372,13 @@ function loadActionPlan(journey,btn){
   const data=loadActionPlan_data(journey);
   const el=document.getElementById(contentId);
   if(!el) return;
- const resolvedItems = JSON.parse(localStorage.getItem('bloom_ap_resolved_'+journey)||'[]');
+ if(!data){
+    el.innerHTML='<div class="ap-empty"><div style="font-size:40px;margin-bottom:12px;">📋</div><div style="font-family:Cormorant Garamond,serif;font-size:24px;font-weight:600;color:var(--text);margin-bottom:8px;">Your Care Checklist</div><p style="color:var(--muted);font-size:15px;line-height:1.7;">Update your profile with your latest test results or check-in to see personalised actions here.</p></div>';
+    return;
+  }
+  const resolvedItems = JSON.parse(localStorage.getItem('bloom_ap_resolved_'+journey)||'[]');
   const filteredAbnormal = (data.abnormal||[]).filter(r => !resolvedItems.includes(r.name));
-  if(!data||((!filteredAbnormal.length)&&(!data.normal||!data.normal.length)&&(!data.checkinAlerts||!data.checkinAlerts.length))){
+  if((!filteredAbnormal.length)&&(!data.normal||!data.normal.length)&&(!data.checkinAlerts||!data.checkinAlerts.length)){
     el.innerHTML='<div class="ap-empty"><div style="font-size:40px;margin-bottom:12px;">📋</div><div style="font-family:Cormorant Garamond,serif;font-size:24px;font-weight:600;color:var(--text);margin-bottom:8px;">Your Action Plan</div><p style="color:var(--muted);font-size:15px;line-height:1.7;">Update your profile with your latest test results or check-in to see personalised actions here.</p></div>';
     return;
   }
