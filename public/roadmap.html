@@ -736,7 +736,7 @@ async function loadTTCSection(section,btn){
     if(!res.ok){const err=await res.json();delete contentCache[key+'_loading'];handleContentError('ttc-ai-content',err,section,'ttc');return;}
     const data=await res.json();
     contentCache[key]=data.content;delete contentCache[key+'_loading'];
-    renderAIContent(data.content,'ttc-ai-content');
+    if(currentTTCSection===section) renderAIContent(data.content,'ttc-ai-content');
   }catch(e){delete contentCache[key+'_loading'];handleContentError('ttc-ai-content',{error:e.message},section,'ttc');}
 }
 
@@ -856,8 +856,8 @@ async function loadPregSection(section,btn){
     const res=await fetch('/roadmap-content',{method:'POST',headers:{'Content-Type':'application/json',Authorization:TOKEN},body:JSON.stringify({journey:'pregnancy',week,section,checkin})});
     if(!res.ok){const err=await res.json();delete contentCache[key+'_loading'];handleContentError('preg-ai-content',err,section,'pregnancy');return;}
     const data=await res.json();
-    contentCache[key]=data.content;delete contentCache[key+'_loading'];
-    renderAIContent(data.content,'preg-ai-content');renderPregInvLog();
+   contentCache[key]=data.content;delete contentCache[key+'_loading'];
+    if(currentPregSection===section){renderAIContent(data.content,'preg-ai-content');renderPregInvLog();}
   }catch(e){delete contentCache[key+'_loading'];handleContentError('preg-ai-content',{error:e.message},section,'pregnancy');}
 }
 
@@ -1023,7 +1023,7 @@ async function loadPPSection(section,btn){
     if(!res.ok){const err=await res.json();delete contentCache[key+'_loading'];handleContentError('pp-ai-content',err,section,'postpartum');return;}
     const data=await res.json();
     contentCache[key]=data.content;delete contentCache[key+'_loading'];
-    renderAIContent(data.content,'pp-ai-content');
+    if(currentPPSection===section) renderAIContent(data.content,'pp-ai-content');
   }catch(e){delete contentCache[key+'_loading'];handleContentError('pp-ai-content',{error:e.message},section,'postpartum');}
 }
 
@@ -1382,6 +1382,9 @@ function updateAllAPDots(){
 }
 
 function loadActionPlan(journey,btn){
+  if(journey==='ttc') currentTTCSection='action_plan';
+  else if(journey==='pregnancy') currentPregSection='action_plan';
+  else currentPPSection='action_plan';
   markAPSeen(journey);
   updateAllAPDots();
   if(!userProfile||!Object.keys(userProfile).length){
