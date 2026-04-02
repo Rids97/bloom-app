@@ -650,7 +650,8 @@ function initTTC(){
   renderTTCChecklist();renderProfileSummary();
   const saved=localStorage.getItem('bloom_ttc_trying_since');
   if(saved){document.getElementById('ttc-trying-since').value=saved;updateTTCDuration(saved);}
-  loadTTCSection('overview',document.querySelector('#ttc-sec-tabs .stab'));
+  const activeTTCTab=document.querySelector('#ttc-sec-tabs .stab.active');
+if(!activeTTCTab||!activeTTCTab.classList.contains('action-plan-tab')) loadTTCSection('overview',document.querySelector('#ttc-sec-tabs .stab'));
 }
 
 function saveTTCTryingSince(val){localStorage.setItem('bloom_ttc_trying_since',val);updateTTCDuration(val);}
@@ -788,7 +789,8 @@ function computeAndRenderPreg(lmpStr){
   document.getElementById('preg-trimester-label').textContent=trimester;
   document.getElementById('preg-due-label').textContent=dueDate.toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
   buildWeekNav(weeksPreg);renderPregMilestones(weeksPreg);renderPregChecklist(weeksPreg);renderPregInvLog();
-  loadPregSection('overview',document.querySelector('#preg-sec-tabs .stab'));
+  const activePregTab=document.querySelector('#preg-sec-tabs .stab.active');
+if(!activePregTab||!activePregTab.classList.contains('action-plan-tab')) loadPregSection('overview',document.querySelector('#preg-sec-tabs .stab'));
   document.getElementById('preg-tip').textContent=getPregTip(weeksPreg);
 }
 
@@ -999,7 +1001,8 @@ function switchPPStage(stage,btn){
   document.getElementById('pp-tip').textContent=info.tip;
   renderPPChecklist(stage);renderPPMilestones(stage);
   contentCache={};
-  loadPPSection('overview',document.querySelector('#pp-sec-tabs .stab'));
+  const activePPTab=document.querySelector('#pp-sec-tabs .stab.active');
+  if(!activePPTab||!activePPTab.classList.contains('action-plan-tab')) loadPPSection('overview',document.querySelector('#pp-sec-tabs .stab'));
 }
 
 async function loadPPSection(section,btn){
