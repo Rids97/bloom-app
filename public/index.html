@@ -1694,22 +1694,23 @@ function buildDashboardActionPlan(profile){
     if(p.ppBabyVaccines&&!p.ppBabyVaccines.includes('bcg')) flags.push({name:'BCG Vaccine Pending',value:'Baby',unit:'',isHigh:true,why:'BCG should be given at birth.',action:'Get BCG done at nearest immunisation centre.'});
     return flags;
   }
- 
-    const abnormal=[],normal=[];
+  function compute(checks,extraFlags){
+    const abnormal=[...(extraFlags||[])],normal=[];
     checks.forEach(c=>{
       if(c.val===null||c.val===undefined) return;
       const isHigh=c.val>c.high,isLow=c.val<c.low;
       if(!isHigh&&!isLow){normal.push({name:c.name,value:c.val,unit:c.unit});}
-      else{abnormal.push({name:c.name,value:c.val,unit:c.unit,isHigh});}
+      else{const adv=getTTCAdvice(c.name,isHigh);abnormal.push({name:c.name,value:c.val,unit:c.unit,isHigh,why:adv.why,action:adv.action});}
     });
     return{abnormal,normal,checkinAlerts:[],date:new Date().toLocaleDateString('en-IN'),savedAt:Date.now()};
   }
+  const flagsMap=[getTTCProfileFlags(profile),getPregProfileFlags(profile),getPPProfileFlags(profile)];
   ['ttc','pregnancy','postpartum'].forEach((j,i)=>{
     const checksMap=[ttcChecks,pregChecks,ppChecks];
     const existing=localStorage.getItem('bloom_ap_'+j);
     let existingAlerts=[];
     if(existing){try{existingAlerts=JSON.parse(existing).checkinAlerts||[];}catch(e){}}
-    const data=compute(checksMap[i]);
+    const data=compute(checksMap[i],flagsMap[i]);
     data.checkinAlerts=existingAlerts;
     localStorage.setItem('bloom_ap_'+j,JSON.stringify(data));
     localStorage.removeItem('bloom_ap_seen_'+j);
