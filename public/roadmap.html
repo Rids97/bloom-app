@@ -1867,7 +1867,11 @@ async function pfSave(){
       var msg=document.getElementById('pf-saved-msg');if(msg) msg.style.display='block';
       userProfile=userData.profile||{};contentCache={};
       computeAndSaveGoldenBox(userProfile);
-      buildAndSaveActionPlan(userProfile,[]);
+      ['ttc','pregnancy','postpartum'].forEach(function(j){
+        const existing=loadActionPlan_data(j);
+        const existingAlerts=existing?existing.checkinAlerts||[]:[];
+        buildAndSaveActionPlan(userProfile,existingAlerts,j);
+      });
       setTimeout(function(){
         if(msg) msg.style.display='none';
         var modal=document.getElementById('profileModal');if(modal) modal.style.display='none';
