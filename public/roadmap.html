@@ -1538,10 +1538,10 @@ function buildAndSaveActionPlan(profile,checkinAlerts,specificJourney){
   }
 
   // Postpartum profile flags
-  function getPPProfileFlags(profile){
+ function getPPProfileFlags(profile){
     const flags=[];
-    const motherComplaints=profile.ppMotherComplaints||[];
-    const babyComplaints=profile.ppBabyComplaints||[];
+    const motherComplaints=Array.isArray(profile.ppMotherComplaints)?profile.ppMotherComplaints:[];
+    const babyComplaints=Array.isArray(profile.ppBabyComplaints)?profile.ppBabyComplaints:[];
     if(motherComplaints.includes('wound_infection'))
       flags.push({name:'Wound Infection',value:'Mother',unit:'',isHigh:true,why:'Wound infection after delivery needs prompt treatment to prevent sepsis.',action:'See your doctor today. Wound swab and antibiotics needed. Keep wound clean and dry.'});
     if(motherComplaints.includes('heavy_bleeding'))
@@ -1564,13 +1564,20 @@ function buildAndSaveActionPlan(profile,checkinAlerts,specificJourney){
       flags.push({name:'Blue Lips / Cyanosis',value:'Baby',unit:'',isHigh:true,why:'Blue or purple lips indicate dangerously low oxygen levels — cardiac or respiratory emergency.',action:'Call an ambulance immediately. This is a life-threatening emergency.'});
     if(babyComplaints.includes('excessive_crying'))
       flags.push({name:'Excessive Crying',value:'Baby',unit:'',isHigh:true,why:'Inconsolable crying can indicate pain, infection, or colic needing assessment.',action:'See your paediatrician today if crying is high-pitched or inconsolable.'});
-    if(profile.ppBabyVaccines&&!profile.ppBabyVaccines.includes('bcg')) flags.push({name:'BCG Vaccine Pending',value:'Baby',unit:'',isHigh:true,why:'BCG should be given at birth.',action:'Get BCG done at nearest immunisation centre.'});
-    if(motherComplaints.includes('wound_pain')) flags.push({name:'Wound Pain',value:'Mother',unit:'',isHigh:true,why:'Wound pain after delivery needs assessment to rule out infection.',action:'Keep wound clean and dry. See doctor if pain is increasing or wound looks red.'});
-    if(motherComplaints.includes('mood_low')) flags.push({name:'Low Mood / Baby Blues',value:'Mother',unit:'',isHigh:true,why:'Low mood persisting beyond 2 weeks may be postpartum depression.',action:'Tell your doctor. Edinburgh scale screening recommended. PPD is very treatable.'});
-    if(motherComplaints.includes('urinary_issues')) flags.push({name:'Urinary Issues',value:'Mother',unit:'',isHigh:true,why:'Urinary problems after delivery can indicate infection or pelvic floor issues.',action:'See your doctor. Urine culture needed if burning or frequency present.'});
-    if(motherComplaints.includes('fatigue')) flags.push({name:'Severe Fatigue',value:'Mother',unit:'',isHigh:true,why:'Severe fatigue can indicate postpartum anaemia or thyroid issues.',action:'Check Hb and TSH if not done. Iron supplements if anaemic.'});
-    if(babyComplaints.includes('colic')) flags.push({name:'Colic / Gassy Baby',value:'Baby',unit:'',isHigh:true,why:'Colic affects 1 in 5 babies. Usually resolves by 3-4 months.',action:'Try 5 S technique — swaddle, side, shush, swing, suck. Avoid overfeeding.'});
-    if(babyComplaints.includes('rash')) flags.push({name:'Skin Rash',value:'Baby',unit:'',isHigh:true,why:'Rashes in newborns can be normal (milia, erythema toxicum) or need treatment (eczema, infection).',action:'Show your paediatrician. Most newborn rashes are harmless but need assessment.'});
+    if(profile.ppBabyVaccines&&!profile.ppBabyVaccines.includes('bcg'))
+      flags.push({name:'BCG Vaccine Pending',value:'Baby',unit:'',isHigh:true,why:'BCG should be given at birth.',action:'Get BCG done at nearest immunisation centre.'});
+    if(motherComplaints.includes('wound_pain'))
+      flags.push({name:'Wound Pain',value:'Mother',unit:'',isHigh:true,why:'Wound pain after delivery needs assessment to rule out infection.',action:'Keep wound clean and dry. See doctor if pain is increasing or wound looks red.'});
+    if(motherComplaints.includes('mood_low'))
+      flags.push({name:'Low Mood / Baby Blues',value:'Mother',unit:'',isHigh:true,why:'Low mood persisting beyond 2 weeks may be postpartum depression.',action:'Tell your doctor. Edinburgh scale screening recommended. PPD is very treatable.'});
+    if(motherComplaints.includes('urinary_issues'))
+      flags.push({name:'Urinary Issues',value:'Mother',unit:'',isHigh:true,why:'Urinary problems after delivery can indicate infection or pelvic floor issues.',action:'See your doctor. Urine culture needed if burning or frequency present.'});
+    if(motherComplaints.includes('fatigue'))
+      flags.push({name:'Severe Fatigue',value:'Mother',unit:'',isHigh:true,why:'Severe fatigue can indicate postpartum anaemia or thyroid issues.',action:'Check Hb and TSH if not done. Iron supplements if anaemic.'});
+    if(babyComplaints.includes('colic'))
+      flags.push({name:'Colic / Gassy Baby',value:'Baby',unit:'',isHigh:true,why:'Colic affects 1 in 5 babies. Usually resolves by 3-4 months.',action:'Try 5 S technique — swaddle, side, shush, swing, suck. Avoid overfeeding.'});
+    if(babyComplaints.includes('rash'))
+      flags.push({name:'Skin Rash',value:'Baby',unit:'',isHigh:true,why:'Rashes in newborns can be normal (milia, erythema toxicum) or need treatment (eczema, infection).',action:'Show your paediatrician. Most newborn rashes are harmless but need assessment.'});
     return flags;
   }
   // If specificJourney passed (from checkin), only update that journey
