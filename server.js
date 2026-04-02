@@ -277,6 +277,15 @@ const UserSchema = new mongoose.Schema({
     immFluDate: String, immCovidDone: Boolean,
     bpReading1: String, bpReading1Date: String,
     bpReading2: String, bpReading2Date: String,
+    // POSTPARTUM
+    ppDeliveryDate: String, ppDeliveryMode: String,
+    ppMotherComplaints: [String], ppMotherMeds: [String],
+    pp6wkCheck: String, ppContraception: String,
+    ppHb: Number, ppBp: String, ppTsh: Number,
+    ppBirthWeight: Number, ppCurrentWeight: Number, ppBabyAgeWeeks: Number,
+    ppFeeding: [String], ppBabyComplaints: [String], ppBabyVaccines: [String],
+    ppBilirubin: Number, ppBabyHb: Number,
+    ppBabyScreens: [String], ppBabyNotes: String,
   },
   fertilityPlan: { content: String, generatedAt: Date },
 });
