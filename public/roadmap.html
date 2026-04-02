@@ -1686,12 +1686,14 @@ const updatedProfile = {...userProfile};
     rash:'rash'
   };
   if(motherChips.length){
-    const mapped = motherChips.map(c => motherChipMap[c]||c).filter(Boolean);
-    updatedProfile.ppMotherComplaints = [...new Set([...(userProfile.ppMotherComplaints||[]), ...mapped])];
+const mapped = motherChips.map(c => motherChipMap[c]||c).filter(Boolean);
+    const existingMC = Array.isArray(userProfile.ppMotherComplaints)?userProfile.ppMotherComplaints:[];
+    updatedProfile.ppMotherComplaints = [...new Set([...existingMC, ...mapped])];
   }
   if(babyChips.length){
     const mapped = babyChips.map(c => babyChipMap[c]||c).filter(Boolean);
-    updatedProfile.ppBabyComplaints = [...new Set([...(userProfile.ppBabyComplaints||[]), ...mapped])];
+    const existingBC = Array.isArray(userProfile.ppBabyComplaints)?userProfile.ppBabyComplaints:[];
+    updatedProfile.ppBabyComplaints = [...new Set([...existingBC, ...mapped])];
   }
 userProfile = updatedProfile;
   buildAndSaveActionPlan(updatedProfile,checkinAlerts,'postpartum');
