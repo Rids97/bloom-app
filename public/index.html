@@ -1716,7 +1716,6 @@ function buildDashboardActionPlan(profile){
     localStorage.removeItem('bloom_ap_seen_'+j);
   });
 }
-  function compute(checks){
     const abnormal=[],normal=[];
     checks.forEach(c=>{
       if(c.val===null||c.val===undefined) return;
