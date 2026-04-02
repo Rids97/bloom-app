@@ -575,7 +575,8 @@ async function init(){
       return;
     }
     mainCont.style.display='block';
-    renderPersonaTags();
+   renderPersonaTags();
+    ['ttc','pregnancy','postpartum'].forEach(j=>buildAndSaveActionPlan(userProfile,[],j));
     switchJourney('ttc',document.querySelector('.jtab'));
   }catch(e){console.error('Init error:',e);}
 }
@@ -1376,6 +1377,9 @@ function updateAllAPDots(){
 function loadActionPlan(journey,btn){
   markAPSeen(journey);
   updateAllAPDots();
+  if(!userProfile||!Object.keys(userProfile).length){
+    buildAndSaveActionPlan(userData.profile||{}, [], journey);
+  }
   const tabsId=journey==='ttc'?'ttc-sec-tabs':journey==='pregnancy'?'preg-sec-tabs':'pp-sec-tabs';
   const contentId=journey==='ttc'?'ttc-ai-content':journey==='pregnancy'?'preg-ai-content':'pp-ai-content';
   document.querySelectorAll('#'+tabsId+' .stab').forEach(b=>b.classList.remove('active'));
