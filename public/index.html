@@ -1832,11 +1832,127 @@ function openProfileModal(){
   
 </script>
 <nav class="mobile-bottom-nav" id="mobileNav">
-  <a class="mbn-item active" href="/app"><span class="mbn-icon">🏠</span><span class="mbn-label">Home</span></a>
+ <a class="mbn-item active" href="/app"><span class="mbn-icon">🏠</span><span class="mbn-label">Home</span></a>
   <a class="mbn-item" href="#" onclick="openModal('cycleCalcModal');return false;"><span class="mbn-icon">📅</span><span class="mbn-label">Cycle</span></a>
+  <a class="mbn-item" href="#" onclick="openMobileChat();return false;"><span class="mbn-icon">💬</span><span class="mbn-label">Chat</span></a>
   <a class="mbn-item" href="#" onclick="window.location.href='/report';return false;"><span class="mbn-icon">🧪</span><span class="mbn-label">Reports</span></a>
   <a class="mbn-item" href="#" onclick="window.location.href='/roadmap';return false;"><span class="mbn-icon">🗺️</span><span class="mbn-label">Roadmap</span></a>
   <a class="mbn-item" href="#" onclick="openProfileModal();return false;"><span class="mbn-icon">👤</span><span class="mbn-label">Profile</span></a>
 </nav>
+<!-- MOBILE FULL SCREEN CHAT -->
+<div id="mobileChatOverlay" style="display:none;position:fixed;inset:0;z-index:999;background:var(--cream);flex-direction:column;">
+  <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;background:rgba(250,246,241,0.97);backdrop-filter:blur(12px);">
+    <button onclick="closeMobileChat()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);padding:4px;">←</button>
+    <div class="chat-bloom-dot"></div>
+    <div>
+      <div style="font-size:17px;font-weight:500;">Ask Bloom</div>
+      <div style="font-size:13px;color:var(--muted);">Your AI women's health companion</div>
+    </div>
+    <div class="msg-limit" id="mobileMsgLimit" style="margin-left:auto;font-size:13px;color:var(--muted);"></div>
+  </div>
+  <div id="mobileChatMessages" style="flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth;">
+  </div>
+  <div style="padding:8px 12px;display:flex;flex-wrap:wrap;gap:6px;border-top:1px solid var(--border);background:var(--cream);" id="mobileSuggestions">
+    <div class="sug-pill" onclick="mobileSendSug(this)">What is PCOS?</div>
+    <div class="sug-pill" onclick="mobileSendSug(this)">When am I most fertile?</div>
+    <div class="sug-pill" onclick="mobileSendSug(this)">Signs of ovulation</div>
+  </div>
+  <div style="padding:10px 12px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center;background:var(--cream);">
+    <input class="chat-input" id="mobileChatInput" placeholder="Ask Bloom anything..." onkeydown="handleMobileKey(event)" style="flex:1;"/>
+    <button class="send-btn" id="mobileSendBtn" onclick="mobileSendChat()">➤</button>
+  </div>
+</div>
+
+<script>
+function openMobileChat(){
+  const overlay = document.getElementById('mobileChatOverlay');
+  overlay.style.display = 'flex';
+  overlay.style.flexDirection = 'column';
+  // Sync messages from main chat
+  const mainMsgs = document.getElementById('chatMessages');
+  const mobileMsgs = document.getElementById('mobileChatMessages');
+  mobileMsgs.innerHTML = mainMsgs.innerHTML;
+  mobileMsgs.scrollTop = mobileMsgs.scrollHeight;
+  // Sync msg limit
+  document.getElementById('mobileMsgLimit').textContent = document.getElementById('msgLimitLabel').textContent;
+  document.getElementById('mobileChatInput').focus();
+}
+
+function closeMobileChat(){
+  document.getElementById('mobileChatOverlay').style.display = 'none';
+  // Sync back to main chat
+  const mainMsgs = document.getElementById('chatMessages');
+  const mobileMsgs = document.getElementById('mobileChatMessages');
+  mainMsgs.innerHTML = mobileMsgs.innerHTML;
+}
+
+function handleMobileKey(e){
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();mobileSendChat();}
+}
+
+function mobileSendSug(el){
+  document.getElementById('mobileChatInput').value=el.textContent;
+  mobileSendChat();
+}
+
+async function mobileSendChat(wantsDetail=false, originalMessage=null){
+  const input = document.getElementById('mobileChatInput');
+  const msg = originalMessage || input.value.trim();
+  if(!msg) return;
+  if(userPlan==='free'){
+    const createdAt = userData.createdAt || new Date().toISOString();
+    const accountAge = (Date.now() - new Date(createdAt).getTime()) / (1000 * 60 * 60 * 24);
+    if(accountAge > 3){openPaywall();return;}
+  }
+  if(!wantsDetail) input.value='';
+  document.getElementById('mobileSendBtn').disabled = true;
+
+  // Append user message
+  const mobileMsgs = document.getElementById('mobileChatMessages');
+  const userDiv = document.createElement('div');
+  userDiv.className = 'msg user';
+  const initial = userData.profile?.name?.[0]?.toUpperCase() || 'Y';
+  userDiv.innerHTML = `<div class="msg-avatar">${initial}</div><div class="msg-content"><div class="msg-bubble">${msg}</div></div>`;
+  mobileMsgs.appendChild(userDiv);
+
+  // Typing indicator
+  const typingDiv = document.createElement('div');
+  typingDiv.className = 'msg';
+  typingDiv.innerHTML = '<div class="msg-avatar bloom">B</div><div class="msg-content"><div class="msg-bubble"><div class="typing"><span></span><span></span><span></span></div></div></div>';
+  mobileMsgs.appendChild(typingDiv);
+  mobileMsgs.scrollTop = mobileMsgs.scrollHeight;
+
+  try{
+    const res = await fetch('/chat',{method:'POST',headers:{'Content-Type':'application/json',Authorization:TOKEN},body:JSON.stringify({message:msg,wantsDetail})});
+    const data = await res.json();
+    typingDiv.remove();
+    if(data.limitReached){
+      const limitDiv = document.createElement('div');
+      limitDiv.className = 'msg';
+      limitDiv.innerHTML = '<div class="msg-avatar bloom">B</div><div class="msg-content"><div class="msg-bubble">Your 3-day free trial has ended. Upgrade to Bloom Pro or Bloom Complete to continue chatting 🌸</div></div>';
+      mobileMsgs.appendChild(limitDiv);
+      openPaywall();
+    } else if(data.reply){
+      const replyDiv = document.createElement('div');
+      replyDiv.className = 'msg';
+      replyDiv.innerHTML = `<div class="msg-avatar bloom">B</div><div class="msg-content"><div class="msg-bubble" style="line-height:1.85;">${formatChatText(data.reply)}</div></div>`;
+      mobileMsgs.appendChild(replyDiv);
+      messageCount = data.messageCount || messageCount + 1;
+      document.getElementById('mobileMsgLimit').textContent = document.getElementById('msgLimitLabel').textContent;
+      // Also sync to main chat
+      document.getElementById('chatMessages').appendChild(userDiv.cloneNode(true));
+      document.getElementById('chatMessages').appendChild(replyDiv.cloneNode(true));
+    }
+    mobileMsgs.scrollTop = mobileMsgs.scrollHeight;
+  }catch(e){
+    typingDiv.remove();
+    const errDiv = document.createElement('div');
+    errDiv.className = 'msg';
+    errDiv.innerHTML = '<div class="msg-avatar bloom">B</div><div class="msg-content"><div class="msg-bubble">Sorry, something went wrong. Please try again 🌸</div></div>';
+    mobileMsgs.appendChild(errDiv);
+  }
+  document.getElementById('mobileSendBtn').disabled = false;
+}
+</script>
 </body>
 </html>
