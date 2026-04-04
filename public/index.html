@@ -1345,7 +1345,6 @@ async function sendChat(wantsDetail=false,originalMessage=null){
   const input=document.getElementById('chatInput');
   const msg=originalMessage||input.value.trim();
   if(!msg) return;
-  if(userPlan==='free'&&messageCount>=FREE_LIMIT){openPaywall();return;}
   if(!wantsDetail) input.value='';
   document.getElementById('sendBtn').disabled=true;
   if(!wantsDetail) appendMsg(msg,'user');
