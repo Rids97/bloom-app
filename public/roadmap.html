@@ -583,7 +583,11 @@ async function init(){
     mainCont.style.display='block';
    renderPersonaTags();
     ['ttc','pregnancy','postpartum'].forEach(j=>buildAndSaveActionPlan(userProfile,[],j));
-    switchJourney('ttc',document.querySelector('.jtab'));
+    if(userProfile.isPregnant){
+      switchJourney('pregnancy',document.querySelectorAll('.jtab')[1]);
+    } else {
+      switchJourney('ttc',document.querySelector('.jtab'));
+    }
   }catch(e){console.error('Init error:',e);}
 }
 
@@ -1802,7 +1806,9 @@ function setChipVals(containerId,vals){
 function pfLoad(){
   var p=userData.profile||{};
   var set=function(id,val){var el=document.getElementById(id);if(el&&val!==undefined&&val!==null) el.value=val;};
-  set('pf-name',p.name);set('pf-age',p.age);set('pf-journey',p.journeyStage);
+ set('pf-name',p.name);set('pf-age',p.age);set('pf-journey',p.journeyStage);
+  var pregToggle=document.getElementById('pf-is-pregnant');
+  if(pregToggle){pregToggle.checked=!!p.isPregnant;var sl=document.getElementById('pf-pregnant-slider');if(sl)sl.style.background=p.isPregnant?'#7B9E87':'#E8DDD5';}
   set('pf-cycle',p.cycleLength);set('pf-period',p.periodLength);set('pf-notes',p.notes);
   setChipVals('pf-sym-grid',p.symptoms);setChipVals('pf-med-grid',p.medications);
   set('pf-lmp',p.lmp);set('pf-cycle-regularity',p.cycleRegularity);set('pf-menarche',p.menarche);
@@ -1873,7 +1879,7 @@ async function pfSave(){
   var gn=function(id){var v=parseFloat(g(id));return isNaN(v)?null:v;};
   var gi=function(id){var v=parseInt(g(id));return isNaN(v)?null:v;};
   var profile={
-    name:g('pf-name'),age:gi('pf-age'),journeyStage:g('pf-journey'),
+    name:g('pf-name'),age:gi('pf-age'),journeyStage:g('pf-journey'),isPregnant:document.getElementById('pf-is-pregnant')?document.getElementById('pf-is-pregnant').checked:false,
     cycleLength:gi('pf-cycle'),periodLength:gi('pf-period'),notes:g('pf-notes'),
     symptoms:getChipVals('pf-sym-grid'),medications:getChipVals('pf-med-grid'),
     lmp:g('pf-lmp'),cycleRegularity:g('pf-cycle-regularity'),menarche:gi('pf-menarche'),
@@ -2000,6 +2006,17 @@ function buildRoadmapProfileModal(){pfBuildChips();pfLoad();document.getElementB
         <div class="pf-grid2" style="margin-bottom:10px;">
           <div><label class="pf-label">Your name</label><input type="text" id="pf-name" placeholder="e.g. Priya" class="pf-input"/></div>
           <div><label class="pf-label">Age</label><input type="number" id="pf-age" placeholder="28" min="16" max="60" class="pf-input"/></div>
+        </div>
+       <div style="margin-bottom:14px;display:flex;align-items:center;gap:14px;background:#F2E4DA;border-radius:10px;padding:12px 16px;border:1px solid #E2C4B4;">
+          <span style="font-size:22px;">🤰</span>
+          <div style="flex:1;">
+            <div style="font-size:16px;font-weight:600;color:#9E5238;">Currently Pregnant?</div>
+            <div style="font-size:13px;color:#8C7468;margin-top:2px;">Turns off cycle tracking, switches roadmap to pregnancy mode</div>
+          </div>
+          <label style="position:relative;display:inline-block;width:48px;height:26px;flex-shrink:0;">
+            <input type="checkbox" id="pf-is-pregnant" style="opacity:0;width:0;height:0;" onchange="pfUpdateCompletion()"/>
+            <span onclick="this.previousElementSibling.click()" style="position:absolute;cursor:pointer;inset:0;background:#E8DDD5;border-radius:13px;transition:0.3s;" id="pf-pregnant-slider"></span>
+          </label>
         </div>
         <div style="margin-bottom:10px;"><label class="pf-label">My journey</label>
           <select id="pf-journey" class="pf-input">
