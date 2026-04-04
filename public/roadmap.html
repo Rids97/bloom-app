@@ -2737,5 +2737,136 @@ function buildRoadmapProfileModal(){pfBuildChips();pfLoad();document.getElementB
     </div>
   </div>
 </div>
+<style>
+@media(max-width:700px){
+  .sec-tabs{display:none !important;}
+  .mobile-tab-bar{display:flex !important;}
+  .stage-path{display:none !important;}
+  .mobile-progress-wrap{display:block !important;}
+}
+.mobile-tab-bar{display:none;position:sticky;bottom:0;left:0;right:0;z-index:200;background:rgba(250,246,241,0.97);backdrop-filter:blur(12px);border-top:1px solid var(--border);justify-content:space-around;padding:6px 0 calc(6px + env(safe-area-inset-bottom));}
+.mtab{display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 8px;cursor:pointer;flex:1;border:none;background:none;}
+.mtab-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.mtab-txt{font-size:10px;color:var(--muted);font-family:'DM Sans',sans-serif;}
+.mtab.active .mtab-txt{color:var(--terra);font-weight:500;}
+.mtab.active .mtab-icon{background:var(--terra-l);}
+.mobile-progress-wrap{display:none;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;margin-bottom:1rem;}
+.mp-bar{height:6px;background:var(--border);border-radius:4px;margin-bottom:8px;overflow:hidden;}
+.mp-fill{height:100%;background:linear-gradient(90deg,var(--sage),var(--terra));border-radius:4px;transition:width 0.4s;}
+.mp-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);}
+.mp-badge{display:inline-block;background:var(--terra-l);color:var(--terra-d);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:500;margin-top:8px;}
+</style>
+
+<script>
+// Mobile progress bar render
+function renderMobileProgress(){
+  if(window.innerWidth>700) return;
+  var stageOrder=['early_ttc','needs_workup','workup_complete','oi_active','iui_active','ivf_active'];
+  var stageLabels=['Trying','Investigate','Plan Ready','OI Cycle','IUI','IVF'];
+  var stageBadges={early_ttc:'🌱 Trying',needs_workup:'🧪 Investigate',needs_urgent_workup:'🧪 Urgent',workup_partial:'📋 Partial',workup_complete:'📋 Plan Ready',oi_active:'💊 OI Cycle — Active',monitoring:'🔬 Monitoring',iui_active:'🔬 IUI — Active',pre_ivf:'⭐ IVF Prep',ivf_active:'⭐ IVF — Active'};
+  var idx=stageOrder.indexOf(currentTTCStage);
+  if(idx<0) idx=0;
+  var pct=Math.round(((idx+1)/stageOrder.length)*100);
+  var wrap=document.getElementById('mobile-progress-ttc');
+  if(!wrap) return;
+  wrap.innerHTML='<div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Your clinical pathway</div>'+
+    '<div class="mp-bar"><div class="mp-fill" style="width:'+pct+'%"></div></div>'+
+    '<div class="mp-labels">'+stageLabels.map(function(l,i){return '<span style="color:'+(i===idx?'var(--terra)':'var(--muted)')+';font-weight:'+(i===idx?'500':'400')+';">'+l+'</span>';}).join('')+'</div>'+
+    '<div class="mp-badge">'+(stageBadges[currentTTCStage]||'🌱 Trying')+'</div>';
+}
+
+// Mobile tab bar for TTC
+var ttcTabs=[
+  {icon:'📋',label:'Overview',section:'overview'},
+  {icon:'🌿',label:'Lifestyle',section:'lifestyle'},
+  {icon:'💊',label:'Supps',section:'supplements'},
+  {icon:'🧪',label:'Results',section:'hormones'},
+  {icon:'✅',label:'Care',section:'action_plan'},
+];
+var pregTabs=[
+  {icon:'📋',label:'Overview',section:'overview'},
+  {icon:'🌿',label:'Lifestyle',section:'lifestyle'},
+  {icon:'💊',label:'Supps',section:'supplements'},
+  {icon:'🔬',label:'Tests',section:'pretreatment'},
+  {icon:'✅',label:'Care',section:'action_plan'},
+];
+var ppTabs=[
+  {icon:'📋',label:'Overview',section:'overview'},
+  {icon:'🤱',label:'Feeding',section:'breastfeeding'},
+  {icon:'🌿',label:'Recovery',section:'recovery'},
+  {icon:'👶',label:'Baby',section:'baby_care'},
+  {icon:'✅',label:'Care',section:'action_plan'},
+];
+
+function buildMobileTabBar(tabs,journey){
+  var bar=document.getElementById('mobile-tab-bar');
+  if(!bar) return;
+  bar.innerHTML=tabs.map(function(t,i){
+    return '<button class="mtab'+(i===0?' active':'')+'" onclick="mobileTabClick(this,\''+t.section+'\',\''+journey+'\')" data-section="'+t.section+'">'+
+      '<div class="mtab-icon">'+t.icon+'</div>'+
+      '<span class="mtab-txt">'+t.label+'</span>'+
+    '</button>';
+  }).join('');
+}
+
+function mobileTabClick(btn,section,journey){
+  document.querySelectorAll('.mtab').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  if(section==='action_plan'){
+    var apBtn=document.getElementById(journey+'-ap-tab');
+    if(apBtn) loadActionPlan(journey,apBtn);
+  } else if(journey==='ttc'){
+    var stab=document.querySelector('#ttc-sec-tabs .stab');
+    loadTTCSection(section,stab);
+  } else if(journey==='pregnancy'){
+    var stab=document.querySelector('#preg-sec-tabs .stab');
+    loadPregSection(section,stab);
+  } else {
+    var stab=document.querySelector('#pp-sec-tabs .stab');
+    loadPPSection(section,stab);
+  }
+}
+
+// Override switchJourney to also update mobile tab bar
+var _origSwitchJourney=switchJourney;
+switchJourney=function(name,btn){
+  _origSwitchJourney(name,btn);
+  if(window.innerWidth<=700){
+    if(name==='ttc') buildMobileTabBar(ttcTabs,'ttc');
+    else if(name==='pregnancy') buildMobileTabBar(pregTabs,'pregnancy');
+    else buildMobileTabBar(ppTabs,'postpartum');
+    setTimeout(renderMobileProgress,500);
+  }
+};
+
+// Override initTTC to render progress
+var _origInitTTC=initTTC;
+initTTC=function(){
+  _origInitTTC();
+  if(window.innerWidth<=700){
+    buildMobileTabBar(ttcTabs,'ttc');
+    setTimeout(renderMobileProgress,300);
+  }
+};
+</script>
+
+<!-- Mobile progress bar placeholder (inside TTC section) -->
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  if(window.innerWidth>700) return;
+  // Insert progress bar before stage-detector in TTC
+  var stageDetector=document.querySelector('#section-ttc .stage-detector');
+  if(stageDetector){
+    var wrap=document.createElement('div');
+    wrap.className='mobile-progress-wrap';
+    wrap.id='mobile-progress-ttc';
+    stageDetector.parentNode.insertBefore(wrap,stageDetector);
+    stageDetector.style.display='none';
+  }
+});
+</script>
+
+<!-- Mobile tab bar -->
+<div class="mobile-tab-bar" id="mobile-tab-bar"></div>
 </body>
 </html>
