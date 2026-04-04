@@ -208,7 +208,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
   </div>
 </nav>
 <div class="journey-tabs">
-  <div class="jtab active" onclick="switchJourney('ttc',this)">🌱 Conception Journey</div>
+  <div class="jtab active" onclick="switchJourney('ttc',this)">🌱 Fertility</div>
   <div class="jtab" onclick="switchJourney('pregnancy',this)">🤰 Pregnancy</div>
   <div class="jtab" onclick="switchJourney('postpartum',this)">👶 Postpartum</div>
 </div>
@@ -274,8 +274,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
           <div class="stab" onclick="loadTTCSection('immunization',this)">Immunization</div>
           <div class="stab action-plan-tab" onclick="loadActionPlan('ttc',this)" id="ttc-ap-tab">📋 My Care Checklist<span class="ap-dot" id="ttc-ap-dot"></span></div>
         </div>
-        <div id="ttc-ai-content"><div class="loading-dots"><span></span><span></span><span></span></div></div>
-        <div style="margin-top:1rem;padding:1rem 1.25rem;background:var(--cream);border-radius:var(--radius);border:1px solid var(--border-l);font-size:11px;color:var(--muted);font-style:italic;">📚 Evidence-based · Built by a gynaecologist · Personalised to your profile</div>
+      <div id="ttc-ai-content"><div class="loading-dots"><span></span><span></span><span></span></div></div>
       </div>
       <div class="sidebar">
         <div class="tip-card">
@@ -738,6 +737,7 @@ async function loadTTCSection(section,btn){
   if(contentCache[key]){renderAIContent(contentCache[key],'ttc-ai-content');return;}
   if(contentCache[key+'_loading']) return;
   contentCache[key+'_loading']=true;
+  setTimeout(()=>{delete contentCache[key+'_loading'];},15000);
   document.getElementById('ttc-ai-content').innerHTML='<div class="loading-dots"><span></span><span></span><span></span></div>';
   try{
     const res=await fetch('/roadmap-content',{method:'POST',headers:{'Content-Type':'application/json',Authorization:TOKEN},body:JSON.stringify({journey:'ttc',section,clinicalStage:currentTTCStage})});
@@ -865,6 +865,7 @@ async function loadPregSection(section,btn){
   if(contentCache[key]){renderAIContent(contentCache[key],'preg-ai-content');renderPregInvLog();return;}
   if(contentCache[key+'_loading']) return;
   contentCache[key+'_loading']=true;
+  setTimeout(()=>{delete contentCache[key+'_loading'];},15000);
   document.getElementById('preg-ai-content').innerHTML='<div class="loading-dots"><span></span><span></span><span></span></div>';
   try{
     const res=await fetch('/roadmap-content',{method:'POST',headers:{'Content-Type':'application/json',Authorization:TOKEN},body:JSON.stringify({journey:'pregnancy',week,section,checkin})});
@@ -1064,6 +1065,7 @@ async function loadPPSection(section,btn){
   if(contentCache[key]){renderAIContent(contentCache[key],'pp-ai-content');return;}
   if(contentCache[key+'_loading']) return;
   contentCache[key+'_loading']=true;
+  setTimeout(()=>{delete contentCache[key+'_loading'];},15000);
   document.getElementById('pp-ai-content').innerHTML='<div class="loading-dots"><span></span><span></span><span></span></div>';
   try{
     const res=await fetch('/roadmap-content',{method:'POST',headers:{'Content-Type':'application/json',Authorization:TOKEN},body:JSON.stringify({journey:'postpartum',section,ppStage:currentPPStage})});
@@ -1159,11 +1161,6 @@ function renderAIContent(content,containerId){
   }
   if(content.personalised_tip) html+='<div class="persona-tip"><span class="persona-tip-icon">💡</span><div class="persona-tip-text" style="font-size:19px;line-height:1.85;"><strong>For you:</strong> '+content.personalised_tip+'</div></div>';
   if(content.clinical_note) html+='<div class="clinical-note"><div class="clinical-note-title">⚠ Clinical Note</div><div class="clinical-note-text" style="font-size:19px;line-height:1.85;">'+content.clinical_note+'</div></div>';
-  if(content.action_items&&content.action_items.length){
-    html+='<div class="action-items"><div class="action-items-title">Action Items</div>';
-    content.action_items.forEach(function(a){var clean=a.replace(/^→\s*/,'');html+='<div class="action-item" style="font-size:18px;line-height:1.8;"> '+clean+'</div>';});
-    html+='</div>';
-  }
   html+='<div class="ai-source">📚 Evidence-based · Built by a gynaecologist · Personalised to your profile</div></div>';
   document.getElementById(containerId).innerHTML=html;
 }
@@ -1992,7 +1989,7 @@ function buildRoadmapProfileModal(){pfBuildChips();pfLoad();document.getElementB
      <div style="display:flex;gap:4px;flex-wrap:wrap;">
         <button class="pf-tab active" onclick="pfSwitchTab('basic',this)">🌸 Basic</button>
         <button class="pf-tab" onclick="pfSwitchTab('menstrual',this)">📅 Menstrual</button>
-        <button class="pf-tab" onclick="pfSwitchTab('fertility',this)">🌱 Fertility &amp; Tests</button>
+        <button class="pf-tab" onclick="pfSwitchTab('fertility',this)">🌱 fertility</button>
         <button class="pf-tab" onclick="pfSwitchTab('pregnancy',this)">🤰 Pregnancy</button>
         <button class="pf-tab" onclick="pfSwitchTab('postpartum',this)">👶 Postpartum</button>
       </div>
