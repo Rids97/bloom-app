@@ -21,9 +21,15 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 .jtab{padding:14px 22px;font-size:16px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all 0.15s;display:flex;align-items:center;gap:6px;}
 .jtab:hover{color:var(--terra);}
 .jtab.active{color:var(--terra);border-bottom-color:var(--terra);font-weight:500;}
-.container{max-width:100%;padding:1.25rem 1.5rem;overflow-x:hidden;width:100%;}
-.grid{display:grid;grid-template-columns:65fr 35fr;gap:1rem;min-width:0;}
+.container{max-width:100%;padding:1.25rem 1.5rem;overflow-x:hidden;width:100%;box-sizing:border-box;}
+.grid{display:grid;grid-template-columns:65fr 35fr;gap:1rem;min-width:0;max-width:100%;}
 @media(max-width:900px){.grid{grid-template-columns:1fr;}}
+@media(max-width:700px){
+  .grid{grid-template-columns:1fr;width:100%;overflow-x:hidden;}
+  .ai-main,.key-point,.action-item,.persona-tip-text,.clinical-note-text{overflow-wrap:break-word;word-wrap:break-word;max-width:100%;}
+  .card,.stage-detector,.stage-card,.checkin-panel,.tip-card,.milestone-card,.checklist-card,.profile-summary-card{max-width:100%;overflow:hidden;box-sizing:border-box;}
+  .sidebar{display:none;}
+}
 
  @media(max-width:700px){
   .topbar{padding:0 1rem;}
