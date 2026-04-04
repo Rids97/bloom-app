@@ -97,13 +97,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 .sp-label.current{color:var(--terra);font-weight:500;}
 .sp-line{height:2px;width:28px;background:var(--border);flex-shrink:0;margin-bottom:22px;}
 .sp-line.done{background:var(--sage);}
-.stage-card{background:var(--terra-l);border:1px solid #E2C4B4;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem;}
-.stage-card-title{font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:600;color:var(--terra-d);margin-bottom:6px;}
-.stage-card-sub{font-size:17px;color:var(--terra-d);opacity:0.8;}
+.stage-card{background:var(--terra-l);border:1px solid #E2C4B4;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem;overflow:hidden;width:100%;box-sizing:border-box;}
+.stage-card-title{font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:600;color:var(--terra-d);margin-bottom:6px;word-break:break-word;overflow-wrap:break-word;}
+.stage-card-sub{font-size:17px;color:var(--terra-d);opacity:0.8;word-break:break-word;overflow-wrap:break-word;white-space:normal;}
 .week-header{margin-bottom:1rem;}
 .week-badge{display:inline-block;background:var(--sage-l);color:var(--sage-d);font-size:15px;font-weight:600;padding:3px 12px;border-radius:20px;letter-spacing:0.04em;margin-bottom:6px;}
 .week-title{font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:600;color:var(--text);}
-.week-sub{font-size:18px;color:var(--muted);margin-top:5px;}
+.week-sub{font-size:18px;color:var(--muted);margin-top:5px;word-break:break-word;overflow-wrap:break-word;white-space:normal;}
 .preg-progress-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1rem;}
 .preg-date-strip{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:0.9rem 1.25rem;margin-bottom:1rem;display:none;}
 .sec-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem;}
