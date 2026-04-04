@@ -1899,6 +1899,12 @@ function mobileSendSug(el){
   mobileSendChat();
 }
 
+async function mobileTellMeMore(btn, originalMsg){
+  btn.disabled=true;
+  btn.textContent='Loading…';
+  await mobileSendChat(true, originalMsg);
+}
+
 async function mobileSendChat(wantsDetail=false, originalMessage=null){
   const input = document.getElementById('mobileChatInput');
   const msg = originalMessage || input.value.trim();
@@ -1939,7 +1945,14 @@ async function mobileSendChat(wantsDetail=false, originalMessage=null){
     } else if(data.reply){
       const replyDiv = document.createElement('div');
       replyDiv.className = 'msg';
-      replyDiv.innerHTML = `<div class="msg-avatar bloom">B</div><div class="msg-content"><div class="msg-bubble" style="line-height:1.85;">${formatChatText(data.reply)}</div></div>`;
+      let replyHtml = `<div class="msg-avatar bloom">B</div><div class="msg-content"><div class="msg-bubble" style="line-height:1.85;">${formatChatText(data.reply)}</div>`;
+      if(!wantsDetail && data.followup){
+        const safeMsg = msg.replace(/'/g,"\\'");
+        const safeFollowup = data.followup.replace(/^Want to know more\?\s*→?\s*/i,'').trim();
+        replyHtml += `<button class="tell-more-btn" onclick="mobileTellMeMore(this,'${safeMsg}')">💡 ${safeFollowup||'Tell me more'}</button>`;
+      }
+      replyHtml += `</div>`;
+      replyDiv.innerHTML = replyHtml;
       mobileMsgs.appendChild(replyDiv);
       messageCount = data.messageCount || messageCount + 1;
       document.getElementById('mobileMsgLimit').textContent = document.getElementById('msgLimitLabel').textContent;
