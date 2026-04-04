@@ -1967,14 +1967,13 @@ async function pfSave(){
 
 function setPregToggle(val){
   window._isPregnant=val;
-  document.getElementById('pf-is-pregnant').checked=val;
-  document.getElementById('preg-yes-btn').style.background=val?'#7B9E87':'#FAF6F1';
-  document.getElementById('preg-yes-btn').style.color=val?'#fff':'#8C7468';
-  document.getElementById('preg-yes-btn').style.borderColor=val?'#7B9E87':'#E2C4B4';
-  document.getElementById('preg-no-btn').style.background=!val?'#C4704F':'#FAF6F1';
-  document.getElementById('preg-no-btn').style.color=!val?'#fff':'#8C7468';
-  document.getElementById('preg-no-btn').style.borderColor=!val?'#C4704F':'#E2C4B4';
-  pfUpdateCompletion();
+  var yb=document.getElementById('preg-yes-btn');
+  var nb=document.getElementById('preg-no-btn');
+  var cb=document.getElementById('pf-is-pregnant');
+  if(cb) cb.checked=val;
+  if(yb){yb.style.background=val?'#7B9E87':'#FAF6F1';yb.style.color=val?'#fff':'#8C7468';yb.style.borderColor=val?'#7B9E87':'#E2C4B4';}
+  if(nb){nb.style.background=!val?'#C4704F':'#FAF6F1';nb.style.color=!val?'#fff':'#8C7468';nb.style.borderColor=!val?'#C4704F':'#E2C4B4';}
+  if(typeof pfUpdateCompletion==='function') pfUpdateCompletion();
 }
 function calcPregLmpFromEdd(){
   var edd=document.getElementById('pf-preg-edd').value;if(!edd) return;
