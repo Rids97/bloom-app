@@ -2745,7 +2745,9 @@ function buildRoadmapProfileModal(){pfBuildChips();pfLoad();document.getElementB
   .stage-path{display:none !important;}
   .mobile-progress-wrap{display:block !important;}
 }
-.mobile-tab-bar{display:none;position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(250,246,241,0.97);backdrop-filter:blur(12px);border-top:1px solid var(--border);justify-content:space-around;padding:6px 0 calc(6px + env(safe-area-inset-bottom));}
+.mobile-tab-bar{display:none;position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(250,246,241,0.97);backdrop-filter:blur(12px);border-top:1px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:6px 0 calc(6px + env(safe-area-inset-bottom));}
+.mobile-tab-bar::-webkit-scrollbar{display:none;}
+.mtab{flex-shrink:0;min-width:60px;}
 .mtab{display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 8px;cursor:pointer;flex:1;border:none;background:none;}
 .mtab-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;}
 .mtab-txt{font-size:10px;color:var(--muted);font-family:'DM Sans',sans-serif;}
@@ -2782,6 +2784,8 @@ var ttcTabs=[
   {icon:'🌿',label:'Lifestyle',section:'lifestyle'},
   {icon:'💊',label:'Supps',section:'supplements'},
   {icon:'🧪',label:'Results',section:'hormones'},
+  {icon:'🔬',label:'Invest.',section:'pretreatment'},
+  {icon:'💉',label:'Immun.',section:'immunization'},
   {icon:'✅',label:'Care',section:'action_plan'},
 ];
 var pregTabs=[
@@ -2789,6 +2793,7 @@ var pregTabs=[
   {icon:'🌿',label:'Lifestyle',section:'lifestyle'},
   {icon:'💊',label:'Supps',section:'supplements'},
   {icon:'🔬',label:'Tests',section:'pretreatment'},
+  {icon:'💉',label:'Immun.',section:'immunization'},
   {icon:'✅',label:'Care',section:'action_plan'},
 ];
 var ppTabs=[
@@ -2796,6 +2801,8 @@ var ppTabs=[
   {icon:'🤱',label:'Feeding',section:'breastfeeding'},
   {icon:'🌿',label:'Recovery',section:'recovery'},
   {icon:'👶',label:'Baby',section:'baby_care'},
+  {icon:'💊',label:'Nutrition',section:'supplements'},
+  {icon:'💉',label:'Immun.',section:'immunization'},
   {icon:'✅',label:'Care',section:'action_plan'},
 ];
 
