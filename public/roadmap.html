@@ -262,8 +262,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
     <div class="grid">
       <div>
         <div class="stage-detector fade-up">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-            <div class="stage-detector-title" style="margin-bottom:0;">Your Clinical Pathway</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px;flex-wrap:wrap;overflow:hidden;">
+            <div class="stage-detector-title" style="margin-bottom:0;font-size:13px;">Your Clinical Pathway</div>
            <button onclick="openRoadmapProfile()" style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;padding:10px 14px;border-radius:10px;border:none;background:#6b4f42;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background 0.15s;max-width:100%;box-sizing:border-box;" onmouseover="this.style.background='#4e3328'" onmouseout="this.style.background='#6b4f42'">
               <span style="font-size:18px;flex-shrink:0;">✏️</span>
               <div style="text-align:left;min-width:0;">
@@ -281,9 +281,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
             <div id="ttc-trying-duration" style="font-size:20px;color:var(--terra-d);font-weight:600;"></div>
           </div>
         </div>
-        <div class="stage-card fade-up">
-          <div class="stage-card-title" id="stage-title">Your Journey</div>
-          <div class="stage-card-sub" id="stage-sub"></div>
+        <div class="stage-card fade-up" style="overflow:hidden;width:100%;box-sizing:border-box;">
+          <div class="stage-card-title" id="stage-title" style="font-size:20px;word-break:break-word;"></div>
+          <div class="stage-card-sub" id="stage-sub" style="font-size:14px;word-break:break-word;overflow-wrap:break-word;white-space:normal;"></div>
         </div>
         
          <div class="checkin-panel" id="ttc-checkin-panel">
