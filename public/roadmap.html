@@ -575,9 +575,13 @@ async function init(){
     userProfile=userData.profile||{};
     updateAllAPDots();
     const mainCont=document.getElementById('main-container');
-    if(userData.plan!=='complete'){
+    const trialDays = 3;
+    const createdAt = userData.createdAt || new Date().toISOString();
+    const accountAge = (Date.now() - new Date(createdAt).getTime()) / (1000 * 60 * 60 * 24);
+    const inTrial = userData.plan === 'free' && accountAge <= trialDays;
+    if(userData.plan !== 'complete' && !inTrial){
       mainCont.style.display='block';
-      mainCont.innerHTML='<div style="text-align:center;padding:5rem 2rem;"><div style="font-size:52px;margin-bottom:1rem;">🗺️</div><div style="font-family:Cormorant Garamond,serif;font-size:32px;font-weight:600;color:#3d2318;margin-bottom:12px;">My Roadmap</div><p style="color:#9b7b6a;font-size:16px;margin-bottom:8px;line-height:1.7;">Your personalised week-by-week journey is part of <strong>Bloom Complete</strong>.</p><a href="/app" style="display:inline-block;padding:14px 32px;background:#b87355;color:#fff;text-decoration:none;border-radius:50px;font-size:15px;font-weight:500;">Upgrade on Dashboard</a></div>';
+      mainCont.innerHTML='<div style="text-align:center;padding:5rem 2rem;"><div style="font-size:52px;margin-bottom:1rem;">🗺️</div><div style="font-family:Cormorant Garamond,serif;font-size:32px;font-weight:600;color:#3d2318;margin-bottom:12px;">My Roadmap</div><p style="color:#9b7b6a;font-size:16px;margin-bottom:8px;line-height:1.7;">Your 3-day free trial has ended. Roadmap is part of <strong>Bloom Complete</strong>.</p><a href="/app" style="display:inline-block;padding:14px 32px;background:#b87355;color:#fff;text-decoration:none;border-radius:50px;font-size:15px;font-weight:500;">Upgrade on Dashboard</a></div>';
       return;
     }
     mainCont.style.display='block';
