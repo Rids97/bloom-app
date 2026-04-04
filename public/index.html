@@ -1310,9 +1310,8 @@ function renderWelcome(){
 function updateMsgLimit(){
   const el=document.getElementById('msgLimitLabel');
   if(userPlan!=='free'){el.textContent='Unlimited';el.className='msg-limit';return;}
-  const left=Math.max(FREE_LIMIT-messageCount,0);
-  el.textContent=left+' messages left';
-  el.className='msg-limit'+(left<=1?' warning':'');
+  el.textContent='3-day free trial';
+  el.className='msg-limit';
 }
 
 function openPaywall(){document.getElementById('paywallOverlay').classList.add('open');}
