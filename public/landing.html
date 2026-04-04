@@ -154,8 +154,11 @@
   .trust-bar { flex-direction: column; align-items: flex-start; gap: 16px; padding: 18px; }
   footer { padding: 20px 18px; }
   #pricing { padding: 50px 18px !important; }
-  #pricing > div > div[style*="grid-template-columns:repeat(3"] {
-    display: flex !important; flex-direction: column;
+ #pricing > div > div[style*="grid-template-columns:repeat(3"] {
+    display: flex !important; flex-direction: column; gap: 16px !important;
+  }
+  #pricing > div > div[style*="grid-template-columns:repeat(3"] > div {
+    transform: none !important; width: 100% !important;
   }
 }
   </style>
