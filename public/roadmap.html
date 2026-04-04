@@ -585,7 +585,8 @@ async function init(){
     ['ttc','pregnancy','postpartum'].forEach(j=>buildAndSaveActionPlan(userProfile,[],j));
     const urlTab=new URLSearchParams(window.location.search).get('tab');
     if(urlTab==='pregnancy'||userProfile.isPregnant){
-      switchJourney('pregnancy',document.querySelectorAll('.jtab')[1]);
+      const pregTab=[...document.querySelectorAll('.jtab')].find(t=>t.textContent.includes('Pregnancy'));
+      switchJourney('pregnancy',pregTab||document.querySelectorAll('.jtab')[1]);
     } else {
       switchJourney('ttc',document.querySelector('.jtab'));
     }
