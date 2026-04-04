@@ -1355,7 +1355,7 @@ async function sendChat(wantsDetail=false,originalMessage=null){
     const res=await fetch('/chat',{method:'POST',headers:{'Content-Type':'application/json',Authorization:TOKEN},body:JSON.stringify({message:msg,wantsDetail})});
     const data=await res.json();
     typing.remove();
-    if(data.limitReached){appendMsg("You've reached your free message limit. Upgrade to Bloom Pro to continue 🌸",'bloom');openPaywall();}
+    if(data.limitReached){appendMsg("You've reached your free message limit. Upgrade to Bloom Pro or Bloom Complete to continue 🌸",'bloom');openPaywall();}
     else if(data.reply){appendBloomMsg(data.reply,data.followup,data.isDetailed,msg);messageCount=data.messageCount||messageCount+1;updateMsgLimit();}
   }catch(e){typing.remove();appendMsg('Sorry, something went wrong. Please try again 🌸','bloom');}
   document.getElementById('sendBtn').disabled=false;
