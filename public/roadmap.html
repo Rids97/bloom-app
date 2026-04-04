@@ -1163,8 +1163,9 @@ function formatContent(text){
   return text.split('\n').map(function(line){
     line=line.trim();
     if(!line) return '<div style="height:14px;"></div>';
-    if(line.startsWith('→')){const txt=line.replace(/^→\s*/,'');return '<div style="display:flex;gap:8px;padding:8px 10px;border-left:3px solid var(--terra-l);margin:6px 0;background:rgba(196,112,79,0.04);border-radius:0 8px 8px 0;width:100%;box-sizing:border-box;overflow:hidden;"><span style="color:var(--terra);font-weight:700;flex-shrink:0;font-size:16px;margin-top:1px;">→</span><span style="line-height:1.75;font-size:15px;word-break:break-word;overflow-wrap:break-word;min-width:0;">'+txt+'</span></div>';}
+   if(line.startsWith('→')){const txt=line.replace(/^→\s*/,'');return '<div style="display:flex;gap:8px;padding:8px 10px;border-left:3px solid var(--terra-l);margin:6px 0;background:rgba(196,112,79,0.04);border-radius:0 8px 8px 0;width:100%;box-sizing:border-box;overflow:hidden;"><span style="color:var(--terra);font-weight:700;flex-shrink:0;font-size:16px;margin-top:1px;">→</span><span style="line-height:1.75;font-size:15px;word-break:break-word;overflow-wrap:break-word;min-width:0;">'+txt+'</span></div>';}
     if(line.startsWith('•')||line.startsWith('* ')||line.startsWith('- ')){const txt=line.replace(/^[•\*\-]\s*/,'');return '<div style="display:flex;gap:8px;padding:8px 10px;border-left:3px solid var(--terra-l);margin:6px 0;background:rgba(196,112,79,0.04);border-radius:0 8px 8px 0;width:100%;box-sizing:border-box;overflow:hidden;"><span style="color:var(--terra);font-weight:700;flex-shrink:0;font-size:16px;margin-top:1px;">→</span><span style="line-height:1.75;font-size:15px;word-break:break-word;overflow-wrap:break-word;min-width:0;">'+txt+'</span></div>';}
+    return '<div style="padding:4px 0;line-height:1.75;font-size:15px;word-break:break-word;overflow-wrap:break-word;width:100%;">'+line+'</div>';
   }).join('');
 }
 
