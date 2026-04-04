@@ -2013,9 +2013,9 @@ function buildRoadmapProfileModal(){pfBuildChips();pfLoad();document.getElementB
             <div style="font-size:16px;font-weight:600;color:#9E5238;">Currently Pregnant?</div>
             <div style="font-size:13px;color:#8C7468;margin-top:2px;">Turns off cycle tracking, switches roadmap to pregnancy mode</div>
           </div>
-          <label style="position:relative;display:inline-block;width:48px;height:26px;flex-shrink:0;">
+          <label style="position:relative;display:block;width:48px;height:26px;flex-shrink:0;cursor:pointer;">
             <input type="checkbox" id="pf-is-pregnant" style="opacity:0;width:0;height:0;" onchange="pfUpdateCompletion()"/>
-            <span onclick="this.previousElementSibling.click()" style="position:absolute;cursor:pointer;inset:0;background:#E8DDD5;border-radius:13px;transition:0.3s;" id="pf-pregnant-slider"></span>
+            <span onclick="this.previousElementSibling.click()" style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#E8DDD5;border-radius:13px;transition:background 0.3s;" onclick="var cb=document.getElementById('pf-is-pregnant');cb.checked=!cb.checked;this.style.background=cb.checked?'#7B9E87':'#E8DDD5';cb.dispatchEvent(new Event('change'));"></span>
           </label>
         </div>
         <div style="margin-bottom:10px;"><label class="pf-label">My journey</label>
