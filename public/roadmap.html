@@ -1842,6 +1842,22 @@ function collapseCheckinsOnMobile(){
   }
 }
 
+// MOBILE OVERFLOW NUCLEAR FIX
+if(window.innerWidth <= 700){
+  document.documentElement.style.overflowX='hidden';
+  document.body.style.overflowX='hidden';
+  document.body.style.width='100vw';
+  document.body.style.maxWidth='100vw';
+  var style=document.createElement('style');
+  style.textContent='*{max-width:100% !important;box-sizing:border-box !important;}'+
+  'body,html{overflow-x:hidden !important;width:100vw !important;}'+
+  '.ai-main,.key-point,.persona-tip-text,.clinical-note-text,.stage-card-sub,.week-sub,.tip-text,.ai-source{font-size:15px !important;line-height:1.75 !important;word-break:break-word !important;white-space:normal !important;}'+
+  '.stage-card-title{font-size:20px !important;}'+
+  '.sidebar{display:none !important;}'+
+  '#ttc-ai-content,#preg-ai-content,#pp-ai-content{overflow:hidden !important;}';
+  document.head.appendChild(style);
+}
+
 init();
 
 // PROFILE MODAL FUNCTIONS
