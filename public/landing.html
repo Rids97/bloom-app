@@ -153,31 +153,15 @@
   .steps { grid-template-columns: 1fr; }
   .trust-bar { flex-direction: column; align-items: flex-start; gap: 16px; padding: 18px; }
   footer { padding: 20px 18px; }
-#pricing { padding: 50px 12px !important; }
-  #pricing > div > div[style*="grid-template-columns:repeat(3"] {
+#pricing { padding: 30px 8px !important; }
+  #pricing-grid {
     grid-template-columns: repeat(3, 1fr) !important;
-    gap: 8px !important;
-    display: grid !important;
-    overflow-x: unset !important;
-  }
-  #pricing > div > div[style*="grid-template-columns:repeat(3"] > div {
-    transform: none !important;
-    padding: 20px 12px !important;
-    border-radius: 16px !important;
-  }
-  #pricing > div > div[style*="grid-template-columns:repeat(3"] > div div[style*="font-size:52px"] {
-    font-size: 32px !important;
-  }
-  #pricing > div > div[style*="grid-template-columns:repeat(3"] > div div[style*="font-size:26px"] {
-    font-size: 18px !important;
-  }
-  #pricing > div > div[style*="grid-template-columns:repeat(3"] > div ul {
-    font-size: 11px !important;
     gap: 6px !important;
   }
-  #pricing > div > div[style*="grid-template-columns:repeat(3"] > div a {
-    font-size: 10px !important;
-    padding: 10px 6px !important;
+  #pricing-grid > div {
+    transform: none !important;
+    padding: 16px 8px !important;
+    border-radius: 14px !important;
   }
 }
   </style>
@@ -381,7 +365,7 @@
     <span style="font-size:13px;color:var(--muted);">Annual <span style="color:var(--sage);font-weight:500;">Save 25%</span></span>
   </div>
 
-  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:start;">
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:start;" id="pricing-grid">
     <!-- FREE -->
     <div style="border-radius:24px;padding:38px 32px;border:1px solid rgba(200,149,122,0.18);background:#fff;">
       <div style="font-family:'Playfair Display',serif;font-size:26px;color:var(--deep);margin-bottom:6px;">Free Trial</div>
