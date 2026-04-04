@@ -300,8 +300,12 @@ const Order = mongoose.models.Order || mongoose.model("Order", OrderSchema);
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 const razorpay = new Razorpay({ key_id: process.env.RAZORPAY_KEY_ID || "dummy", key_secret: process.env.RAZORPAY_KEY_SECRET || "dummy" });
-const PLANS = { pro: { amount: 14900, label: "Bloom Pro", monthly: 149 }, complete: { amount: 44900, label: "Bloom Complete", monthly: 449 } };
-
+const PLANS = {
+  pro_monthly:  { amount: 10000, label: "Bloom Pro", planId: "plan_SZJjRcuuxv2eLA", interval: "monthly" },
+  pro_annual:   { amount: 100000, label: "Bloom Pro Annual", planId: "plan_SZJlEEAYfheySC", interval: "yearly" },
+  complete_monthly: { amount: 30000, label: "Bloom Complete", planId: "plan_SZJlvVDyrb0Tfu", interval: "monthly" },
+  complete_annual:  { amount: 270000, label: "Bloom Complete Annual", planId: "plan_SZJmn5lVvfBLnR", interval: "yearly" },
+};
 function auth(req, res, next) {
   const token = req.headers.authorization?.replace('Bearer ', '');
   if (!token) return res.status(401).json({ error: "No token" });
@@ -572,20 +576,27 @@ app.post("/create-order", auth, async (req, res) => {
     await connectDB();
     const { plan } = req.body;
     if (!PLANS[plan]) return res.status(400).json({ error: "Invalid plan" });
-    const razorpayOrder = await razorpay.orders.create({ amount: PLANS[plan].amount, currency: "INR", notes: { userId: req.user.id.toString(), plan } });
-    await Order.create({ razorpayOrderId: razorpayOrder.id, userId: req.user.id, plan, amount: PLANS[plan].amount });
-    res.json({ orderId: razorpayOrder.id, amount: razorpayOrder.amount, currency: razorpayOrder.currency, plan, planLabel: PLANS[plan].label });
-  } catch (err) { res.status(500).json({ error: "Could not create order" }); }
+    const subscription = await razorpay.subscriptions.create({
+      plan_id: PLANS[plan].planId,
+      customer_notify: 1,
+      quantity: 1,
+      total_count: PLANS[plan].interval === "yearly" ? 1 : 12,
+      notes: { userId: req.user.id.toString(), plan },
+    });
+    await Order.create({ razorpayOrderId: subscription.id, userId: req.user.id, plan, amount: PLANS[plan].amount });
+    res.json({ subscriptionId: subscription.id, plan, planLabel: PLANS[plan].label, amount: PLANS[plan].amount });
+  } catch (err) { res.status(500).json({ error: "Could not create subscription: " + err.message }); }
 });
 
 app.post("/verify-payment", auth, async (req, res) => {
   try {
     await connectDB();
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, plan } = req.body;
-    const expectedSig = crypto.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET).update(razorpay_order_id + "|" + razorpay_payment_id).digest("hex");
+    const { razorpay_subscription_id, razorpay_payment_id, razorpay_signature, plan } = req.body;
+    const expectedSig = crypto.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET).update(razorpay_payment_id + "|" + razorpay_subscription_id).digest("hex");
     if (expectedSig !== razorpay_signature) return res.status(400).json({ error: "Payment verification failed." });
-    await Order.findOneAndUpdate({ razorpayOrderId: razorpay_order_id }, { status: "paid" });
-    const updatedUser = await User.findByIdAndUpdate(req.user.id, { plan, isPremium: true }, { new: true });
+    await Order.findOneAndUpdate({ razorpayOrderId: razorpay_subscription_id }, { status: "paid" });
+    const planKey = plan.includes("complete") ? "complete" : "pro";
+    const updatedUser = await User.findByIdAndUpdate(req.user.id, { plan: planKey, isPremium: true }, { new: true });
     const newToken = jwt.sign({ id: updatedUser._id, plan: updatedUser.plan }, process.env.JWT_SECRET || "BLOOM_SECRET", { expiresIn: "30d" });
     res.json({ success: true, plan: updatedUser.plan, token: newToken });
   } catch (err) { res.status(500).json({ error: "Payment verification failed: " + err.message }); }
