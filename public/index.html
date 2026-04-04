@@ -402,6 +402,17 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
           <div><label class="pf-label">Your name</label><input type="text" id="pf-name" placeholder="e.g. Priya" class="pf-input"/></div>
           <div><label class="pf-label">Age</label><input type="number" id="pf-age" placeholder="28" min="16" max="60" class="pf-input"/></div>
         </div>
+        <div style="margin-bottom:14px;display:flex;align-items:center;gap:14px;background:#F2E4DA;border-radius:10px;padding:12px 16px;border:1px solid #E2C4B4;">
+          <span style="font-size:22px;">🤰</span>
+          <div style="flex:1;">
+            <div style="font-size:16px;font-weight:600;color:#9E5238;">Currently Pregnant?</div>
+            <div style="font-size:13px;color:#8C7468;margin-top:2px;">Hides cycle tracker, shows pregnancy week on dashboard</div>
+          </div>
+          <label style="position:relative;display:inline-block;width:48px;height:26px;flex-shrink:0;">
+            <input type="checkbox" id="pf-is-pregnant" style="opacity:0;width:0;height:0;" onchange="pfUpdateCompletion();document.getElementById('pf-pregnant-slider').style.background=this.checked?'#7B9E87':'#E8DDD5';"/>
+            <span id="pf-pregnant-slider" style="position:absolute;cursor:pointer;inset:0;background:#E8DDD5;border-radius:13px;transition:0.3s;" onclick="this.previousElementSibling.click()"></span>
+          </label>
+        </div>
         <div style="margin-bottom:10px;"><label class="pf-label">My journey</label>
           <select id="pf-journey" class="pf-input">
             <option value="">Select your journey…</option>
@@ -1146,6 +1157,34 @@ function renderProfile(){
   if(upgradeBtn) upgradeBtn.style.display=userPlan==='complete'?'none':'inline-block';
   if(p.cycleLength) document.getElementById('ccCycleLen').value=p.cycleLength;
   if(p.periodLength) document.getElementById('ccPeriodLen').value=p.periodLength;
+  if(p.isPregnant){
+    document.querySelector('.cycle-hero').style.display='none';
+    document.querySelector('.stat-row').style.display='none';
+    const lmp=p.pregLmp||localStorage.getItem('bloom_preg_lmp');
+    let weekHtml='<div style="background:var(--card);border:1px solid #B8D4BF;border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1rem;background:var(--sage-l);">';
+    weekHtml+='<div style="font-size:14px;font-weight:600;color:var(--sage-d);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">🤰 Your Pregnancy</div>';
+    if(lmp){
+      const lmpDate=new Date(lmp);lmpDate.setHours(0,0,0,0);
+      const today=new Date();today.setHours(0,0,0,0);
+      const days=Math.floor((today-lmpDate)/86400000);
+      const weeks=Math.floor(days/7);const daysRem=days%7;
+      const due=new Date(lmpDate);due.setDate(due.getDate()+280);
+      weekHtml+='<div style="font-family:Cormorant Garamond,serif;font-size:56px;font-weight:600;color:var(--sage-d);line-height:1;">'+weeks+'<span style="font-size:18px;color:var(--muted);font-weight:400;"> weeks '+daysRem+' days</span></div>';
+      weekHtml+='<div style="font-size:15px;color:var(--muted);margin-top:6px;">Due date: <strong>'+due.toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})+'</strong></div>';
+    } else {
+      weekHtml+='<div style="font-size:15px;color:var(--muted);">Enter your LMP in profile to see your week.</div>';
+    }
+    weekHtml+='<div style="margin-top:12px;"><a href="/roadmap" style="font-size:14px;padding:8px 18px;background:var(--sage);color:#fff;border-radius:8px;text-decoration:none;display:inline-block;">Open Pregnancy Roadmap →</a></div>';
+    weekHtml+='</div>';
+    const greeting=document.querySelector('.greeting');
+    const existing=document.getElementById('preg-week-card');
+    if(!existing){const div=document.createElement('div');div.id='preg-week-card';div.innerHTML=weekHtml;greeting.insertAdjacentElement('afterend',div);}
+    else existing.innerHTML=weekHtml;
+  } else {
+    document.querySelector('.cycle-hero').style.display='';
+    document.querySelector('.stat-row').style.display='';
+    const existing=document.getElementById('preg-week-card');if(existing) existing.remove();
+  }
   const profileLmp=p.lmp;
   const savedLmp=localStorage.getItem('bloom_last_period');
   const lmpToUse=profileLmp||savedLmp;
@@ -1455,8 +1494,10 @@ function setChipVals(containerId,vals){
 
 function pfLoad(){
   const p=userData.profile||{};
-  const set=(id,val)=>{const el=document.getElementById(id);if(el&&val!==undefined&&val!==null) el.value=val;};
+ const set=(id,val)=>{const el=document.getElementById(id);if(el&&val!==undefined&&val!==null) el.value=val;};
   set('pf-name',p.name);set('pf-age',p.age);set('pf-journey',p.journeyStage);
+  var pregToggle=document.getElementById('pf-is-pregnant');
+  if(pregToggle){pregToggle.checked=!!p.isPregnant;var sl=document.getElementById('pf-pregnant-slider');if(sl)sl.style.background=p.isPregnant?'#7B9E87':'#E8DDD5';}
   set('pf-cycle',p.cycleLength);set('pf-period',p.periodLength);set('pf-notes',p.notes);
   setChipVals('pf-sym-grid',p.symptoms);setChipVals('pf-med-grid',p.medications);
   set('pf-lmp',p.lmp);set('pf-cycle-regularity',p.cycleRegularity);set('pf-menarche',p.menarche);
@@ -1533,6 +1574,7 @@ async function pfSave(){
   const gi=(id)=>{const v=parseInt(g(id));return isNaN(v)?null:v;};
   const profile={
     name:g('pf-name'),age:gi('pf-age'),journeyStage:g('pf-journey'),
+    isPregnant:document.getElementById('pf-is-pregnant')?document.getElementById('pf-is-pregnant').checked:false,
     cycleLength:gi('pf-cycle'),periodLength:gi('pf-period'),notes:g('pf-notes'),
     symptoms:getChipVals('pf-sym-grid'),medications:getChipVals('pf-med-grid'),
     lmp:g('pf-lmp'),cycleRegularity:g('pf-cycle-regularity'),menarche:gi('pf-menarche'),
