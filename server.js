@@ -182,6 +182,7 @@ connectDB();
 // -- USER SCHEMA --
 const UserSchema = new mongoose.Schema({
   email:               { type: String, required: true, unique: true },
+  createdAt:           { type: Date, default: Date.now },
   password:            { type: String, required: true },
   isVerified:          { type: Boolean, default: false },
   resetToken:          String,
@@ -457,8 +458,10 @@ app.post("/chat", auth, async (req, res) => {
     await connectDB();
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ error: "User not found" });
-    if (user.plan === "free" && user.messageCount >= 3) {
-      return res.json({ reply: null, limitReached: true, message: "You've used your 3 free messages. Upgrade to Bloom Pro for unlimited conversations." });
+    const trialDays = 3;
+    const accountAge = (Date.now() - new Date(user.createdAt).getTime()) / (1000 * 60 * 60 * 24);
+    if (user.plan === "free" && accountAge > trialDays) {
+      return res.json({ reply: null, limitReached: true, message: "Your 3-day free trial has ended. Upgrade to Bloom Pro to continue chatting 🌸" });
     }
     user.messageCount++;
     await user.save();
@@ -550,7 +553,9 @@ app.post("/analyze-report", auth, async (req, res) => {
     await connectDB();
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ error: "User not found" });
-    if (user.plan === "free") return res.status(403).json({ error: "upgrade_required", message: "Report analysis requires Bloom Pro or Complete." });
+    const reportTrialDays = 3;
+    const reportAccountAge = (Date.now() - new Date(user.createdAt).getTime()) / (1000 * 60 * 60 * 24);
+    if (user.plan === "free" && reportAccountAge > reportTrialDays) return res.status(403).json({ error: "upgrade_required", message: "Your 3-day free trial has ended. Upgrade to Bloom Pro to analyze reports 🌸" });
     if (user.plan === "pro" && user.reportAnalysisCount >= 3) return res.status(403).json({ error: "limit_reached", message: "Upgrade to Bloom Complete for unlimited reports." });
     if (user.plan === "pro") await User.findByIdAndUpdate(req.user.id, { $inc: { reportAnalysisCount: 1 } });
     const { imageBase64, reportType } = req.body;
@@ -709,7 +714,9 @@ app.post("/roadmap-content", auth, async (req, res) => {
     await connectDB();
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ error: "User not found" });
-    if (user.plan !== "complete") return res.status(403).json({ error: "upgrade_required" });
+    const roadmapTrialDays = 3;
+    const roadmapAccountAge = (Date.now() - new Date(user.createdAt).getTime()) / (1000 * 60 * 60 * 24);
+    if (user.plan !== "complete" && !(user.plan === "free" && roadmapAccountAge <= roadmapTrialDays)) return res.status(403).json({ error: "upgrade_required" });
 
     const { journey, month, week, section, checkin, ppStage } = req.body;
     const profile = user.profile || {};
