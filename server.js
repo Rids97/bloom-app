@@ -362,8 +362,8 @@ app.post("/verify-otp", async (req, res) => {
     delete otpStore[email];
     const existing = await User.findOne({ email });
     if (existing) return res.status(409).json({ error: "Email already registered" });
-    const hash = await bcrypt.hash(password, 10);
-    const user = await User.create({ email, password: hash, isVerified: true });
+   const hash = await bcrypt.hash(password, 10);
+    const user = await User.create({ email, password: hash, isVerified: false, createdAt: new Date() });
     res.json({ message: "Account created", userId: user._id });
   } catch (err) {
     res.status(500).json({ error: "Signup failed: " + err.message });
