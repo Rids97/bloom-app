@@ -402,16 +402,16 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
           <div><label class="pf-label">Your name</label><input type="text" id="pf-name" placeholder="e.g. Priya" class="pf-input"/></div>
           <div><label class="pf-label">Age</label><input type="number" id="pf-age" placeholder="28" min="16" max="60" class="pf-input"/></div>
         </div>
-        <div style="margin-bottom:14px;display:flex;align-items:center;gap:14px;background:#F2E4DA;border-radius:10px;padding:12px 16px;border:1px solid #E2C4B4;">
-          <span style="font-size:22px;">🤰</span>
-          <div style="flex:1;">
+        <div style="margin-bottom:14px;background:#F2E4DA;border-radius:10px;padding:12px 16px;border:1px solid #E2C4B4;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <span style="font-size:22px;">🤰</span>
             <div style="font-size:16px;font-weight:600;color:#9E5238;">Currently Pregnant?</div>
-            <div style="font-size:13px;color:#8C7468;margin-top:2px;">Hides cycle tracker, shows pregnancy week on dashboard</div>
           </div>
-          <label style="position:relative;display:block;width:48px;height:26px;flex-shrink:0;cursor:pointer;">
-            <input type="checkbox" id="pf-is-pregnant" style="opacity:0;width:0;height:0;" onchange="pfUpdateCompletion();document.getElementById('pf-pregnant-slider').style.background=this.checked?'#7B9E87':'#E8DDD5';"/>
-            <span id="pf-pregnant-slider" style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#E8DDD5;border-radius:13px;transition:background 0.3s;" onclick="var cb=document.getElementById('pf-is-pregnant');cb.checked=!cb.checked;this.style.background=cb.checked?'#7B9E87':'#E8DDD5';cb.dispatchEvent(new Event('change'));"></span>
-          </label>
+          <div style="display:flex;gap:8px;">
+            <button type="button" id="preg-yes-btn" onclick="setPregToggle(true)" style="flex:1;padding:10px;border-radius:8px;border:2px solid #E2C4B4;background:#FAF6F1;font-size:15px;font-family:'DM Sans',sans-serif;cursor:pointer;font-weight:500;color:#8C7468;transition:all 0.15s;">Yes 🤰</button>
+            <button type="button" id="preg-no-btn" onclick="setPregToggle(false)" style="flex:1;padding:10px;border-radius:8px;border:2px solid #E2C4B4;background:#FAF6F1;font-size:15px;font-family:'DM Sans',sans-serif;cursor:pointer;font-weight:500;color:#8C7468;transition:all 0.15s;">No</button>
+          </div>
+          <input type="checkbox" id="pf-is-pregnant" style="display:none;"/>
         </div>
         <div style="margin-bottom:10px;"><label class="pf-label">My journey</label>
           <select id="pf-journey" class="pf-input">
@@ -1496,8 +1496,7 @@ function pfLoad(){
   const p=userData.profile||{};
  const set=(id,val)=>{const el=document.getElementById(id);if(el&&val!==undefined&&val!==null) el.value=val;};
   set('pf-name',p.name);set('pf-age',p.age);set('pf-journey',p.journeyStage);
-  var pregToggle=document.getElementById('pf-is-pregnant');
-  if(pregToggle){pregToggle.checked=!!p.isPregnant;var sl=document.getElementById('pf-pregnant-slider');if(sl)sl.style.background=p.isPregnant?'#7B9E87':'#E8DDD5';}
+  if(typeof setPregToggle==='function') setPregToggle(!!p.isPregnant);
   set('pf-cycle',p.cycleLength);set('pf-period',p.periodLength);set('pf-notes',p.notes);
   setChipVals('pf-sym-grid',p.symptoms);setChipVals('pf-med-grid',p.medications);
   set('pf-lmp',p.lmp);set('pf-cycle-regularity',p.cycleRegularity);set('pf-menarche',p.menarche);
@@ -1768,6 +1767,16 @@ function buildDashboardActionPlan(profile){
   });
 }
 
+function setPregToggle(val){
+  document.getElementById('pf-is-pregnant').checked=val;
+  document.getElementById('preg-yes-btn').style.background=val?'#7B9E87':'#FAF6F1';
+  document.getElementById('preg-yes-btn').style.color=val?'#fff':'#8C7468';
+  document.getElementById('preg-yes-btn').style.borderColor=val?'#7B9E87':'#E2C4B4';
+  document.getElementById('preg-no-btn').style.background=!val?'#C4704F':'#FAF6F1';
+  document.getElementById('preg-no-btn').style.color=!val?'#fff':'#8C7468';
+  document.getElementById('preg-no-btn').style.borderColor=!val?'#C4704F':'#E2C4B4';
+  pfUpdateCompletion();
+}
 init();
 
 function openProfileModal(){
