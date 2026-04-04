@@ -460,12 +460,12 @@ app.post("/chat", auth, async (req, res) => {
     if (!user) return res.status(404).json({ error: "User not found" });
     const trialDays = 3;
     const accountAge = (Date.now() - new Date(user.createdAt).getTime()) / (1000 * 60 * 60 * 24);
-    if (user.plan === "free" && accountAge > trialDays) {
+    const inTrial = user.plan === "free" && accountAge <= trialDays;
+    if (user.plan === "free" && !inTrial) {
       return res.json({ reply: null, limitReached: true, message: "Your 3-day free trial has ended. Upgrade to Bloom Pro to continue chatting 🌸" });
     }
     user.messageCount++;
     await user.save();
-
     const profile = user.profile || {};
     const userMessage = req.body.message || '';
     const wantsDetail = req.body.wantsDetail || false;
