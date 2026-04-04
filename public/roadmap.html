@@ -9,7 +9,7 @@
 <style>
 :root{--terra:#C4704F;--terra-l:#F2E4DA;--terra-d:#9E5238;--sage:#7B9E87;--sage-l:#E1EDE5;--sage-d:#4F7A5E;--cream:#FAF6F1;--blush:#F5E6DC;--gold:#C9A96E;--gold-l:#F7EDD8;--text:#2C2420;--muted:#8C7468;--border:#E8DDD5;--border-l:#F0E8E2;--card:#FFFFFF;--radius:14px;}
 *{box-sizing:border-box;margin:0;padding:0;max-width:100%;}
-body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);overflow-x:hidden;width:100%;font-size:18px;}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);overflow-x:hidden;width:100vw;max-width:100vw;font-size:18px;}
 .topbar{position:sticky;top:0;z-index:100;background:rgba(250,246,241,0.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 1.5rem;height:54px;display:flex;align-items:center;justify-content:space-between;width:100%;box-sizing:border-box;}
 .topbar-logo{font-family:'Playfair Display',serif;font-size:36px;font-style:italic;font-weight:500;color:#3d2318;letter-spacing:-0.02em;display:flex;align-items:center;gap:8px;line-height:1;}
 .topbar-right{display:flex;gap:10px;align-items:center;}
@@ -21,14 +21,19 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 .jtab{padding:14px 22px;font-size:16px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all 0.15s;display:flex;align-items:center;gap:6px;}
 .jtab:hover{color:var(--terra);}
 .jtab.active{color:var(--terra);border-bottom-color:var(--terra);font-weight:500;}
-.container{max-width:100%;padding:1.25rem 1.5rem;overflow-x:hidden;width:100%;box-sizing:border-box;}
+.container{max-width:100vw;padding:1.25rem 1rem;overflow-x:hidden;width:100%;box-sizing:border-box;}
 .grid{display:grid;grid-template-columns:65fr 35fr;gap:1rem;min-width:0;max-width:100%;}
 @media(max-width:900px){.grid{grid-template-columns:1fr;}}
 @media(max-width:700px){
-  .grid{grid-template-columns:1fr;width:100%;overflow-x:hidden;}
-  .ai-main,.key-point,.action-item,.persona-tip-text,.clinical-note-text{overflow-wrap:break-word;word-wrap:break-word;max-width:100%;}
-  .card,.stage-detector,.stage-card,.checkin-panel,.tip-card,.milestone-card,.checklist-card,.profile-summary-card{max-width:100%;overflow:hidden;box-sizing:border-box;}
-  .sidebar{display:none;}
+  .grid{grid-template-columns:1fr !important;width:100% !important;overflow-x:hidden !important;}
+  .sidebar{display:none !important;}
+  .ai-main{font-size:15px !important;line-height:1.75 !important;overflow:hidden !important;word-break:break-word !important;overflow-wrap:break-word !important;width:100% !important;box-sizing:border-box !important;}
+  .key-point,.action-item,.persona-tip-text,.clinical-note-text,.tip-text,.stage-card-sub,.week-sub{font-size:15px !important;line-height:1.75 !important;word-break:break-word !important;overflow-wrap:break-word !important;}
+  .card,.stage-detector,.stage-card,.checkin-panel,.tip-card,.milestone-card,.checklist-card,.profile-summary-card,.checkin-panel-pp,.inv-card,.golden-box,.ap-abnormal-card,.ap-normal-section,.ap-checkin-alert{max-width:100% !important;overflow:hidden !important;box-sizing:border-box !important;width:100% !important;}
+  .ai-content{width:100% !important;overflow:hidden !important;}
+  .persona-tip{overflow:hidden !important;word-break:break-word !important;}
+  .clinical-note{overflow:hidden !important;word-break:break-word !important;}
+  .ai-source{font-size:12px !important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 }
 
  @media(max-width:700px){
@@ -1190,14 +1195,14 @@ function renderAIContent(content,containerId){
   }
   if(!content||typeof content!=='object'){document.getElementById(containerId).innerHTML='<div class="ai-content fade-up"><div class="ai-main">Could not load content. <button class="retry-btn" onclick="location.reload()">Retry</button></div></div>';return;}
   var html='<div class="ai-content fade-up">';
-  if(content.main_content) html+='<div class="ai-main" style="line-height:1.9;margin-bottom:1.5rem;">'+formatContent(content.main_content)+'</div>';
+  if(content.main_content) html+='<div class="ai-main">'+formatContent(content.main_content)+'</div>';
   if(content.key_points&&content.key_points.length){
     html+='<div class="key-points"><div class="key-points-title">Key Clinical Points</div>';
-    content.key_points.forEach(function(pt){var clean=pt.replace(/^→\s*/,'');html+='<div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border-l);"><span style="color:var(--terra);font-weight:700;flex-shrink:0;font-size:18px;margin-top:2px;">→</span><span style="font-size:19px;line-height:1.85;">'+clean+'</span></div>';});
+    content.key_points.forEach(function(pt){var clean=pt.replace(/^→\s*/,'');html+='<div class="key-point">'+clean+'</div>';});
     html+='</div>';
   }
-  if(content.personalised_tip) html+='<div class="persona-tip"><span class="persona-tip-icon">💡</span><div class="persona-tip-text" style="font-size:19px;line-height:1.85;"><strong>For you:</strong> '+content.personalised_tip+'</div></div>';
-  if(content.clinical_note) html+='<div class="clinical-note"><div class="clinical-note-title">⚠ Clinical Note</div><div class="clinical-note-text" style="font-size:19px;line-height:1.85;">'+content.clinical_note+'</div></div>';
+ if(content.personalised_tip) html+='<div class="persona-tip"><span class="persona-tip-icon">💡</span><div class="persona-tip-text"><strong>For you:</strong> '+content.personalised_tip+'</div></div>';
+  if(content.clinical_note) html+='<div class="clinical-note"><div class="clinical-note-title">⚠ Clinical Note</div><div class="clinical-note-text">'+content.clinical_note+'</div></div>';
   html+='<div class="ai-source">📚 Evidence-based · Built by a gynaecologist · Personalised to your profile</div></div>';
   document.getElementById(containerId).innerHTML=html;
 }
