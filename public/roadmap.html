@@ -583,10 +583,15 @@ async function init(){
     mainCont.style.display='block';
    renderPersonaTags();
     ['ttc','pregnancy','postpartum'].forEach(j=>buildAndSaveActionPlan(userProfile,[],j));
-    const urlTab=new URLSearchParams(window.location.search).get('tab');
-    if(urlTab==='pregnancy'||userProfile.isPregnant){
+   const urlTab=new URLSearchParams(window.location.search).get('tab');
+    if(urlTab==='pregnancy'){
       const pregTab=[...document.querySelectorAll('.jtab')].find(t=>t.textContent.includes('Pregnancy'));
-      switchJourney('pregnancy',pregTab||document.querySelectorAll('.jtab')[1]);
+      if(pregTab) switchJourney('pregnancy',pregTab);
+      else switchJourney('ttc',document.querySelector('.jtab'));
+    } else if(userProfile.isPregnant){
+      const pregTab=[...document.querySelectorAll('.jtab')].find(t=>t.textContent.includes('Pregnancy'));
+      if(pregTab) switchJourney('pregnancy',pregTab);
+      else switchJourney('ttc',document.querySelector('.jtab'));
     } else {
       switchJourney('ttc',document.querySelector('.jtab'));
     }
