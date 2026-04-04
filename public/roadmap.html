@@ -1807,7 +1807,7 @@ function pfLoad(){
   var p=userData.profile||{};
   var set=function(id,val){var el=document.getElementById(id);if(el&&val!==undefined&&val!==null) el.value=val;};
  set('pf-name',p.name);set('pf-age',p.age);set('pf-journey',p.journeyStage);
- if(typeof setPregToggle==='function') setPregToggle(!!p.isPregnant);
+ window._isPregnant=!!p.isPregnant;if(typeof setPregToggle==='function') setPregToggle(!!p.isPregnant);
   set('pf-cycle',p.cycleLength);set('pf-period',p.periodLength);set('pf-notes',p.notes);
   setChipVals('pf-sym-grid',p.symptoms);setChipVals('pf-med-grid',p.medications);
   set('pf-lmp',p.lmp);set('pf-cycle-regularity',p.cycleRegularity);set('pf-menarche',p.menarche);
@@ -1878,7 +1878,7 @@ async function pfSave(){
   var gn=function(id){var v=parseFloat(g(id));return isNaN(v)?null:v;};
   var gi=function(id){var v=parseInt(g(id));return isNaN(v)?null:v;};
   var profile={
-    name:g('pf-name'),age:gi('pf-age'),journeyStage:g('pf-journey'),isPregnant:document.getElementById('pf-is-pregnant')?document.getElementById('pf-is-pregnant').checked:false,
+   name:g('pf-name'),age:gi('pf-age'),journeyStage:g('pf-journey'),isPregnant:window._isPregnant||false,
     cycleLength:gi('pf-cycle'),periodLength:gi('pf-period'),notes:g('pf-notes'),
     symptoms:getChipVals('pf-sym-grid'),medications:getChipVals('pf-med-grid'),
     lmp:g('pf-lmp'),cycleRegularity:g('pf-cycle-regularity'),menarche:gi('pf-menarche'),
@@ -1966,6 +1966,7 @@ async function pfSave(){
 }
 
 function setPregToggle(val){
+  window._isPregnant=val;
   document.getElementById('pf-is-pregnant').checked=val;
   document.getElementById('preg-yes-btn').style.background=val?'#7B9E87':'#FAF6F1';
   document.getElementById('preg-yes-btn').style.color=val?'#fff':'#8C7468';
