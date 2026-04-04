@@ -206,7 +206,11 @@ async function init() {
   try {
     const res = await fetch('/me', { headers: { Authorization: 'Bearer ' + token } });
     userData = await res.json();
-    if (userData.plan !== 'complete') {
+   const trialDays = 3;
+    const createdAt = userData.createdAt || new Date().toISOString();
+    const accountAge = (Date.now() - new Date(createdAt).getTime()) / (1000 * 60 * 60 * 24);
+    const inTrial = userData.plan === 'free' && accountAge <= trialDays;
+    if (userData.plan !== 'complete' && !inTrial) {
       document.getElementById('main-content').style.display = 'none';
       document.getElementById('locked-section').style.display = 'block';
     }
