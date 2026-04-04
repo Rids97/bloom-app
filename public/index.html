@@ -327,15 +327,25 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
     <div class="paywall-title">You've used your free messages</div>
     <div class="paywall-sub">Upgrade to keep chatting with Bloom — plus unlock fertile window tracking, report analysis, and more.</div>
     <div class="paywall-plans">
-      <a href="#" class="paywall-plan featured" onclick="closePaywall();startPayment('pro');return false;">
+      <a href="#" class="paywall-plan featured" onclick="closePaywall();startPayment('pro_monthly');return false;">
         <div class="paywall-plan-name">Bloom Pro</div>
-        <div class="paywall-plan-price">₹149<span style="font-size:12px;opacity:0.7;">/mo</span></div>
-        <div class="paywall-plan-features">✓ Unlimited chat<br/>✓ Fertile window<br/>✓ 3 reports/month</div>
+        <div class="paywall-plan-price">₹100<span style="font-size:12px;opacity:0.7;">/mo</span></div>
+        <div class="paywall-plan-features">✓ Unlimited chat<br/>✓ Fertile window<br/>✓ Cycle tracking</div>
       </a>
-      <a href="#" class="paywall-plan" onclick="closePaywall();startPayment('complete');return false;">
+      <a href="#" class="paywall-plan featured" onclick="closePaywall();startPayment('pro_annual');return false;" style="background:var(--sage-d);border-color:var(--sage-d);">
+        <div class="paywall-plan-name">Bloom Pro Annual</div>
+        <div class="paywall-plan-price" style="color:rgba(255,255,255,0.85);">₹1000<span style="font-size:12px;opacity:0.7;">/yr</span></div>
+        <div class="paywall-plan-features" style="color:rgba(255,255,255,0.7);">✓ Save ₹200 vs monthly<br/>✓ All Pro features</div>
+      </a>
+      <a href="#" class="paywall-plan" onclick="closePaywall();startPayment('complete_monthly');return false;">
         <div class="paywall-plan-name" style="color:var(--text)">Bloom Complete</div>
-        <div class="paywall-plan-price">₹449<span style="font-size:12px;color:var(--muted);">/mo</span></div>
+        <div class="paywall-plan-price">₹300<span style="font-size:12px;color:var(--muted);">/mo</span></div>
         <div class="paywall-plan-features">✓ Everything in Pro<br/>✓ Unlimited reports<br/>✓ Personalised roadmap</div>
+      </a>
+      <a href="#" class="paywall-plan" onclick="closePaywall();startPayment('complete_annual');return false;" style="border-color:var(--gold);background:var(--gold-l);">
+        <div class="paywall-plan-name" style="color:var(--text)">Bloom Complete Annual</div>
+        <div class="paywall-plan-price" style="color:var(--gold);">₹2700<span style="font-size:12px;color:var(--muted);">/yr</span></div>
+        <div class="paywall-plan-features">✓ Save ₹900 vs monthly<br/>✓ All Complete features<br/>✓ Most popular 🌟</div>
       </a>
     </div>
     <button class="paywall-dismiss" onclick="closePaywall()">Maybe later</button>
@@ -1312,12 +1322,14 @@ async function startPayment(plan){
   try{
     const res=await fetch('/create-order',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+TOKEN},body:JSON.stringify({plan})});
     const order=await res.json();
-    if(!order.orderId){alert('Could not create order. Please try again.');return;}
+    if(!order.subscriptionId){alert('Could not create subscription. Please try again.');return;}
     const options={
       key:'rzp_live_SWHdCUejMAQwBE',
-      amount:order.amount,currency:'INR',name:'Bloom',description:order.planLabel,order_id:order.orderId,
+      subscription_id:order.subscriptionId,
+      name:'Bloom',
+      description:order.planLabel,
       handler:async function(response){
-        const vRes=await fetch('/verify-payment',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+TOKEN},body:JSON.stringify({razorpay_order_id:response.razorpay_order_id,razorpay_payment_id:response.razorpay_payment_id,razorpay_signature:response.razorpay_signature,plan})});
+        const vRes=await fetch('/verify-payment',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+TOKEN},body:JSON.stringify({razorpay_subscription_id:response.razorpay_subscription_id,razorpay_payment_id:response.razorpay_payment_id,razorpay_signature:response.razorpay_signature,plan})});
         const vData=await vRes.json();
         if(vData.success){localStorage.setItem('bloom_token',vData.token);alert('Payment successful! Welcome to '+order.planLabel);window.location.reload();}
       },
