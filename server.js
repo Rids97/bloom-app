@@ -553,11 +553,10 @@ app.post("/analyze-report", auth, async (req, res) => {
     await connectDB();
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ error: "User not found" });
-    const reportTrialDays = 3;
+   const reportTrialDays = 3;
     const reportAccountAge = (Date.now() - new Date(user.createdAt).getTime()) / (1000 * 60 * 60 * 24);
-    if (user.plan === "free" && reportAccountAge > reportTrialDays) return res.status(403).json({ error: "upgrade_required", message: "Your 3-day free trial has ended. Upgrade to Bloom Pro to analyze reports 🌸" });
-    if (user.plan === "pro" && user.reportAnalysisCount >= 3) return res.status(403).json({ error: "limit_reached", message: "Upgrade to Bloom Complete for unlimited reports." });
-    if (user.plan === "pro") await User.findByIdAndUpdate(req.user.id, { $inc: { reportAnalysisCount: 1 } });
+    const reportInTrial = user.plan === "free" && reportAccountAge <= reportTrialDays;
+    if (!reportInTrial && user.plan !== "complete") return res.status(403).json({ error: "upgrade_required", message: "Report analyzer is available in Bloom Complete. Upgrade to access 🌸" });
     const { imageBase64, reportType } = req.body;
     if (!imageBase64) return res.status(400).json({ error: "No image provided" });
     const profile = user.profile || {};
