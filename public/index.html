@@ -1363,6 +1363,7 @@ function formatChatText(text){
   const lines=text.split('\n');let html='';
   lines.forEach(line=>{
     line=line.trim();
+    line=line.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
     if(!line){html+='<div style="height:5px;"></div>';return;}
     if(line.startsWith('→')){
       const txt=line.replace(/^→\s*/,'');
