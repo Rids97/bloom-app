@@ -3,7 +3,7 @@
 <head>
 <script>if(!localStorage.getItem('bloom_token'))window.location.href='/login';</script>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <style>
 @media(max-width:700px){
   html,body{overflow-x:hidden !important;max-width:100vw !important;}
@@ -85,6 +85,20 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 .section.active{display:block;}
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1rem;}
 .stage-detector{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1rem;}
+@media(max-width:700px){
+  .stage-detector{padding:0.75rem !important;}
+  .stage-detector>div:first-child{display:block !important;}
+  .stage-detector-title{font-size:13px !important;margin-bottom:8px !important;}
+  .stage-card{overflow:hidden !important;white-space:normal !important;}
+  .stage-card-title{font-size:18px !important;word-break:break-word !important;}
+  .stage-card-sub{font-size:13px !important;word-break:break-word !important;white-space:normal !important;}
+  .week-title{font-size:20px !important;word-break:break-word !important;}
+  .week-sub{font-size:13px !important;word-break:break-word !important;white-space:normal !important;}
+  .container{padding:0.75rem !important;overflow:hidden !important;width:100vw !important;max-width:100vw !important;box-sizing:border-box !important;}
+  .grid>div:first-child{min-width:0 !important;max-width:100% !important;overflow:hidden !important;}
+  #ttc-ai-content,#preg-ai-content,#pp-ai-content{width:100% !important;max-width:100% !important;overflow:hidden !important;word-break:break-word !important;}
+  #ttc-ai-content *,#preg-ai-content *,#pp-ai-content *{max-width:100% !important;word-break:break-word !important;white-space:normal !important;box-sizing:border-box !important;}
+}
 @media(max-width:600px){.stage-detector .stage-detector-title{font-size:18px;margin-bottom:8px;}
 .stage-detector>div:first-child{flex-direction:column;align-items:flex-start;gap:10px;}}
 .stage-detector-title{font-size:28px;font-weight:600;color:var(--sage-d);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;}
@@ -1845,6 +1859,17 @@ function collapseCheckinsOnMobile(){
   }
 }
 
+// MOBILE LAYOUT
+if(window.innerWidth <= 700){
+  // Floating profile button
+  var fab=document.createElement('button');
+  fab.innerHTML='✏️';
+  fab.onclick=openRoadmapProfile;
+  fab.style.cssText='position:fixed;bottom:80px;right:16px;z-index:500;width:52px;height:52px;border-radius:50%;background:#6b4f42;color:#fff;border:none;font-size:22px;box-shadow:0 4px 16px rgba(61,35,24,0.3);cursor:pointer;';
+  document.body.appendChild(fab);
+  // Hide all Update My Profile buttons
+  document.querySelectorAll('.stage-detector button[onclick*="openRoadmapProfile"]').forEach(function(b){b.style.display='none';});
+}
 // MOBILE OVERFLOW NUCLEAR FIX
 if(window.innerWidth <= 700){
   document.documentElement.style.overflowX='hidden';
