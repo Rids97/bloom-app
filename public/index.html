@@ -252,15 +252,7 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
       <div class="greeting-sub" id="greetDate">—</div>
       <div class="greeting-title" id="greetTitle">Good morning, <em>there</em> 🌸</div>
     </div>
-   <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;padding:10px 14px;background:#F2E4DA;border-radius:10px;border:1px solid #E2C4B4;">
-      <span style="font-size:18px;">🤰</span>
-      <span style="font-size:15px;font-weight:500;color:#9E5238;">Currently pregnant?</span>
-      <div style="display:flex;gap:6px;margin-left:auto;">
-        <button id="dash-preg-yes" onclick="setDashPregnant(true)" style="padding:6px 16px;border-radius:20px;border:2px solid #E2C4B4;background:#FAF6F1;font-size:14px;font-family:'DM Sans',sans-serif;cursor:pointer;font-weight:500;color:#8C7468;">Yes</button>
-        <button id="dash-preg-no" onclick="setDashPregnant(false)" style="padding:6px 16px;border-radius:20px;border:2px solid #E2C4B4;background:#FAF6F1;font-size:14px;font-family:'DM Sans',sans-serif;cursor:pointer;font-weight:500;color:#8C7468;">No</button>
-      </div>
-    </div>
-    <div class="insight-banner" id="insightBanner">
+      <div class="insight-banner" id="insightBanner">   
       <div class="insight-label">🌿 Personalised for you</div>
       <div class="insight-text" id="insightText"></div>
     </div>
@@ -289,6 +281,14 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
       <div class="stat-card fertile"><div class="stat-icon">🌿</div><div class="stat-val green" id="fertileVal">—</div><div class="stat-label" id="fertileLabel">Fertile window</div></div>
       <div class="stat-card ovulation"><div class="stat-icon">✨</div><div class="stat-val terra" id="ovulVal">—</div><div class="stat-label" id="ovulLabel">Days to ovulation</div></div>
       <div class="stat-card period"><div class="stat-icon">🗓️</div><div class="stat-val gold" id="nextPeriodVal">—</div><div class="stat-label">Days to next period</div></div>
+    </div>
+   <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;padding:10px 14px;background:#F2E4DA;border-radius:10px;border:1px solid #E2C4B4;">
+      <span style="font-size:18px;">🤰</span>
+      <span style="font-size:15px;font-weight:500;color:#9E5238;">Currently pregnant?</span>
+      <div style="display:flex;gap:6px;margin-left:auto;">
+        <button id="dash-preg-yes" onclick="setDashPregnant(true)" style="padding:6px 16px;border-radius:20px;border:2px solid #E2C4B4;background:#FAF6F1;font-size:14px;font-family:'DM Sans',sans-serif;cursor:pointer;font-weight:500;color:#8C7468;">Yes</button>
+        <button id="dash-preg-no" onclick="setDashPregnant(false)" style="padding:6px 16px;border-radius:20px;border:2px solid #E2C4B4;background:#FAF6F1;font-size:14px;font-family:'DM Sans',sans-serif;cursor:pointer;font-weight:500;color:#8C7468;">No</button>
+      </div>
     </div>
     <div class="tip-card">
       <div class="tip-icon">💡</div>
