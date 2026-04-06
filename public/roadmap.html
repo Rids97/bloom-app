@@ -1001,8 +1001,18 @@ function saveCheckin(){
   if(notes&&notes.trim()){
     pregCheckinAlerts.push({label:'Your note: "'+notes.trim().slice(0,80)+(notes.trim().length>80?'…':'')+'"',action:'Bloom has noted this. Update your profile if this reflects a new scan finding, test result, or medication so your Care Checklist stays accurate.',isInfo:true});
   }
+// Add urgent alert chips to checkinAlerts as urgent (not isInfo)
+  const urgentAlertMap={
+    bleeding:{label:'Bleeding / spotting',action:'Do not wait. Contact your doctor or go to hospital today.'},
+    reduced_movements:{label:'Reduced fetal movements',action:'Go to hospital within 2 hours. Do not use home doppler to reassure yourself.'},
+    headache:{label:'Headache / visual changes',action:'Check BP immediately. If above 140/90 — go to hospital now.'},
+    swelling:{label:'Swelling in feet/hands',action:'If sudden, facial, or with headache — seek medical assessment today.'},
+  };
+  triggered.forEach(function(t){
+    if(urgentAlertMap[t]) pregCheckinAlerts.push({label:urgentAlertMap[t].label,action:urgentAlertMap[t].action,isInfo:false});
+  });
   // Always save action plan before showing any modal
-  buildAndSaveActionPlan(userProfile,pregCheckinAlerts,'pregnancy');
+  buildAndSaveActionPlan(userData.profile||userProfile||{},pregCheckinAlerts,'pregnancy');
   if(triggered.length>0){
     showCheckinAlert(triggered);
   } else {
