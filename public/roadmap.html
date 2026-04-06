@@ -887,6 +887,9 @@ function computeAndRenderPreg(lmpStr){
   document.getElementById('preg-trimester-label').textContent=trimester;
   document.getElementById('preg-due-label').textContent=dueDate.toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
   buildWeekNav(weeksPreg);renderPregMilestones(weeksPreg);renderPregChecklist(weeksPreg);renderPregInvLog();
+  const existing_preg=loadActionPlan_data('pregnancy');
+  const existing_preg_alerts=existing_preg?existing_preg.checkinAlerts||[]:[];
+  buildAndSaveActionPlan(userData.profile||userProfile||{},existing_preg_alerts,'pregnancy');
   const activePregTab=document.querySelector('#preg-sec-tabs .stab.active');
 if(!activePregTab||!activePregTab.classList.contains('action-plan-tab')) loadPregSection('overview',document.querySelector('#preg-sec-tabs .stab'));
   document.getElementById('preg-tip').textContent=getPregTip(weeksPreg);
