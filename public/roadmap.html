@@ -647,7 +647,11 @@ async function init(){
     }
     mainCont.style.display='block';
    renderPersonaTags();
-    ['ttc','pregnancy','postpartum'].forEach(j=>buildAndSaveActionPlan(userProfile,[],j));
+    ['ttc','pregnancy','postpartum'].forEach(j=>{
+      const existing=loadActionPlan_data(j);
+      const existingAlerts=existing?existing.checkinAlerts||[]:[];
+      buildAndSaveActionPlan(userProfile,existingAlerts,j);
+    });
   const urlTab=new URLSearchParams(window.location.search).get('tab');
     if(urlTab==='pregnancy'||userProfile.isPregnant){
       setTimeout(function(){
