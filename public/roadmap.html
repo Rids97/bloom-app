@@ -997,7 +997,7 @@ function saveCheckin(){
     contentCache={};
     const activeTab=document.querySelector('#preg-sec-tabs .stab.active');
     loadPregSection(currentPregSection||'overview',activeTab);
-    const btn=document.querySelector('.checkin-save-btn');
+    const btn=document.querySelector('#preg-checkin-panel .checkin-save-btn');
     if(btn){btn.textContent='Saved ✓';setTimeout(function(){btn.textContent='Save Check-in ✓';},2000);}
   }
 }
