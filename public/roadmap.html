@@ -2846,11 +2846,16 @@ switchJourney=function(name,btn){
     var anchorMap={
       ttc:'ttc-checkin-panel',
       pregnancy:'preg-checkin-panel',
-      postpartum:'pp-checkin-body'
+      postpartum:'pp-sec-tabs'
     };
     var anchorEl=document.getElementById(anchorMap[name]);
-    if(anchorEl&&bar&&anchorEl.parentNode){
-      anchorEl.parentNode.insertBefore(bar,anchorEl.nextSibling);
+  if(anchorEl&&bar&&anchorEl.parentNode){
+      // For postpartum, anchor is pp-sec-tabs itself — insert before it
+      if(name==='postpartum'){
+        anchorEl.parentNode.insertBefore(bar,anchorEl);
+      } else {
+        anchorEl.parentNode.insertBefore(bar,anchorEl.nextSibling);
+      }
     }
     if(name==='ttc') buildMobileTabBar(ttcTabs,'ttc');
     else if(name==='pregnancy') buildMobileTabBar(pregTabs,'pregnancy');
