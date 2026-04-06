@@ -41,7 +41,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 .jtab:hover{color:var(--terra);}
 .jtab.active{color:var(--terra);border-bottom-color:var(--terra);font-weight:500;}
 .container{max-width:100vw;padding:1.25rem 1rem;overflow-x:hidden;width:100%;box-sizing:border-box;}
-@media(max-width:700px){.container{padding-bottom:90px !important;}}
+@media(max-width:700px){.container{padding-bottom:20px !important;}}
 .grid{display:grid;grid-template-columns:65fr 35fr;gap:1rem;min-width:0;max-width:100%;}
 @media(max-width:900px){.grid{grid-template-columns:1fr;}}
 @media(max-width:700px){
@@ -2745,7 +2745,7 @@ function buildRoadmapProfileModal(){pfBuildChips();pfLoad();document.getElementB
   .stage-path{display:none !important;}
   .mobile-progress-wrap{display:block !important;}
 }
-.mobile-tab-bar{display:none;position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(250,246,241,0.97);backdrop-filter:blur(12px);border-top:1px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:6px 0 calc(6px + env(safe-area-inset-bottom));}
+.mobile-tab-bar{display:none;position:static;width:100%;z-index:10;background:rgba(250,246,241,0.97);backdrop-filter:blur(12px);border-top:1px solid var(--border);border-bottom:1px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:6px 0;}
 .mobile-tab-bar::-webkit-scrollbar{display:none;}
 .mtab{flex-shrink:0;min-width:60px;}
 .mtab{display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 8px;cursor:pointer;flex:1;border:none;background:none;}
@@ -2821,8 +2821,9 @@ function mobileTabClick(btn,section,journey){
   document.querySelectorAll('.mtab').forEach(function(b){b.classList.remove('active');});
   btn.classList.add('active');
   if(section==='action_plan'){
-    var apBtn=document.getElementById(journey+'-ap-tab');
-    if(apBtn) loadActionPlan(journey,apBtn);
+    var apIdMap={ttc:'ttc-ap-tab',pregnancy:'preg-ap-tab',postpartum:'pp-ap-tab'};
+    var apBtn=document.getElementById(apIdMap[journey]);
+    loadActionPlan(journey,apBtn||null);
   } else if(journey==='ttc'){
     var stab=document.querySelector('#ttc-sec-tabs .stab');
     loadTTCSection(section,stab);
@@ -2840,13 +2841,23 @@ var _origSwitchJourney=switchJourney;
 switchJourney=function(name,btn){
   _origSwitchJourney(name,btn);
   if(window.innerWidth<=700){
+    // Move tab bar to correct anchor point below checkin panel
+    var bar=document.getElementById('mobile-tab-bar');
+    var anchorMap={
+      ttc:'ttc-checkin-panel',
+      pregnancy:'preg-checkin-panel',
+      postpartum:'pp-checkin-body'
+    };
+    var anchorEl=document.getElementById(anchorMap[name]);
+    if(anchorEl&&bar&&anchorEl.parentNode){
+      anchorEl.parentNode.insertBefore(bar,anchorEl.nextSibling);
+    }
     if(name==='ttc') buildMobileTabBar(ttcTabs,'ttc');
     else if(name==='pregnancy') buildMobileTabBar(pregTabs,'pregnancy');
     else buildMobileTabBar(ppTabs,'postpartum');
     setTimeout(renderMobileProgress,500);
   }
 };
-
 // Override initTTC to render progress
 var _origInitTTC=initTTC;
 initTTC=function(){
