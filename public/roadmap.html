@@ -977,12 +977,22 @@ function showCheckinAlert(alerts){
 
 function saveCheckin(){
   const chips=[...document.querySelectorAll('.cc-chip.selected')].map(c=>c.dataset.val);
+  const notes=document.getElementById('preg-checkin-notes')?document.getElementById('preg-checkin-notes').value:'';
   const alertChips=['bleeding','reduced_movements','headache','swelling'];
   const triggered=chips.filter(c=>alertChips.includes(c));
   if(triggered.length>0){
     showCheckinAlert(triggered);
   } else {
-    const pregCheckinAlerts=[];
+    const pregAlertMap={
+      scan_done:{label:'Scan done this week',action:'Note the findings and share with your doctor. Update your profile with any new scan results so your Care Checklist stays accurate.'},
+      new_medication:{label:'New medication started',action:'Log it in your profile so Bloom can adjust your guidance. Note any side effects and report them to your doctor.'},
+      nausea:{label:'Nausea / vomiting',action:'Small frequent meals, ginger, and vitamin B6 10mg TDS can help. If unable to keep fluids down — see your doctor today (hyperemesis).'},
+      all_well:{label:'All going well 🌸',action:'Keep attending all scheduled ANC appointments and continue your supplements as prescribed.'},
+    };
+    const pregCheckinAlerts=chips.filter(c=>pregAlertMap[c]).map(c=>pregAlertMap[c]).filter(Boolean);
+    if(notes&&notes.trim()){
+      pregCheckinAlerts.push({label:'Your note: "'+notes.trim().slice(0,80)+(notes.trim().length>80?'…':'')+'"',action:'Bloom has noted this. Update your profile if this reflects a new scan finding, test result, or medication so your Care Checklist stays accurate.'});
+    }
     buildAndSaveActionPlan(userProfile,pregCheckinAlerts,'pregnancy');
     contentCache={};
     const activeTab=document.querySelector('#preg-sec-tabs .stab.active');
@@ -1738,11 +1748,21 @@ function saveTTCCheckin(){
     spotting:{label:'Spotting',action:'Note cycle day. Mid-cycle spotting can be ovulatory. Post-intercourse spotting needs cervical assessment.'},
     side_effects:{label:'Medication side effects',action:'Document symptoms. Contact your doctor if hot flushes, visual changes, or severe mood changes occur on Clomiphene.'},
     positive_test:{label:'Positive pregnancy test 🎉',action:'Book an early viability scan at 6-7 weeks. Start folic acid if not already taking it.'},
+    opk_positive:{label:'OPK positive this cycle',action:'Time intercourse or IUI within 24–36 hours of a positive OPK. Confirm trigger timing with your doctor if on OI.'},
+    scan_done:{label:'Scan done this cycle',action:'Note follicle size and cycle day in your notes. Share scan findings with your doctor at next review.'},
+    new_result:{label:'New test result',action:'Update your profile with the new result so Bloom can personalise your Care Checklist and guidance.'},
+    medication_started:{label:'New medication started',action:'Log it in your profile under medications so Bloom adjusts your guidance. Note any side effects.'},
+    tww:{label:'In two-week wait',action:'Avoid early testing before Day 14. Continue luteal support exactly as prescribed. Rest and stay hydrated.'},
+    period_arrived:{label:'Period arrived',action:'Note cycle day 1. If on treatment — contact your clinic to plan the next cycle. Do not stop supplements without advice.'},
   };
-  const alertChips=['pelvic_pain','spotting','side_effects'];
+  const alertChips=['pelvic_pain','spotting','side_effects','opk_positive','scan_done','new_result','medication_started','tww','period_arrived'];
   const checkinAlerts=chips.filter(c=>alertChips.includes(c)).map(c=>alertMap[c]).filter(Boolean);
-  // Add positive test as good news
+  // Add positive test
   if(chips.includes('positive_test')) checkinAlerts.push(alertMap.positive_test);
+  // Add free-text notes as a checkin alert if present
+  if(notes&&notes.trim()){
+    checkinAlerts.push({label:'Your note: "'+notes.trim().slice(0,80)+(notes.trim().length>80?'…':'')+'"',action:'Bloom has noted this. Update your profile if this reflects a new test result or medication change so your Care Checklist stays accurate.'});
+  }
   // Save checkin to localStorage
   localStorage.setItem('bloom_ttc_checkin',JSON.stringify({chips,notes,date:new Date().toISOString()}));
   // Rebuild action plan with new checkin alerts
@@ -1790,6 +1810,10 @@ function savePPCheckin(){
     modal.style.cssText='position:fixed;inset:0;z-index:400;background:rgba(44,36,32,0.6);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
     modal.innerHTML='<div style="background:#fff;border-radius:18px;width:520px;max-width:95vw;max-height:90vh;overflow-y:auto;padding:1.75rem;border:1px solid #E8DDD5;"><div style="font-family:Cormorant Garamond,serif;font-size:22px;font-weight:600;color:#2C2420;margin-bottom:4px;">Important Symptoms Noted</div><p style="font-size:13px;color:#8C7468;margin-bottom:1.25rem;">You have reported symptoms that need medical attention.</p>'+alertHtml+'<div style="display:flex;gap:10px;margin-top:1rem;"><button onclick="document.getElementById(\'pp-checkin-alert-modal\').remove();contentCache={};loadPPSection(\'overview\',document.querySelector(\'#pp-sec-tabs .stab\'));" style="flex:1;padding:11px;background:#C4704F;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;font-family:DM Sans,sans-serif;">I understand — show me guidance</button><button onclick="document.getElementById(\'pp-checkin-alert-modal\').remove();" style="padding:11px 18px;background:none;border:1.5px solid #E8DDD5;border-radius:10px;font-size:13px;color:#8C7468;cursor:pointer;font-family:DM Sans,sans-serif;">Close</button></div></div>';
     document.body.appendChild(modal);
+  }
+ // Add free-text notes to checkin alerts if present
+  if(notes&&notes.trim()){
+    checkinAlerts.push({label:'Your note: "'+notes.trim().slice(0,80)+(notes.trim().length>80?'…':'')+'"',action:'Bloom has noted this. Update your profile if this reflects a new test result, baby weight, or medication change so your Care Checklist stays accurate.'});
   }
   localStorage.setItem('bloom_pp_checkin_'+currentPPStage,JSON.stringify({motherChips,babyChips,notes,date:new Date().toISOString()}));
   // Auto-sync checkin chips to profile so Care Checklist picks them up
