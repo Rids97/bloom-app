@@ -1839,10 +1839,149 @@ function openProfileModal(){
  <a class="mbn-item active" href="/app"><span class="mbn-icon">🏠</span><span class="mbn-label">Home</span></a>
   <a class="mbn-item" href="#" onclick="openModal('cycleCalcModal');return false;"><span class="mbn-icon">📅</span><span class="mbn-label">Cycle</span></a>
   <a class="mbn-item" href="#" onclick="openMobileChat();return false;"><span class="mbn-icon">💬</span><span class="mbn-label">Chat</span></a>
+  <a class="mbn-item" href="#" onclick="openMobileBMI();return false;"><span class="mbn-icon">⚖️</span><span class="mbn-label">BMI</span></a>
   <a class="mbn-item" href="#" onclick="window.location.href='/report';return false;"><span class="mbn-icon">🧪</span><span class="mbn-label">Reports</span></a>
   <a class="mbn-item" href="#" onclick="window.location.href='/roadmap';return false;"><span class="mbn-icon">🗺️</span><span class="mbn-label">Roadmap</span></a>
   <a class="mbn-item" href="#" onclick="openProfileModal();return false;"><span class="mbn-icon">👤</span><span class="mbn-label">Profile</span></a>
 </nav>
+
+<!-- MOBILE BMI OVERLAY -->
+<div id="mobileBMIOverlay" style="display:none;position:fixed;inset:0;z-index:999;background:var(--cream);flex-direction:column;">
+  <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;background:rgba(250,246,241,0.97);backdrop-filter:blur(12px);">
+    <button onclick="closeMobileBMI()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);padding:4px;">←</button>
+    <div><div style="font-size:17px;font-weight:500;">⚖️ BMI & Fertility</div><div style="font-size:13px;color:var(--muted);">Personalised to your health journey</div></div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:1.25rem 1rem;">
+    <!-- Input card -->
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem;">
+      <div style="font-size:14px;font-weight:600;color:var(--terra-d);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:14px;">Enter your measurements</div>
+      <div style="margin-bottom:12px;">
+        <label style="font-size:14px;color:var(--muted);display:block;margin-bottom:6px;">Height (cm)</label>
+        <input type="number" id="mobileBmiHeight" placeholder="e.g. 162" style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:16px;font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);outline:none;" oninput="runMobileBMI()"/>
+      </div>
+      <div style="margin-bottom:16px;">
+        <label style="font-size:14px;color:var(--muted);display:block;margin-bottom:6px;">Weight (kg)</label>
+        <input type="number" id="mobileBmiWeight" placeholder="e.g. 58" style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:16px;font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);outline:none;" oninput="runMobileBMI()"/>
+      </div>
+      <button onclick="runMobileBMI()" style="width:100%;padding:13px;background:var(--terra);color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;">Calculate BMI</button>
+    </div>
+    <!-- Result card -->
+    <div id="mobileBmiResult" style="display:none;">
+      <!-- BMI number + category -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem;text-align:center;">
+        <div style="font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Your BMI</div>
+        <div id="mobileBmiVal" style="font-family:'Cormorant Garamond',serif;font-size:72px;font-weight:600;color:var(--terra);line-height:1;">—</div>
+        <div id="mobileBmiCat" style="font-size:18px;font-weight:500;color:var(--text);margin-top:6px;">—</div>
+        <!-- BMI scale bar -->
+        <div style="margin-top:16px;position:relative;">
+          <div style="height:8px;border-radius:4px;background:linear-gradient(90deg,#6BAED6 0%,#74C476 22%,#FED976 45%,#FD8D3C 70%,#E31A1C 100%);margin-bottom:6px;"></div>
+          <div id="mobileBmiMarker" style="position:absolute;top:-4px;width:16px;height:16px;border-radius:50%;background:var(--text);border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.3);transform:translateX(-50%);transition:left 0.4s;left:0%;"></div>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:8px;">
+            <span>15</span><span>18.5</span><span>23</span><span>27.5</span><span>32.5</span><span>40</span>
+          </div>
+        </div>
+      </div>
+      <!-- Clinical context card -->
+      <div id="mobileBmiAdviceCard" style="border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem;border:1.5px solid var(--border);">
+        <div style="font-size:14px;font-weight:600;color:var(--terra-d);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;">🩺 What this means for you</div>
+        <div id="mobileBmiAdvice" style="font-size:15px;color:var(--text);line-height:1.8;"></div>
+      </div>
+      <!-- Journey-specific tip -->
+      <div id="mobileBmiJourneyCard" style="background:var(--sage-l);border:1px solid #B8D4BF;border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem;display:none;">
+        <div style="font-size:14px;font-weight:600;color:var(--sage-d);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">💡 For your journey</div>
+        <div id="mobileBmiJourneyTip" style="font-size:15px;color:var(--text);line-height:1.8;"></div>
+      </div>
+      <!-- Healthy range card -->
+      <div style="background:var(--cream);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1rem;">
+        <div style="font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;">Healthy weight range for your height</div>
+        <div id="mobileBmiRange" style="font-size:22px;font-weight:600;font-family:'Cormorant Garamond',serif;color:var(--sage-d);">— kg</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:4px;">Based on BMI 18.5–23 (Indian guidelines)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function openMobileBMI(){
+  var overlay=document.getElementById('mobileBMIOverlay');
+  overlay.style.display='flex';
+  overlay.style.flexDirection='column';
+  // Pre-fill from profile if available
+  var p=userData&&userData.profile?userData.profile:{};
+  if(p.height) document.getElementById('mobileBmiHeight').value=p.height;
+}
+
+function closeMobileBMI(){
+  document.getElementById('mobileBMIOverlay').style.display='none';
+}
+
+function runMobileBMI(){
+  var h=parseFloat(document.getElementById('mobileBmiHeight').value)/100;
+  var w=parseFloat(document.getElementById('mobileBmiWeight').value);
+  if(!h||!w||h<=0||w<=0) return;
+  var bmi=Math.round((w/(h*h))*10)/10;
+  var cat,adviceHtml,bgColor,borderColor,markerPct;
+  // Indian BMI cutoffs (WHO Asia-Pacific)
+  if(bmi<18.5){
+    cat='Underweight';bgColor='#EBF5FB';borderColor='#6BAED6';
+    adviceHtml='A BMI below 18.5 can suppress GnRH pulsatility, causing irregular or absent ovulation. Leptin levels drop with low body fat, directly disrupting the HPO axis. Even a 2–3 kg gain can restore menstrual regularity in underweight women.';
+    markerPct=Math.max(2,((bmi-15)/5)*22);
+  } else if(bmi<23){
+    cat='Healthy Weight ✓';bgColor='var(--sage-l)';borderColor='#74C476';
+    adviceHtml='Your BMI is in the optimal range for hormonal health and fertility. Women in this range have the best outcomes for natural conception, IVF, and healthy pregnancy. Maintain this with a balanced diet rich in antioxidants, healthy fats, and protein.';
+    markerPct=22+((bmi-18.5)/4.5)*23;
+  } else if(bmi<27.5){
+    cat='Overweight';bgColor='#FFFDE7';borderColor='#FED976';
+    adviceHtml='Excess adipose tissue converts androgens to oestrogen via aromatisation, disrupting the HPO axis feedback loop. This can cause anovulatory cycles, irregular periods, and reduced IVF success rates. A 5–10% weight reduction significantly improves ovulation frequency and egg quality.';
+    markerPct=45+((bmi-23)/4.5)*25;
+  } else if(bmi<32.5){
+    cat='Obese Class I';bgColor='#FFF3E0';borderColor='#FD8D3C';
+    adviceHtml='BMI above 27.5 (Indian cutoff for obesity) is strongly associated with insulin resistance, hyperandrogenaemia, and PCOS. IVF success rates decline significantly above this range. Even 5% weight loss has been shown to restore ovulation in anovulatory obese women. A low-GI diet with inositol supplementation is first-line.';
+    markerPct=70+((bmi-27.5)/5)*15;
+  } else {
+    cat='Obese Class II–III';bgColor='#FFEBEE';borderColor='#E31A1C';
+    adviceHtml='Severe obesity markedly reduces fertility treatment success and increases pregnancy complications including GDM, pre-eclampsia, miscarriage, and stillbirth. Most fertility clinics recommend reaching a BMI below 32.5 before starting IVF. Referral to a bariatric/metabolic specialist alongside your gynaecologist is recommended.';
+    markerPct=Math.min(97,85+((bmi-32.5)/7.5)*12);
+  }
+  // Healthy weight range (BMI 18.5–23 for Indian guidelines)
+  var hm=h;
+  var minW=Math.round(18.5*hm*hm*10)/10;
+  var maxW=Math.round(23*hm*hm*10)/10;
+  document.getElementById('mobileBmiVal').textContent=bmi;
+  document.getElementById('mobileBmiCat').textContent=cat;
+  document.getElementById('mobileBmiRange').textContent=minW+' – '+maxW+' kg';
+  document.getElementById('mobileBmiAdvice').textContent=adviceHtml;
+  document.getElementById('mobileBmiAdviceCard').style.background=bgColor;
+  document.getElementById('mobileBmiAdviceCard').style.borderColor=borderColor;
+  document.getElementById('mobileBmiMarker').style.left=markerPct+'%';
+  // Journey-specific tip
+  var p=userData&&userData.profile?userData.profile:{};
+  var journeyCard=document.getElementById('mobileBmiJourneyCard');
+  var journeyTip=document.getElementById('mobileBmiJourneyTip');
+  var tip='';
+  if(p.journeyStage==='ttc_natural'||p.journeyStage==='ttc_ivf'){
+    if(bmi<18.5) tip='For TTC, reaching a BMI of 18.5–23 is the single most impactful lifestyle change you can make. Consider increasing caloric intake with protein-rich, nutrient-dense foods rather than simply eating more.';
+    else if(bmi<23) tip='Your BMI is ideal for TTC. Focus on maintaining it with a low-GI diet, iron, folic acid, and vitamin D. Both you and your partner should be taking preconception supplements.';
+    else tip='For TTC, a 5–10% weight reduction can restore ovulation and significantly improve IVF success rates. Low-GI diet, inositol 4g/day, and 30 minutes of moderate exercise daily are evidence-based starting points.';
+  } else if(p.journeyStage==='pcos'||(p.symptoms&&p.symptoms.includes('pcos_diagnosed'))){
+    if(bmi<23) tip='Even at a healthy BMI, PCOS causes metabolic dysfunction. Focus on a low-GI diet, inositol (myo-inositol 2g BD), vitamin D, and regular exercise to reduce androgen levels and improve insulin sensitivity.';
+    else tip='In PCOS, weight loss of just 5% reduces free testosterone by up to 30% and can restore ovulation without medication. Inositol, metformin, and a low-GI diet are your most evidence-based tools.';
+  } else if(p.journeyStage==='pregnant'){
+    if(bmi<18.5) tip='Being underweight in pregnancy increases risk of preterm birth and low birth weight. Aim for the upper end of gestational weight gain recommendations (12.5–18 kg total) with your obstetrician.';
+    else if(bmi<23) tip='Healthy pre-pregnancy BMI is associated with the best obstetric outcomes. Continue balanced nutrition, prenatal supplements, and gentle exercise as advised by your doctor.';
+    else tip='Higher BMI in pregnancy increases GDM, pre-eclampsia, and LSCS risk. Monitor blood sugars, attend all ANC checkups, and follow your doctor\'s advice on gestational weight gain (typically 7–11.5 kg for BMI 25–29.9).';
+  } else if(p.journeyStage==='postpartum'){
+    tip='Postpartum weight loss should be gradual — 0.5 kg/week is safe while breastfeeding. Crash dieting reduces milk supply and delays hormonal recovery. Focus on nutrient density rather than calorie restriction.';
+  }
+  if(tip){
+    journeyTip.textContent=tip;
+    journeyCard.style.display='block';
+  } else {
+    journeyCard.style.display='none';
+  }
+  document.getElementById('mobileBmiResult').style.display='block';
+}
+</script>
 <!-- MOBILE FULL SCREEN CHAT -->
 <div id="mobileChatOverlay" style="display:none;position:fixed;inset:0;z-index:999;background:var(--cream);flex-direction:column;">
   <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;background:rgba(250,246,241,0.97);backdrop-filter:blur(12px);">
