@@ -1003,15 +1003,12 @@ function saveCheckin(){
     if(notes&&notes.trim()){
       pregCheckinAlerts.push({label:'Your note: "'+notes.trim().slice(0,80)+(notes.trim().length>80?'…':'')+'"',action:'Bloom has noted this. Update your profile if this reflects a new scan finding, test result, or medication so your Care Checklist stays accurate.',isInfo:true});
     }
-    buildAndSaveActionPlan(userProfile,pregCheckinAlerts,'pregnancy');
+   buildAndSaveActionPlan(userProfile,pregCheckinAlerts,'pregnancy');
     contentCache={};
     const activeTab=document.querySelector('#preg-sec-tabs .stab.active');
     loadPregSection(currentPregSection||'overview',activeTab);
-    const btn=document.querySelector('#preg-checkin-panel .checkin-save-btn');
-    if(btn){btn.textContent='Saved ✓';setTimeout(function(){btn.textContent='Save Check-in ✓';},2000);}
   }
 }
-
 async function savePregInvestigation(){
   var test=document.getElementById('preg-log-test').value;
   var result=document.getElementById('preg-log-result').value;
