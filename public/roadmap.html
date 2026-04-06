@@ -980,7 +980,7 @@ function showCheckinAlert(alerts){
 }
 
 function saveCheckin(){
-  const chips=[...document.querySelectorAll('.cc-chip.selected')].map(c=>c.dataset.val);
+  const chips=[...document.querySelectorAll('#checkin-chips-container .cc-chip.selected')].map(c=>c.dataset.val);
   const notes=document.getElementById('preg-checkin-notes')?document.getElementById('preg-checkin-notes').value:'';
   const alertChips=['bleeding','reduced_movements','headache','swelling'];
   const triggered=chips.filter(c=>alertChips.includes(c));
