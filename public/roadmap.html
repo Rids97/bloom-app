@@ -980,24 +980,30 @@ function saveCheckin(){
   const notes=document.getElementById('preg-checkin-notes')?document.getElementById('preg-checkin-notes').value:'';
   const alertChips=['bleeding','reduced_movements','headache','swelling'];
   const triggered=chips.filter(c=>alertChips.includes(c));
+  const btn=document.querySelector('#preg-checkin-panel .checkin-save-btn');
+  if(btn){btn.textContent='Saved ✓';setTimeout(function(){btn.textContent='Save Check-in ✓';},2000);}
   if(triggered.length>0){
     showCheckinAlert(triggered);
-  } else {
-    const pregAlertMap={
+
+    } else {
+    // These are informational only — shown as tips in Care Checklist, NOT as red flagged symptoms
+    const pregInfoMap={
       scan_done:{label:'Scan done this week',action:'Note the findings and share with your doctor. Update your profile with any new scan results so your Care Checklist stays accurate.'},
       new_medication:{label:'New medication started',action:'Log it in your profile so Bloom can adjust your guidance. Note any side effects and report them to your doctor.'},
       nausea:{label:'Nausea / vomiting',action:'Small frequent meals, ginger, and vitamin B6 10mg TDS can help. If unable to keep fluids down — see your doctor today (hyperemesis).'},
       all_well:{label:'All going well 🌸',action:'Keep attending all scheduled ANC appointments and continue your supplements as prescribed.'},
     };
-    const pregCheckinAlerts=chips.filter(c=>pregAlertMap[c]).map(c=>pregAlertMap[c]).filter(Boolean);
+    // Only pass notes as checkin alert — informational chips are stored separately as infoAlerts
+    const pregInfoAlerts=chips.filter(c=>pregInfoMap[c]).map(c=>({...pregInfoMap[c],isInfo:true})).filter(Boolean);
+    const pregCheckinAlerts=[...pregInfoAlerts];
     if(notes&&notes.trim()){
-      pregCheckinAlerts.push({label:'Your note: "'+notes.trim().slice(0,80)+(notes.trim().length>80?'…':'')+'"',action:'Bloom has noted this. Update your profile if this reflects a new scan finding, test result, or medication so your Care Checklist stays accurate.'});
+      pregCheckinAlerts.push({label:'Your note: "'+notes.trim().slice(0,80)+(notes.trim().length>80?'…':'')+'"',action:'Bloom has noted this. Update your profile if this reflects a new scan finding, test result, or medication so your Care Checklist stays accurate.',isInfo:true});
     }
     buildAndSaveActionPlan(userProfile,pregCheckinAlerts,'pregnancy');
     contentCache={};
     const activeTab=document.querySelector('#preg-sec-tabs .stab.active');
     loadPregSection(currentPregSection||'overview',activeTab);
-    const btn=document.querySelector('.checkin-save-btn');
+    const btn=document.querySelector('#preg-checkin-panel .checkin-save-btn');
     if(btn){btn.textContent='Saved ✓';setTimeout(function(){btn.textContent='Save Check-in ✓';},2000);}
   }
 }
@@ -1538,13 +1544,28 @@ function loadActionPlan(journey,btn){
     return;
   }
   let html='<div class="ap-section ai-content fade-up">';
-  // Checkin alerts first
+ // Checkin alerts — split urgent (red) vs informational (green)
   if(data.checkinAlerts&&data.checkinAlerts.length){
-    html+='<div style="font-size:14px;font-weight:600;color:#9E2020;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;">🚨 Symptoms Flagged</div>';
-    data.checkinAlerts.forEach((a,i)=>{
-      html+=`<div class="ap-checkin-alert"><div class="ap-checkin-title">⚠️ ${a.label}</div><div class="ap-checkin-action">→ ${a.action}</div><div style="margin-top:10px;"><button onclick="resolveCheckinAlert(this)" data-journey="${journey}" data-index="${i}" style="font-size:13px;padding:6px 14px;background:none;border:1.5px solid var(--sage);color:var(--sage-d);border-radius:8px;cursor:pointer;font-family:DM Sans,sans-serif;">✓ Mark as Resolved</button></div></div>`;
-    });
-    
+    const urgentAlerts=data.checkinAlerts.filter(a=>!a.isInfo);
+    const infoAlerts=data.checkinAlerts.filter(a=>a.isInfo);
+    if(urgentAlerts.length){
+      html+='<div style="font-size:14px;font-weight:600;color:#9E2020;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;">🚨 Symptoms Flagged</div>';
+      urgentAlerts.forEach((a,i)=>{
+        const globalIdx=data.checkinAlerts.indexOf(a);
+        html+=`<div class="ap-checkin-alert"><div class="ap-checkin-title">⚠️ ${a.label}</div><div class="ap-checkin-action">→ ${a.action}</div><div style="margin-top:10px;"><button onclick="resolveCheckinAlert(this)" data-journey="${journey}" data-index="${globalIdx}" style="font-size:13px;padding:6px 14px;background:none;border:1.5px solid var(--sage);color:var(--sage-d);border-radius:8px;cursor:pointer;font-family:DM Sans,sans-serif;">✓ Mark as Resolved</button></div></div>`;
+      });
+    }
+    if(infoAlerts.length){
+      html+='<div style="font-size:14px;font-weight:600;color:var(--sage-d);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;margin-top:4px;">📋 This Week\'s Notes</div>';
+      infoAlerts.forEach((a,i)=>{
+        const globalIdx=data.checkinAlerts.indexOf(a);
+        html+=`<div style="background:var(--sage-l);border:1.5px solid var(--sage);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem;">
+          <div style="font-size:15px;font-weight:600;color:var(--sage-d);margin-bottom:6px;">✅ ${a.label}</div>
+          <div style="font-size:14px;color:var(--text);line-height:1.6;">→ ${a.action}</div>
+          <div style="margin-top:10px;"><button onclick="resolveCheckinAlert(this)" data-journey="${journey}" data-index="${globalIdx}" style="font-size:13px;padding:6px 14px;background:none;border:1.5px solid var(--sage);color:var(--sage-d);border-radius:8px;cursor:pointer;font-family:DM Sans,sans-serif;">✓ Done</button></div>
+        </div>`;
+      });
+    }
   }
   // Abnormal values
   if(filteredAbnormal&&filteredAbnormal.length){
