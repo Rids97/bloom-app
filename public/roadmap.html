@@ -2129,7 +2129,7 @@ async function pfSave(){
       ['ttc','pregnancy','postpartum'].forEach(function(j){
         const existing=loadActionPlan_data(j);
         const existingAlerts=existing?existing.checkinAlerts||[]:[];
-        buildAndSaveActionPlan(userProfile,existingAlerts,j);
+        buildAndSaveActionPlan(userData.profile||{},existingAlerts,j);
       });
       setTimeout(function(){
         if(msg) msg.style.display='none';
