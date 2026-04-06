@@ -647,11 +647,11 @@ async function init(){
     }
     mainCont.style.display='block';
    renderPersonaTags();
-    ['ttc','pregnancy','postpartum'].forEach(j=>{
-      const existing=loadActionPlan_data(j);
-      const existingAlerts=existing?existing.checkinAlerts||[]:[];
-      buildAndSaveActionPlan(userProfile,existingAlerts,j);
-    });
+    ['ttc','pregnancy','postpartum'].forEach(function(j){
+        const existing=loadActionPlan_data(j);
+        const existingAlerts=existing?existing.checkinAlerts||[]:[];
+        buildAndSaveActionPlan(userData.profile||{},existingAlerts,j);
+      });
   const urlTab=new URLSearchParams(window.location.search).get('tab');
     if(urlTab==='pregnancy'||userProfile.isPregnant){
       setTimeout(function(){
@@ -984,31 +984,31 @@ function saveCheckin(){
   const notes=document.getElementById('preg-checkin-notes')?document.getElementById('preg-checkin-notes').value:'';
   const alertChips=['bleeding','reduced_movements','headache','swelling'];
   const triggered=chips.filter(c=>alertChips.includes(c));
-  const btn=document.querySelector('#preg-checkin-panel .checkin-save-btn');
-  if(btn){btn.textContent='Saved ✓';setTimeout(function(){btn.textContent='Save Check-in ✓';},2000);}
+  const saveBtn=document.querySelector('#preg-checkin-panel .checkin-save-btn');
+  if(saveBtn){saveBtn.textContent='Saved ✓';setTimeout(function(){saveBtn.textContent='Save Check-in ✓';},2000);}
+  // Build info alerts from all chips regardless of path
+  const pregInfoMap={
+    scan_done:{label:'Scan done this week',action:'Note the findings and share with your doctor. Update your profile with any new scan results so your Care Checklist stays accurate.'},
+    new_medication:{label:'New medication started',action:'Log it in your profile so Bloom can adjust your guidance. Note any side effects and report them to your doctor.'},
+    nausea:{label:'Nausea / vomiting',action:'Small frequent meals, ginger, and vitamin B6 10mg TDS can help. If unable to keep fluids down — see your doctor today (hyperemesis).'},
+    all_well:{label:'All going well 🌸',action:'Keep attending all scheduled ANC appointments and continue your supplements as prescribed.'},
+  };
+  const pregInfoAlerts=chips.filter(c=>pregInfoMap[c]).map(c=>({...pregInfoMap[c],isInfo:true})).filter(Boolean);
+  const pregCheckinAlerts=[...pregInfoAlerts];
+  if(notes&&notes.trim()){
+    pregCheckinAlerts.push({label:'Your note: "'+notes.trim().slice(0,80)+(notes.trim().length>80?'…':'')+'"',action:'Bloom has noted this. Update your profile if this reflects a new scan finding, test result, or medication so your Care Checklist stays accurate.',isInfo:true});
+  }
+  // Always save action plan before showing any modal
+  buildAndSaveActionPlan(userProfile,pregCheckinAlerts,'pregnancy');
   if(triggered.length>0){
     showCheckinAlert(triggered);
-
-    } else {
-    // These are informational only — shown as tips in Care Checklist, NOT as red flagged symptoms
-    const pregInfoMap={
-      scan_done:{label:'Scan done this week',action:'Note the findings and share with your doctor. Update your profile with any new scan results so your Care Checklist stays accurate.'},
-      new_medication:{label:'New medication started',action:'Log it in your profile so Bloom can adjust your guidance. Note any side effects and report them to your doctor.'},
-      nausea:{label:'Nausea / vomiting',action:'Small frequent meals, ginger, and vitamin B6 10mg TDS can help. If unable to keep fluids down — see your doctor today (hyperemesis).'},
-      all_well:{label:'All going well 🌸',action:'Keep attending all scheduled ANC appointments and continue your supplements as prescribed.'},
-    };
-    // Only pass notes as checkin alert — informational chips are stored separately as infoAlerts
-    const pregInfoAlerts=chips.filter(c=>pregInfoMap[c]).map(c=>({...pregInfoMap[c],isInfo:true})).filter(Boolean);
-    const pregCheckinAlerts=[...pregInfoAlerts];
-    if(notes&&notes.trim()){
-      pregCheckinAlerts.push({label:'Your note: "'+notes.trim().slice(0,80)+(notes.trim().length>80?'…':'')+'"',action:'Bloom has noted this. Update your profile if this reflects a new scan finding, test result, or medication so your Care Checklist stays accurate.',isInfo:true});
-    }
-   buildAndSaveActionPlan(userProfile,pregCheckinAlerts,'pregnancy');
+  } else {
     contentCache={};
     const activeTab=document.querySelector('#preg-sec-tabs .stab.active');
     loadPregSection(currentPregSection||'overview',activeTab);
   }
 }
+  
 async function savePregInvestigation(){
   var test=document.getElementById('preg-log-test').value;
   var result=document.getElementById('preg-log-result').value;
