@@ -1498,13 +1498,9 @@ const AP_SEEN_KEY='bloom_ap_seen';
 function saveActionPlan(journey,data){
   const key='bloom_ap_'+journey;
   const seenKey='bloom_ap_seen_'+journey;
-  const resolvedKey='bloom_ap_resolved_'+journey;
   const payload={...data,savedAt:Date.now()};
   localStorage.setItem(key,JSON.stringify(payload));
   localStorage.removeItem(seenKey);
-  // Clear resolved items whenever action plan is rebuilt from profile
-  // so new abnormal values always show fresh
-  localStorage.removeItem(resolvedKey);
   updateAllAPDots();
 }
 function loadActionPlan_data(journey){
@@ -2131,6 +2127,7 @@ async function pfSave(){
       if(userProfile.pregLmp) localStorage.setItem('bloom_preg_lmp',userProfile.pregLmp);
       computeAndSaveGoldenBox(userProfile);
       ['ttc','pregnancy','postpartum'].forEach(function(j){
+        localStorage.removeItem('bloom_ap_resolved_'+j);
         const existing=loadActionPlan_data(j);
         const existingAlerts=existing?existing.checkinAlerts||[]:[];
         buildAndSaveActionPlan(userData.profile||{},existingAlerts,j);
