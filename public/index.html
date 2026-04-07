@@ -1703,10 +1703,11 @@ async function pfSave(){
       const msg=document.getElementById('pf-saved-msg');
       msg.style.display='block';setTimeout(()=>msg.style.display='none',2000);
      renderProfile();renderCycle();renderTip();renderInsight();
-      buildDashboardActionPlan(userData.profile||{});
+     buildDashboardActionPlan(userData.profile||{});
       // Also update roadmap seen flags so red dot appears
       ['ttc','pregnancy','postpartum'].forEach(function(j){
         localStorage.removeItem('bloom_ap_seen_'+j);
+        localStorage.removeItem('bloom_ap_resolved_'+j);
       });
   }
   }catch(e){alert('Could not save profile. Please try again.');}
