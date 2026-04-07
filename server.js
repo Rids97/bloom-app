@@ -300,10 +300,6 @@ const OrderSchema = new mongoose.Schema({
 const Order = mongoose.models.Order || mongoose.model("Order", OrderSchema);
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-
-// ── SERVER-SIDE ROADMAP CACHE ──
-const roadmapCache = {};
-const CACHE_MAX = 500; // max entries to prevent memory leak
 const razorpay = new Razorpay({ key_id: process.env.RAZORPAY_KEY_ID || "dummy", key_secret: process.env.RAZORPAY_KEY_SECRET || "dummy" });
 const PLANS = {
   pro_monthly:  { amount: 10000, label: "Bloom Pro", planId: "plan_SZJjRcuuxv2eLA", interval: "monthly" },
@@ -830,15 +826,8 @@ app.post("/roadmap-content", auth, async (req, res) => {
       return lines.join('\n');
     }
 
-    const clinicalStage = determineClinicalStage(profile);
+   const clinicalStage = determineClinicalStage(profile);
     const clinicalContext = buildClinicalContext(profile);
-
-    // ── CACHE CHECK ──
-    const cacheKey = [journey, section, clinicalStage, week||'', ppStage||''].join('_');
-    if(roadmapCache[cacheKey]){
-      return res.json({ content: roadmapCache[cacheKey], journey, month, week, section, clinicalStage, cached: true });
-    }
-
     // ── POSTPARTUM ──
     if (journey === 'postpartum') {
       const ppStageLabel = { day1_3: 'Day 1-3 after birth', week1_2: 'Week 1-2 postpartum', week3_6: 'Week 3-6 postpartum', '6week_check': '6-week postnatal check', month3: '3 months postpartum', month6: '6 months postpartum' }[ppStage] || 'postpartum';
@@ -937,8 +926,7 @@ if (!ppParsed.main_content || ppParsed.main_content.trim() === '') {
   const cleaned = ppRaw.replace(/```json|```/g, '').replace(/\*\*/g, '').replace(/\*/g, '').trim();
   ppParsed = { main_content: cleaned, key_points: [], personalised_tip: '', clinical_note: '', action_items: [] };
 }
-if(Object.keys(roadmapCache).length < CACHE_MAX) roadmapCache[cacheKey] = ppParsed;
-    return res.json({ content: ppParsed, journey, section, ppStage });
+return res.json({ content: ppParsed, journey, section, ppStage });
     }
 
     const stageDescriptions = {
@@ -1319,8 +1307,7 @@ if (!parsed.main_content || parsed.main_content.trim() === '') {
   const cleaned = rawText.replace(/```json|```/g, '').replace(/\*\*/g, '').replace(/\*/g, '').trim();
   parsed = { main_content: cleaned, key_points: [], personalised_tip: '', clinical_note: '', action_items: [] };
 }
-if(Object.keys(roadmapCache).length < CACHE_MAX) roadmapCache[cacheKey] = parsed;
-    res.json({ content: parsed, journey, month, week, section, clinicalStage });
+res.json({ content: parsed, journey, month, week, section, clinicalStage });
 
   } catch (err) {
     console.error("Roadmap content error:", err.message);
