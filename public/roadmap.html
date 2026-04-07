@@ -1498,12 +1498,15 @@ const AP_SEEN_KEY='bloom_ap_seen';
 function saveActionPlan(journey,data){
   const key='bloom_ap_'+journey;
   const seenKey='bloom_ap_seen_'+journey;
+  const resolvedKey='bloom_ap_resolved_'+journey;
   const payload={...data,savedAt:Date.now()};
   localStorage.setItem(key,JSON.stringify(payload));
   localStorage.removeItem(seenKey);
+  // Clear resolved items whenever action plan is rebuilt from profile
+  // so new abnormal values always show fresh
+  localStorage.removeItem(resolvedKey);
   updateAllAPDots();
 }
-
 function loadActionPlan_data(journey){
   const raw=localStorage.getItem('bloom_ap_'+journey);
   if(!raw) return null;
@@ -1537,9 +1540,10 @@ function loadActionPlan(journey,btn){
   else currentPPSection='action_plan';
   markAPSeen(journey);
   updateAllAPDots();
-  if(!userProfile||!Object.keys(userProfile).length){
-    buildAndSaveActionPlan(userData.profile||{}, [], journey);
-  }
+  // Always rebuild from fresh profile before rendering
+  const existing=loadActionPlan_data(journey);
+  const existingAlerts=existing?existing.checkinAlerts||[]:[];
+  buildAndSaveActionPlan(userData.profile||userProfile||{},existingAlerts,journey);
   const tabsId=journey==='ttc'?'ttc-sec-tabs':journey==='pregnancy'?'preg-sec-tabs':'pp-sec-tabs';
   const contentId=journey==='ttc'?'ttc-ai-content':journey==='pregnancy'?'preg-ai-content':'pp-ai-content';
   document.querySelectorAll('#'+tabsId+' .stab').forEach(b=>b.classList.remove('active'));
