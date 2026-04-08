@@ -409,7 +409,7 @@ app.post("/forgot-password", async (req, res) => {
     const resetToken = crypto.randomBytes(32).toString("hex");
     const resetTokenExpiry = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
     await User.findByIdAndUpdate(user._id, { resetToken, resetTokenExpiry });
-    const resetUrl = `${process.env.APP_URL || 'https://bloom-fertility.onrender.com'}/reset-password?token=${resetToken}&email=${encodeURIComponent(email)}`;
+    const resetUrl = `${process.env.APP_URL || 'https://bloomhealth.fit'}/reset-password?token=${resetToken}&email=${encodeURIComponent(email)}`;
     await sendResetEmail(email, resetUrl);
     res.json({ message: "If this email is registered, a reset link has been sent." });
   } catch (err) {
