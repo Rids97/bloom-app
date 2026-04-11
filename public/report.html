@@ -338,8 +338,39 @@ function displayResults(data, type) {
     const banner = document.createElement('div');
     banner.className = 'interp-block';
     banner.style.marginBottom = '1.25rem';
-    banner.innerHTML = `<div class="interp-block-title">🖼️ Imaging Study Detected</div><div class="interp-text">This appears to be an ultrasound, Doppler, X-ray, or other imaging study — not a text-based lab report. Bloom cannot extract numeric values from scan images, but has noted what is visually observed below. Please share this image with your doctor for a formal interpretation.</div>`;
+    banner.innerHTML = `<div class="interp-block-title">🖼️ Imaging Study Detected</div><div class="interp-text">This is a scan image (ultrasound, Doppler, MRI, X-ray, CT etc.). Bloom can describe what is visually visible, but <strong>cannot diagnose conditions from scan photos</strong>. Please share this image with your doctor or radiologist for a proper interpretation.<br/><br/>💡 <em>Tip: If you have a printed ultrasound report with written findings and measurements, upload that instead — Bloom can analyze text reports much more accurately.</em></div>`;
     body.appendChild(banner);
+    // For imaging: skip concerns and positives entirely, only show summary, personalised, nextSteps
+    const interp2 = document.createElement('div');
+    interp2.className = 'interp-section';
+    interp2.innerHTML = '<div class="section-label">WHAT BLOOM CAN SEE</div>';
+    if (data.summary) {
+      const block = document.createElement('div');
+      block.className = 'interp-block';
+      block.innerHTML = `<div class="interp-block-title">👁️ Visual Description</div><div class="interp-text">${data.summary}</div>`;
+      interp2.appendChild(block);
+    }
+    if (data.personalised) {
+      const block = document.createElement('div');
+      block.className = 'interp-block';
+      block.innerHTML = `<div class="interp-block-title">🌸 For you</div><div class="interp-text">${data.personalised}</div>`;
+      interp2.appendChild(block);
+    }
+    body.appendChild(interp2);
+    if (data.nextSteps && data.nextSteps.length > 0) {
+      const ns = document.createElement('div');
+      ns.className = 'next-steps';
+      ns.innerHTML = '<div class="next-steps-title">Recommended next steps</div>';
+      data.nextSteps.forEach((step, i) => {
+        const s = document.createElement('div');
+        s.className = 'step-item';
+        s.innerHTML = `<div class="step-num">${i+1}</div><div>${step}</div>`;
+        ns.appendChild(s);
+      });
+      body.appendChild(ns);
+    }
+    document.getElementById('results-card').style.display = 'block';
+    return;
   } else if (data.values && data.values.length > 0) {
     const sec = document.createElement('div');
     sec.className = 'values-section';
