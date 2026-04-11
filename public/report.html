@@ -334,7 +334,13 @@ function displayResults(data, type) {
   document.getElementById('results-type-label').textContent = typeLabels[type] || 'Report';
   const body = document.getElementById('results-body');
   body.innerHTML = '';
-  if (data.values && data.values.length > 0) {
+ if (data.imageType === 'imaging') {
+    const banner = document.createElement('div');
+    banner.className = 'interp-block';
+    banner.style.marginBottom = '1.25rem';
+    banner.innerHTML = `<div class="interp-block-title">🖼️ Imaging Study Detected</div><div class="interp-text">This appears to be an ultrasound, Doppler, X-ray, or other imaging study — not a text-based lab report. Bloom cannot extract numeric values from scan images, but has noted what is visually observed below. Please share this image with your doctor for a formal interpretation.</div>`;
+    body.appendChild(banner);
+  } else if (data.values && data.values.length > 0) {
     const sec = document.createElement('div');
     sec.className = 'values-section';
     sec.innerHTML = '<div class="section-label">EXTRACTED VALUES</div>';
