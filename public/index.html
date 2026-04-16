@@ -1870,7 +1870,6 @@ function openProfileModal(){
  <a class="mbn-item active" href="/app"><span class="mbn-icon">🏠</span><span class="mbn-label">Home</span></a>
   <a class="mbn-item" href="#" onclick="openModal('cycleCalcModal');return false;"><span class="mbn-icon">📅</span><span class="mbn-label">Cycle</span></a>
   <a class="mbn-item" href="#" onclick="openMobileBMI();return false;"><span class="mbn-icon">⚖️</span><span class="mbn-label">BMI</span></a>
-  <a class="mbn-item" href="#" onclick="openMobileChat();return false;"><span class="mbn-icon">💬</span><span class="mbn-label">Chat</span></a>
   <a class="mbn-item" href="#" onclick="window.location.href='/report';return false;"><span class="mbn-icon">🧪</span><span class="mbn-label">Reports</span></a>
   <a class="mbn-item" href="#" onclick="window.location.href='/roadmap';return false;"><span class="mbn-icon">🗺️</span><span class="mbn-label">Roadmap</span></a>
   <a class="mbn-item" href="#" onclick="openProfileModal();return false;"><span class="mbn-icon">👤</span><span class="mbn-label">Profile</span></a>
@@ -2013,6 +2012,32 @@ function runMobileBMI(){
   document.getElementById('mobileBmiResult').style.display='block';
 }
 </script>
+<!-- FLOATING CHAT BUTTON -->
+<div id="floatingChatBtn" onclick="openMobileChat()" style="
+  position:fixed;
+  bottom:90px;
+  right:20px;
+  z-index:998;
+  width:56px;
+  height:56px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#C4704F,#9E5238);
+  box-shadow:0 4px 20px rgba(196,112,79,0.5);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  animation:floatPulse 2.5s ease-in-out infinite;
+  border:2px solid rgba(255,255,255,0.3);
+">
+  <span style="font-size:24px;">🌸</span>
+</div>
+<style>
+@keyframes floatPulse{
+  0%,100%{transform:translateY(0);box-shadow:0 4px 20px rgba(196,112,79,0.5);}
+  50%{transform:translateY(-6px);box-shadow:0 8px 30px rgba(196,112,79,0.7);}
+}
+</style>  
 <!-- MOBILE FULL SCREEN CHAT -->
 <div id="mobileChatOverlay" style="display:none;position:fixed;inset:0;z-index:999;background:var(--cream);flex-direction:column;">
   <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;background:rgba(250,246,241,0.97);backdrop-filter:blur(12px);">
