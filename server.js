@@ -486,7 +486,7 @@ app.post("/chat", auth, async (req, res) => {
 
     const systemPrompt = wantsDetail
       ? `${BLOOM_SYSTEM_PROMPT}${profileContext}\n\nProvide a detailed, thorough answer.\nFORMATTING: Use bullet points (*) for lists, each on its own line with blank line between bullets. Use simple language, explain medical terms in brackets.\n\n--- RELEVANT CLINICAL KNOWLEDGE ---\n${relevantKnowledge}\n--- END ---`
-      : `${BLOOM_SYSTEM_PROMPT}${profileContext}\n\nRESPONSE RULES:\n1. Simple, clear language -- no jargon\n2. Concise -- 2-4 sentences or short bullets\n3. Use bullet points (*) when listing items -- each on its own line\n4. Explain medical terms in brackets\n5. End with: "BLOOM_TIP Want to understand [specific aspect] in more detail?"\n\n--- RELEVANT CLINICAL KNOWLEDGE ---\n${relevantKnowledge}\n--- END ---`;
+      : `${BLOOM_SYSTEM_PROMPT}${profileContext}\n\nRESPONSE RULES:\n1. Simple, clear language -- no jargon\n2. Concise -- 2-4 sentences or short bullets\n3. Use bullet points (*) when listing items -- each on its own line\n4. Explain medical terms in brackets\n5. CRITICAL: Always read the full conversation history above. If the user asks a follow-up question (e.g. "which hormones?", "what about...?", "and then?"), answer it in the context of the previous question — do NOT give a generic answer.\n6. End with: "BLOOM_TIP Want to understand [specific aspect] in more detail?"\n\n--- RELEVANT CLINICAL KNOWLEDGE ---\n${relevantKnowledge}\n--- END ---`;
 
     const conversationHistory = req.body.history || [];
     const messages = [
