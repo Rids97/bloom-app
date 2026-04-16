@@ -561,14 +561,19 @@ ${relevantKnowledge}
       temperature: 0.1,
     });
 
-    const rawReply = response.choices[0].message.content;
-    const lines = rawReply.trim().split('\n');
-    let mainReply = rawReply.trim();
-    let followupSuggestion = null;
-    if (lines.length > 1 && lines[lines.length - 1].startsWith('BLOOM_TIP')) {
-      followupSuggestion = lines[lines.length - 1].replace('BLOOM_TIP', '').trim();
-      mainReply = lines.slice(0, -1).join('\n').trim();
-    }
+   const rawReply = response.choices[0].message.content;
+      const lines = rawReply.trim().split('\n');
+      let mainReply = rawReply.trim();
+      let followupSuggestion = null;
+      // Extract last line if it's a follow-up question
+      const lastLine = lines[lines.length - 1].trim();
+      if (lines.length > 1 && lastLine.startsWith('BLOOM_TIP')) {
+        followupSuggestion = lastLine.replace('BLOOM_TIP', '').trim();
+        mainReply = lines.slice(0, -1).join('\n').trim();
+      } else if (lines.length > 1 && (lastLine.endsWith('?') || lastLine.toLowerCase().includes('would you like'))) {
+        followupSuggestion = lastLine.replace(/^(Would you like to know more about|Want to know more about)\s*/i, '').trim();
+        mainReply = lines.slice(0, -1).join('\n').trim();
+      }
     res.json({ reply: mainReply, followup: wantsDetail ? null : followupSuggestion, isDetailed: wantsDetail, originalMessage: userMessage, messageCount: user.messageCount, plan: user.plan });
   } catch (err) { res.status(500).json({ error: "Something went wrong: " + err.message }); }
 });
