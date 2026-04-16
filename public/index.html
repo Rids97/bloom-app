@@ -196,7 +196,12 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
   .mbn-label{font-size:10px;color:var(--muted);letter-spacing:0.04em;}
   .mbn-item.active .mbn-label{color:var(--terra-d);font-weight:500;}
   .main{padding-bottom:80px;}
-  #floatingChatBtn{display:flex !important;align-items:center !important;justify-content:center !important;}
+  #floatingChatBtn{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+}
+
   .sidebar{display:none;}
   .topbar{padding:0 1rem;}
   .topbar-logo{font-size:24px;}
@@ -214,7 +219,16 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
   .pf-grid2:not(#pf-body .pf-grid2),.pf-grid3:not(#pf-body .pf-grid3){grid-template-columns:1fr;}
 }
 </style>
+
+<style>
+@keyframes floatPulse{
+  0%,100%{transform:translateY(0);box-shadow:0 4px 20px rgba(196,112,79,0.5);}
+  50%{transform:translateY(-6px);box-shadow:0 8px 30px rgba(196,112,79,0.7);}
+}
+</style>
+
 <link rel="manifest" href="/manifest.json">
+
 <meta name="theme-color" content="#C4704F">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1868,20 +1882,14 @@ function openProfileModal(){
   
 </script>
 <nav class="mobile-bottom-nav" id="mobileNav">
- <a class="mbn-item active" href="/app"><span class="mbn-icon">🏠</span><span class="mbn-label">Home</span></a>
+  <a class="mbn-item active" href="/app"><span class="mbn-icon">🏠</span><span class="mbn-label">Home</span></a>
   <a class="mbn-item" href="#" onclick="openModal('cycleCalcModal');return false;"><span class="mbn-icon">📅</span><span class="mbn-label">Cycle</span></a>
   <a class="mbn-item" href="#" onclick="openMobileBMI();return false;"><span class="mbn-icon">⚖️</span><span class="mbn-label">BMI</span></a>
   <a class="mbn-item" href="#" onclick="window.location.href='/report';return false;"><span class="mbn-icon">🧪</span><span class="mbn-label">Reports</span></a>
   <a class="mbn-item" href="#" onclick="window.location.href='/roadmap';return false;"><span class="mbn-icon">🗺️</span><span class="mbn-label">Roadmap</span></a>
   <a class="mbn-item" href="#" onclick="openProfileModal();return false;"><span class="mbn-icon">👤</span><span class="mbn-label">Profile</span></a>
 </nav>
-<script>
-(function(){
-  var style = document.createElement('style');
-  style.innerHTML = '@media(max-width:700px){#floatingChatBtn{display:flex !important;}}';
-  document.head.appendChild(style);
-})();
-</script>
+
 
 <!-- MOBILE BMI OVERLAY -->
 <div id="mobileBMIOverlay" style="display:none;position:fixed;inset:0;z-index:999;background:var(--cream);flex-direction:column;">
@@ -2021,9 +2029,10 @@ function runMobileBMI(){
 }
 </script>
 <!-- FLOATING CHAT BUTTON -->
-<div onclick="openMobileChat()" id="floatingChatBtn" style="position:fixed;bottom:100px;right:20px;z-index:998;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#C4704F,#9E5238);box-shadow:0 4px 20px rgba(196,112,79,0.5);align-items:center;justify-content:center;cursor:pointer;animation:floatPulse 2.5s ease-in-out infinite;border:2px solid rgba(255,255,255,0.3);">
-  <span style="font-size:24px;">🌸</span>
+<div onclick="openMobileChat()" id="floatingChatBtn" style="display:none;position:fixed;bottom:100px;right:20px;z-index:998;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#C4704F,#9E5238);box-shadow:0 4px 20px rgba(196,112,79,0.5);align-items:center;justify-content:center;cursor:pointer;animation:floatPulse 2.5s ease-in-out infinite;border:2px solid rgba(255,255,255,0.3);color:#fff;font-size:22px;font-weight:600;">
+  💬
 </div>
+
 <style>
 @keyframes floatPulse{
   0%,100%{transform:translateY(0);box-shadow:0 4px 20px rgba(196,112,79,0.5);}
@@ -2178,5 +2187,9 @@ if('serviceWorker' in navigator){
   });
 }
 </script>
+<div onclick="openMobileChat()" id="floatingChatBtn" style="display:none;position:fixed;bottom:100px;right:20px;z-index:998;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#C4704F,#9E5238);box-shadow:0 4px 20px rgba(196,112,79,0.5);align-items:center;justify-content:center;cursor:pointer;animation:floatPulse 2.5s ease-in-out infinite;border:2px solid rgba(255,255,255,0.3);">
+  <span style="font-size:24px;">🌸</span>
+</div>
+
 </body>
 </html>
