@@ -472,14 +472,29 @@ app.post("/chat", auth, async (req, res) => {
     }
     user.messageCount++;
     await user.save();
-    const profile = user.profile || {};
+   const profile = user.profile || {};
     const userMessage = req.body.message || '';
     const wantsDetail = req.body.wantsDetail || false;
-    const relevantKnowledge = searchKnowledge(userMessage, profile, 10);
+    const conversationHistory = req.body.history || [];
+    const isInConversation = conversationHistory.length >= 2;
 
+    // Use conversation topic for RAG search when mid-conversation
+    // This prevents profile-biased KB chunks from dominating
+    const lastUserMsgs = conversationHistory.filter(m => m.role === 'user');
+    const lastUserMsg = lastUserMsgs.slice(-1)[0]?.content || '';
+    const secondLastUserMsg = lastUserMsgs.slice(-2)[0]?.content || '';
+    const searchQuery = isInConversation
+      ? `${secondLastUserMsg} ${lastUserMsg} ${userMessage}`.slice(0, 300)
+      : userMessage;
+
+    // Only pass profile to RAG if NOT in active conversation about a different topic
+    const ragProfile = isInConversation ? null : profile;
+    const relevantKnowledge = searchKnowledge(searchQuery, ragProfile, 10);
+
+    // Build profile context
     let profileContext = '';
     if (profile.journeyStage) {
-      profileContext = `\n\nUser profile: ${profile.name || 'User'}, ${profile.journeyStage} journey.`;
+      profileContext = `${profile.name || 'User'}, ${profile.journeyStage} journey.`;
       if (profile.age) profileContext += ` Age: ${profile.age}.`;
       if (profile.symptoms && profile.symptoms.length) profileContext += ` Symptoms: ${profile.symptoms.join(', ')}.`;
       if (profile.medications && profile.medications.length) profileContext += ` Medications: ${profile.medications.join(', ')}.`;
@@ -489,37 +504,59 @@ app.post("/chat", auth, async (req, res) => {
       if (profile.txPhase && profile.txPhase !== 'none') profileContext += ` On: ${profile.txPhase}.`;
     }
 
-    const conversationHistory = req.body.history || [];
-    const isInConversation = conversationHistory.length >= 2;
-
-    // Extract last assistant response topic for context injection
     const lastAssistantMsg = conversationHistory
       .filter(m => m.role === 'assistant')
       .slice(-1)[0]?.content || '';
-    const lastUserMsg = conversationHistory
-      .filter(m => m.role === 'user')
-      .slice(-1)[0]?.content || '';
 
-    const conversationContextBlock = isInConversation
-      ? `\n\n═══ ACTIVE CONVERSATION CONTEXT ═══
-You are mid-conversation with this user. The conversation history is your PRIMARY source of context.
-Last user question was about: "${lastUserMsg.slice(0, 150)}"
-Your last response was about: "${lastAssistantMsg.slice(0, 150)}"
+    // Build system prompt based on conversation state
+    let systemPrompt;
+    if (isInConversation) {
+      systemPrompt = `${BLOOM_SYSTEM_PROMPT}
 
-RULE: Answer the current question in the context of this ongoing conversation.
-The user profile below is BACKGROUND ONLY — do NOT let it override the conversation topic.
-If the user asks "treatment for it", "medicines", "causes", "symptoms", "how to manage" — 
-they are ALWAYS referring to the topic from the conversation above, not their fertility profile.
-═══════════════════════════════════════`
-      : '';
+━━━ CONVERSATION MODE — READ THIS FIRST ━━━
+You are in an ongoing conversation. The chat history below shows the full context.
+The user's previous question was: "${secondLastUserMsg.slice(0, 200)}"
+Your previous answer was about: "${lastAssistantMsg.slice(0, 200)}"
+The user is now asking: "${userMessage}"
 
-    const profileBlock = profileContext
-      ? `\n\n[BACKGROUND PROFILE — use only if directly relevant to current question]\n${profileContext}`
-      : '';
+YOUR ONLY TASK: Answer "${userMessage}" as a continuation of this conversation.
+- If the question is a follow-up (treatment, medicines, causes, complications, symptoms, management), it refers to the PREVIOUS TOPIC in the conversation, not the user's health profile.
+- The health profile below is REFERENCE ONLY — do not use it to determine the topic.
+- Only switch topics if the user clearly introduces an entirely new subject.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    const systemPrompt = wantsDetail
-      ? `${BLOOM_SYSTEM_PROMPT}${conversationContextBlock}${profileBlock}\n\nProvide a detailed, thorough answer about the topic being discussed.\nFORMATTING: Use bullet points (*) for lists, each on its own line with blank line between bullets. Use simple language, explain medical terms in brackets.\n\n--- RELEVANT CLINICAL KNOWLEDGE ---\n${relevantKnowledge}\n--- END ---`
-      : `${BLOOM_SYSTEM_PROMPT}${conversationContextBlock}${profileBlock}\n\nRESPONSE RULES:\n1. Simple, clear language — no jargon\n2. Concise — 3-5 sentences or short bullets (never cut off mid-sentence)\n3. Use bullet points (*) when listing items — each on its own line\n4. Explain medical terms in brackets\n5. NEVER mention book names, textbook names, authors, or citation sources\n6. NEVER output the text "BLOOM_TIP" — end naturally instead\n7. End with one natural follow-up question like: "Would you like to know more about [specific aspect]?"\n\n--- RELEVANT CLINICAL KNOWLEDGE ---\n${relevantKnowledge}\n--- END ---`;
+[HEALTH PROFILE — reference only, do not override conversation topic]
+${profileContext || 'No profile set'}
+
+${wantsDetail ? 'Provide a detailed, thorough answer.\nFORMATTING: Use bullet points (*) for lists, each on its own line. Explain medical terms in brackets.' : `RESPONSE RULES:
+1. Simple, clear language — no jargon
+2. Complete answers — never cut off mid-sentence
+3. Use bullet points (*) when listing items — each on its own line
+4. Explain medical terms in brackets
+5. NEVER mention book names, textbooks, authors, or citations
+6. End with one natural follow-up question about the SAME topic`}
+
+--- RELEVANT CLINICAL KNOWLEDGE ---
+${relevantKnowledge}
+--- END ---`;
+    } else {
+      systemPrompt = `${BLOOM_SYSTEM_PROMPT}
+
+[USER PROFILE]
+${profileContext || 'No profile set'}
+
+${wantsDetail ? 'Provide a detailed, thorough answer.\nFORMATTING: Use bullet points (*) for lists, each on its own line. Explain medical terms in brackets.' : `RESPONSE RULES:
+1. Simple, clear language — no jargon
+2. Complete answers — never cut off mid-sentence
+3. Use bullet points (*) when listing items — each on its own line
+4. Explain medical terms in brackets
+5. NEVER mention book names, textbooks, authors, or citations
+6. End with one natural follow-up question`}
+
+--- RELEVANT CLINICAL KNOWLEDGE ---
+${relevantKnowledge}
+--- END ---`;
+    }
 
     const messages = [
       { role: "system", content: systemPrompt },
