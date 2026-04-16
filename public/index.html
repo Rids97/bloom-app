@@ -2014,7 +2014,7 @@ function runMobileBMI(){
 }
 </script>
 <!-- FLOATING CHAT BUTTON -->
-<div id="floatingChatBtn" onclick="openMobileChat()" style="
+<div onclick="openMobileChat()" style="
   position:fixed;
   bottom:100px;
   right:20px;
@@ -2024,13 +2024,12 @@ function runMobileBMI(){
   border-radius:50%;
   background:linear-gradient(135deg,#C4704F,#9E5238);
   box-shadow:0 4px 20px rgba(196,112,79,0.5);
-  display:flex;
+  display:none;
   align-items:center;
   justify-content:center;
   cursor:pointer;
   animation:floatPulse 2.5s ease-in-out infinite;
- border:2px solid rgba(255,255,255,0.3);
-  display:none;
+  border:2px solid rgba(255,255,255,0.3);
 " id="floatingChatBtn">
   <span style="font-size:24px;">🌸</span>
 </div>
