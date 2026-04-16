@@ -1359,7 +1359,7 @@ async function sendChat(wantsDetail=false,originalMessage=null){
   if(!wantsDetail) input.value='';
   // Silently resolve ambiguous follow-ups using last topic
   if(conversationHistory.length >= 2 && !originalMessage) {
-    const lastQ = conversationHistory.filter(m=>m.role==='user').slice(-1)[0]?.content || '';
+    const lastQ = conversationHistory.filter(m=>m.role==='user').slice(-2)[0]?.content || '';
     const isShortFollowup = msg.split(' ').length <= 6;
     const hasAmbiguousRef = /\bit\b|\bthis\b|\bthat\b|\bthe same\b/i.test(msg);
     if(isShortFollowup && (hasAmbiguousRef || msg.toLowerCase().match(/^(yes|no|why|how|what|when|treatment|causes?|symptoms?|complications?|medicines?|management|tell me more|explain|details?)[\s?]*$/))) {
@@ -2077,7 +2077,7 @@ async function mobileSendChat(wantsDetail=false, originalMessage=null){
   if(!msg) return;
   // Silently resolve ambiguous follow-ups using last topic
   if(conversationHistory.length >= 2 && !originalMessage) {
-    const lastQ = conversationHistory.filter(m=>m.role==='user').slice(-1)[0]?.content || '';
+    const lastQ = conversationHistory.filter(m=>m.role==='user').slice(-2)[0]?.content || '';
     const lastA = conversationHistory.filter(m=>m.role==='assistant').slice(-1)[0]?.content?.slice(0,120) || '';
     const isShortFollowup = msg.split(' ').length <= 6;
     const hasAmbiguousRef = /\bit\b|\bthis\b|\bthat\b|\bthe same\b/i.test(msg);
