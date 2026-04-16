@@ -1357,13 +1357,14 @@ async function sendChat(wantsDetail=false,originalMessage=null){
   let msg=originalMessage||input.value.trim();
   if(!msg) return;
   if(!wantsDetail) input.value='';
- // Always inject last topic for short messages
+ // Silently resolve ambiguous follow-ups using last topic
   if(conversationHistory.length >= 2 && !originalMessage) {
-    const lastUserMessages = conversationHistory.filter(m=>m.role==='user');
-    const lastTopic = lastUserMessages.slice(-1)[0]?.content || '';
-    const lastAnswer = conversationHistory.filter(m=>m.role==='assistant').slice(-1)[0]?.content?.slice(0,150) || '';
-    if(msg.split(' ').length <= 10) {
-      msg = `${msg} [CONTEXT: This is a follow-up to our discussion. Last topic: "${lastTopic.slice(0,100)}". Previous answer summary: "${lastAnswer.slice(0,150)}". Answer ONLY about this topic.]`;
+    const lastQ = conversationHistory.filter(m=>m.role==='user').slice(-2)[0]?.content || '';
+    const lastA = conversationHistory.filter(m=>m.role==='assistant').slice(-1)[0]?.content?.slice(0,120) || '';
+    const isShortFollowup = msg.split(' ').length <= 8;
+    const hasAmbiguousRef = /\bit\b|\bthis\b|\bthat\b|\bthe same\b/i.test(msg);
+    if(isShortFollowup && (hasAmbiguousRef || msg.toLowerCase().match(/^(yes|no|why|how|what|when|treatment|causes?|symptoms?|complications?|medicines?|management|tell me more|explain|details?)[\s?]*$/))) {
+      msg = `${msg} (continuing our discussion about: ${lastQ.slice(0,80)})`;
     }
   }
   document.getElementById('sendBtn').disabled=true;
@@ -2078,13 +2079,13 @@ async function mobileSendChat(wantsDetail=false, originalMessage=null){
   const input = document.getElementById('mobileChatInput');
   let msg = originalMessage || input.value.trim();
   if(!msg) return;
-  // Always inject last topic for short messages
+  // Silently resolve ambiguous follow-ups using last topic
   if(conversationHistory.length >= 2 && !originalMessage) {
-    const lastUserMessages = conversationHistory.filter(m=>m.role==='user');
-    const lastTopic = lastUserMessages.slice(-1)[0]?.content || '';
-    const lastAnswer = conversationHistory.filter(m=>m.role==='assistant').slice(-1)[0]?.content?.slice(0,150) || '';
-    if(msg.split(' ').length <= 10) {
-      msg = `${msg} [CONTEXT: This is a follow-up to our discussion. Last topic: "${lastTopic.slice(0,100)}". Previous answer summary: "${lastAnswer.slice(0,150)}". Answer ONLY about this topic.]`;
+    const lastQ = conversationHistory.filter(m=>m.role==='user').slice(-1)[0]?.content || '';
+    const isShortFollowup = msg.split(' ').length <= 6;
+    const hasAmbiguousRef = /\bit\b|\bthis\b|\bthat\b|\bthe same\b/i.test(msg);
+    if(isShortFollowup && (hasAmbiguousRef || msg.toLowerCase().match(/^(yes|no|why|how|what|when|treatment|causes?|symptoms?|complications?|medicines?|management|tell me more|explain|details?)[\s?]*$/))) {
+      msg = `${msg} (continuing our discussion about: ${lastQ.slice(0,80)})`;
     }
   }
   if(userPlan==='free'){
