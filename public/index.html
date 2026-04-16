@@ -1875,6 +1875,12 @@ function openProfileModal(){
   <a class="mbn-item" href="#" onclick="window.location.href='/roadmap';return false;"><span class="mbn-icon">🗺️</span><span class="mbn-label">Roadmap</span></a>
   <a class="mbn-item" href="#" onclick="openProfileModal();return false;"><span class="mbn-icon">👤</span><span class="mbn-label">Profile</span></a>
 </nav>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  var btn = document.getElementById('floatingChatBtn');
+  if(btn) { btn.style.display='flex'; }
+});
+</script>
 
 <!-- MOBILE BMI OVERLAY -->
 <div id="mobileBMIOverlay" style="display:none;position:fixed;inset:0;z-index:999;background:var(--cream);flex-direction:column;">
