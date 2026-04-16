@@ -1418,7 +1418,10 @@ function appendBloomMsg(text,followup,isDetailed,originalMsg){
   div.innerHTML=html;wrap.appendChild(div);wrap.scrollTop=wrap.scrollHeight;return div;
 }
 
-async function tellMeMore(btn,originalMsg){btn.disabled=true;btn.textContent='Loading…';await sendChat(true,originalMsg);}
+async function tellMeMore(btn,originalMsg){
+  btn.disabled=true;btn.textContent='Loading…';
+  await sendChat(true,originalMsg+' — please expand on your previous answer in detail');
+}
 
 function appendMsg(text,who){
   const wrap=document.getElementById('chatMessages');
@@ -2068,7 +2071,7 @@ function mobileSendSug(el){
 async function mobileTellMeMore(btn, originalMsg){
   btn.disabled=true;
   btn.textContent='Loading…';
-  await mobileSendChat(true, originalMsg);
+  await mobileSendChat(true, originalMsg+' — please expand on your previous answer in detail');
 }
 
 async function mobileSendChat(wantsDetail=false, originalMessage=null){
