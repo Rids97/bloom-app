@@ -555,10 +555,10 @@ ${relevantKnowledge}
     ];
 
     const response = await groq.chat.completions.create({
-     model: "qwen-qwq-32b",
+      model: "llama-3.3-70b-versatile",
       messages: messages,
       max_tokens: wantsDetail ? 1500 : 700,
-      temperature: 0.2,
+      temperature: 0.1,
     });
 
     const rawReply = response.choices[0].message.content;
