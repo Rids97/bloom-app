@@ -2029,16 +2029,12 @@ function runMobileBMI(){
 }
 </script>
 <!-- FLOATING CHAT BUTTON -->
-<div onclick="openMobileChat()" id="floatingChatBtn" style="display:none;position:fixed;bottom:100px;right:20px;z-index:998;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#C4704F,#9E5238);box-shadow:0 4px 20px rgba(196,112,79,0.5);align-items:center;justify-content:center;cursor:pointer;animation:floatPulse 2.5s ease-in-out infinite;border:2px solid rgba(255,255,255,0.3);color:#fff;font-size:22px;font-weight:600;">
+<div onclick="openMobileChat()" id="floatingChatBtn" style="display:none;position:fixed;bottom:100px;right:20px;z-index:998;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#C4704F,#9E5238);box-shadow:0 4px 20px rgba(196,112,79,0.5);align-items:center;justify-content:center;cursor:pointer;animation:floatPulse 2.5s ease-in-out infinite;border:2px solid rgba(255,255,255,0.3);color:#fff;font-size:22px;line-height:1;">
   💬
 </div>
 
-<style>
-@keyframes floatPulse{
-  0%,100%{transform:translateY(0);box-shadow:0 4px 20px rgba(196,112,79,0.5);}
-  50%{transform:translateY(-6px);box-shadow:0 8px 30px rgba(196,112,79,0.7);}
-}
-</style>  
+
+
 <!-- MOBILE FULL SCREEN CHAT -->
 <div id="mobileChatOverlay" style="display:none;position:fixed;inset:0;z-index:999;background:var(--cream);flex-direction:column;">
   <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;background:rgba(250,246,241,0.97);backdrop-filter:blur(12px);">
@@ -2187,9 +2183,7 @@ if('serviceWorker' in navigator){
   });
 }
 </script>
-<div onclick="openMobileChat()" id="floatingChatBtn" style="display:none;position:fixed;bottom:100px;right:20px;z-index:998;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#C4704F,#9E5238);box-shadow:0 4px 20px rgba(196,112,79,0.5);align-items:center;justify-content:center;cursor:pointer;animation:floatPulse 2.5s ease-in-out infinite;border:2px solid rgba(255,255,255,0.3);">
-  <span style="font-size:24px;">🌸</span>
-</div>
+
 
 </body>
 </html>
