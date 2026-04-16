@@ -491,19 +491,9 @@ app.post("/chat", auth, async (req, res) => {
     const ragProfile = isInConversation ? null : profile;
     const relevantKnowledge = searchKnowledge(searchQuery, ragProfile, 10);
 
-    // Build profile context
+    // Build minimal profile context - only name and journey, no clinical values
     let profileContext = '';
-    if (profile.journeyStage) {
-      profileContext = `${profile.name || 'User'}, ${profile.journeyStage} journey.`;
-      if (profile.age) profileContext += ` Age: ${profile.age}.`;
-      if (profile.symptoms && profile.symptoms.length) profileContext += ` Symptoms: ${profile.symptoms.join(', ')}.`;
-      if (profile.medications && profile.medications.length) profileContext += ` Medications: ${profile.medications.join(', ')}.`;
-      if (profile.amh) profileContext += ` AMH: ${profile.amh} ng/mL.`;
-      if (profile.tsh) profileContext += ` TSH: ${profile.tsh} mIU/L.`;
-      if (profile.workupStatus) profileContext += ` Workup: ${profile.workupStatus}.`;
-      if (profile.txPhase && profile.txPhase !== 'none') profileContext += ` On: ${profile.txPhase}.`;
-    }
-
+    if (profile.name) profileContext = `User's name: ${profile.name}.`;
     const lastAssistantMsg = conversationHistory
       .filter(m => m.role === 'assistant')
       .slice(-1)[0]?.content || '';
@@ -565,7 +555,7 @@ ${relevantKnowledge}
     ];
 
     const response = await groq.chat.completions.create({
-      model: "meta-llama/llama-4-scout-17b-16e-instruct",
+     model: "qwen-qwq-32b",
       messages: messages,
       max_tokens: wantsDetail ? 1500 : 700,
       temperature: 0.2,
