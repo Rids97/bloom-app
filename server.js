@@ -557,7 +557,7 @@ ${relevantKnowledge}
     const response = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
       messages: messages,
-      max_tokens: wantsDetail ? 1500 : 700,
+      max_tokens: wantsDetail ? 1500 : 350,
       temperature: 0.1,
     });
 
@@ -570,8 +570,8 @@ ${relevantKnowledge}
       if (lines.length > 1 && lastLine.startsWith('BLOOM_TIP')) {
         followupSuggestion = lastLine.replace('BLOOM_TIP', '').trim();
         mainReply = lines.slice(0, -1).join('\n').trim();
-      } else if (lines.length > 1 && (lastLine.endsWith('?') || lastLine.toLowerCase().includes('would you like'))) {
-        followupSuggestion = lastLine.replace(/^(Would you like to know more about|Want to know more about)\s*/i, '').trim();
+     } else if (lines.length > 1 && (lastLine.endsWith('?') || lastLine.toLowerCase().includes('would you like'))) {
+        followupSuggestion = 'Learn more about this topic';
         mainReply = lines.slice(0, -1).join('\n').trim();
       }
     res.json({ reply: mainReply, followup: wantsDetail ? null : followupSuggestion, isDetailed: wantsDetail, originalMessage: userMessage, messageCount: user.messageCount, plan: user.plan });
