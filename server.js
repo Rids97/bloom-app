@@ -524,7 +524,7 @@ FORMATTING: Use bullet points (*) for lists, each on its own line. Explain medic
 2. Simple language — explain medical terms in brackets
 3. Use bullet points (*) only if listing multiple items
 4. NEVER mention book names, textbooks, authors, or citations
-5. End with ONE short follow-up question on the SAME topic`}
+5. Do NOT ask the user any questions — just give the answer`}
 
 --- RELEVANT CLINICAL KNOWLEDGE ---
 ${relevantKnowledge}
@@ -541,7 +541,7 @@ FORMATTING: Use bullet points (*) for lists, each on its own line. Explain medic
 2. Simple language — explain medical terms in brackets
 3. Use bullet points (*) only if listing multiple items
 4. NEVER mention book names, textbooks, authors, or citations
-5. End with ONE short follow-up question on the SAME topic`}
+5. Do NOT ask the user any questions — just give the answer`}
 
 --- RELEVANT CLINICAL KNOWLEDGE ---
 ${relevantKnowledge}
@@ -570,10 +570,11 @@ ${relevantKnowledge}
       if (lines.length > 1 && lastLine.startsWith('BLOOM_TIP')) {
         followupSuggestion = lastLine.replace('BLOOM_TIP', '').trim();
         mainReply = lines.slice(0, -1).join('\n').trim();
-     } else if (lines.length > 1 && (lastLine.endsWith('?') || lastLine.toLowerCase().includes('would you like'))) {
-        followupSuggestion = 'Learn more about this topic';
+    } else if (lines.length > 1 && (lastLine.endsWith('?') || lastLine.toLowerCase().includes('would you like'))) {
         mainReply = lines.slice(0, -1).join('\n').trim();
       }
+      // Always show tell-me-more button
+      followupSuggestion = 'Tell me more';
     res.json({ reply: mainReply, followup: wantsDetail ? null : followupSuggestion, isDetailed: wantsDetail, originalMessage: userMessage, messageCount: user.messageCount, plan: user.plan });
   } catch (err) { res.status(500).json({ error: "Something went wrong: " + err.message }); }
 });
