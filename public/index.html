@@ -2099,7 +2099,10 @@ async function mobileSendChat(wantsDetail=false, originalMessage=null){
       limitDiv.innerHTML = '<div class="msg-avatar bloom">B</div><div class="msg-content"><div class="msg-bubble">Your 3-day free trial has ended. Upgrade to Bloom Pro or Bloom Complete to continue chatting 🌸</div></div>';
       mobileMsgs.appendChild(limitDiv);
       openPaywall();
-    } else if(data.reply){
+   } else if(data.reply){
+      conversationHistory.push({role:'user',content:msg});
+      conversationHistory.push({role:'assistant',content:data.reply});
+      if(conversationHistory.length>20) conversationHistory=conversationHistory.slice(-20);
       const replyDiv = document.createElement('div');
       replyDiv.className = 'msg';
       let replyHtml = `<div class="msg-avatar bloom">B</div><div class="msg-content"><div class="msg-bubble" style="line-height:1.85;">${formatChatText(data.reply)}</div>`;
@@ -2113,7 +2116,6 @@ async function mobileSendChat(wantsDetail=false, originalMessage=null){
       mobileMsgs.appendChild(replyDiv);
       messageCount = data.messageCount || messageCount + 1;
       document.getElementById('mobileMsgLimit').textContent = document.getElementById('msgLimitLabel').textContent;
-      // Also sync to main chat
       document.getElementById('chatMessages').appendChild(userDiv.cloneNode(true));
       document.getElementById('chatMessages').appendChild(replyDiv.cloneNode(true));
     }
