@@ -489,23 +489,48 @@ app.post("/chat", auth, async (req, res) => {
       if (profile.txPhase && profile.txPhase !== 'none') profileContext += ` On: ${profile.txPhase}.`;
     }
 
-    const systemPrompt = wantsDetail
-      ? `${BLOOM_SYSTEM_PROMPT}${profileContext}\n\nProvide a detailed, thorough answer.\nFORMATTING: Use bullet points (*) for lists, each on its own line with blank line between bullets. Use simple language, explain medical terms in brackets.\n\n--- RELEVANT CLINICAL KNOWLEDGE ---\n${relevantKnowledge}\n--- END ---`
-      : `${BLOOM_SYSTEM_PROMPT}${profileContext}\n\nRESPONSE RULES:\n1. Simple, clear language -- no jargon\n2. Concise -- 2-4 sentences or short bullets\n3. Use bullet points (*) when listing items -- each on its own line\n4. Explain medical terms in brackets\n5. CRITICAL: Always read the full conversation history above. If the user asks a follow-up question (e.g. "which hormones?", "what about...?", "and then?"), answer it in the context of the previous question — do NOT give a generic answer.\n6. End with: "BLOOM_TIP Want to understand [specific aspect] in more detail?"\n\n--- RELEVANT CLINICAL KNOWLEDGE ---\n${relevantKnowledge}\n--- END ---`;
+    const conversationHistory = req.body.history || [];
+    const isInConversation = conversationHistory.length >= 2;
 
-   const conversationHistory = req.body.history || [];
-    const contextNote = conversationHistory.length > 0
-      ? `\n\nIMPORTANT: The user is currently in an active conversation. The last topic discussed was: "${conversationHistory[conversationHistory.length-2]?.content || conversationHistory[conversationHistory.length-1]?.content || ''}". If the user sends a short follow-up like "treatment for it", "medicines for it", "how to treat", "what causes it" — answer STRICTLY about that previous topic, NOT about their fertility profile.`
+    // Extract last assistant response topic for context injection
+    const lastAssistantMsg = conversationHistory
+      .filter(m => m.role === 'assistant')
+      .slice(-1)[0]?.content || '';
+    const lastUserMsg = conversationHistory
+      .filter(m => m.role === 'user')
+      .slice(-1)[0]?.content || '';
+
+    const conversationContextBlock = isInConversation
+      ? `\n\n═══ ACTIVE CONVERSATION CONTEXT ═══
+You are mid-conversation with this user. The conversation history is your PRIMARY source of context.
+Last user question was about: "${lastUserMsg.slice(0, 150)}"
+Your last response was about: "${lastAssistantMsg.slice(0, 150)}"
+
+RULE: Answer the current question in the context of this ongoing conversation.
+The user profile below is BACKGROUND ONLY — do NOT let it override the conversation topic.
+If the user asks "treatment for it", "medicines", "causes", "symptoms", "how to manage" — 
+they are ALWAYS referring to the topic from the conversation above, not their fertility profile.
+═══════════════════════════════════════`
       : '';
+
+    const profileBlock = profileContext
+      ? `\n\n[BACKGROUND PROFILE — use only if directly relevant to current question]\n${profileContext}`
+      : '';
+
+    const systemPrompt = wantsDetail
+      ? `${BLOOM_SYSTEM_PROMPT}${conversationContextBlock}${profileBlock}\n\nProvide a detailed, thorough answer about the topic being discussed.\nFORMATTING: Use bullet points (*) for lists, each on its own line with blank line between bullets. Use simple language, explain medical terms in brackets.\n\n--- RELEVANT CLINICAL KNOWLEDGE ---\n${relevantKnowledge}\n--- END ---`
+      : `${BLOOM_SYSTEM_PROMPT}${conversationContextBlock}${profileBlock}\n\nRESPONSE RULES:\n1. Simple, clear language — no jargon\n2. Concise — 3-5 sentences or short bullets (never cut off mid-sentence)\n3. Use bullet points (*) when listing items — each on its own line\n4. Explain medical terms in brackets\n5. NEVER mention book names, textbook names, authors, or citation sources\n6. NEVER output the text "BLOOM_TIP" — end naturally instead\n7. End with one natural follow-up question like: "Would you like to know more about [specific aspect]?"\n\n--- RELEVANT CLINICAL KNOWLEDGE ---\n${relevantKnowledge}\n--- END ---`;
+
     const messages = [
-      { role: "system", content: systemPrompt + contextNote },
-      ...conversationHistory.slice(-10),
+      { role: "system", content: systemPrompt },
+      ...conversationHistory.slice(-14),
       { role: "user", content: userMessage }
     ];
+
     const response = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
       messages: messages,
-      max_tokens: wantsDetail ? 1200 : 350,
+      max_tokens: wantsDetail ? 1500 : 700,
     });
 
     const rawReply = response.choices[0].message.content;
