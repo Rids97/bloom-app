@@ -1878,12 +1878,12 @@ function openProfileModal(){
 <script>
 window.addEventListener('load', function(){
   if(window.innerWidth <= 700){
-    var btn = document.getElementById('floatingChatBtn');
-    if(btn){
-      btn.style.cssText = btn.style.cssText.replace('display:none','display:flex');
-      btn.style.setProperty('display','flex','important');
-    }
+    document.getElementById('floatingChatBtn').style.display = 'flex';
   }
+});
+window.addEventListener('resize', function(){
+  var btn = document.getElementById('floatingChatBtn');
+  btn.style.display = window.innerWidth <= 700 ? 'flex' : 'none';
 });
 </script>
 
@@ -2025,23 +2025,7 @@ function runMobileBMI(){
 }
 </script>
 <!-- FLOATING CHAT BUTTON -->
-<div onclick="openMobileChat()" style="
-  position:fixed;
-  bottom:100px;
-  right:20px;
-  z-index:998;
-  width:56px;
-  height:56px;
-  border-radius:50%;
-  background:linear-gradient(135deg,#C4704F,#9E5238);
-  box-shadow:0 4px 20px rgba(196,112,79,0.5);
-  display:none;
-  align-items:center !important;
-  justify-content:center !important;
-  cursor:pointer;
-  animation:floatPulse 2.5s ease-in-out infinite;
-  border:2px solid rgba(255,255,255,0.3);
-" id="floatingChatBtn" class="floatingChatBtn">
+<div onclick="openMobileChat()" id="floatingChatBtn" style="position:fixed;bottom:100px;right:20px;z-index:998;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#C4704F,#9E5238);box-shadow:0 4px 20px rgba(196,112,79,0.5);align-items:center;justify-content:center;cursor:pointer;animation:floatPulse 2.5s ease-in-out infinite;border:2px solid rgba(255,255,255,0.3);display:none;">
   <span style="font-size:24px;">🌸</span>
 </div>
 <style>
