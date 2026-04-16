@@ -518,13 +518,13 @@ YOUR ONLY TASK: Answer "${userMessage}" as a continuation of this conversation.
 [HEALTH PROFILE — reference only, do not override conversation topic]
 ${profileContext || 'No profile set'}
 
-${wantsDetail ? 'Provide a detailed, thorough answer.\nFORMATTING: Use bullet points (*) for lists, each on its own line. Explain medical terms in brackets.' : `RESPONSE RULES:
-1. Simple, clear language — no jargon
-2. Complete answers — never cut off mid-sentence
-3. Use bullet points (*) when listing items — each on its own line
-4. Explain medical terms in brackets
-5. NEVER mention book names, textbooks, authors, or citations
-6. End with one natural follow-up question about the SAME topic`}
+${wantsDetail ? `Provide a thorough, detailed answer — full explanation with all relevant points.
+FORMATTING: Use bullet points (*) for lists, each on its own line. Explain medical terms in brackets.` : `RESPONSE RULES:
+1. Answer briefly and to the point — give only the core facts, no padding or elaboration
+2. Simple language — explain medical terms in brackets
+3. Use bullet points (*) only if listing multiple items
+4. NEVER mention book names, textbooks, authors, or citations
+5. End with ONE short follow-up question on the SAME topic`}
 
 --- RELEVANT CLINICAL KNOWLEDGE ---
 ${relevantKnowledge}
@@ -535,13 +535,13 @@ ${relevantKnowledge}
 [USER PROFILE]
 ${profileContext || 'No profile set'}
 
-${wantsDetail ? 'Provide a detailed, thorough answer.\nFORMATTING: Use bullet points (*) for lists, each on its own line. Explain medical terms in brackets.' : `RESPONSE RULES:
-1. Simple, clear language — no jargon
-2. Complete answers — never cut off mid-sentence
-3. Use bullet points (*) when listing items — each on its own line
-4. Explain medical terms in brackets
-5. NEVER mention book names, textbooks, authors, or citations
-6. End with one natural follow-up question`}
+${wantsDetail ? `Provide a thorough, detailed answer — full explanation with all relevant points.
+FORMATTING: Use bullet points (*) for lists, each on its own line. Explain medical terms in brackets.` : `RESPONSE RULES:
+1. Answer briefly and to the point — give only the core facts, no padding or elaboration
+2. Simple language — explain medical terms in brackets
+3. Use bullet points (*) only if listing multiple items
+4. NEVER mention book names, textbooks, authors, or citations
+5. End with ONE short follow-up question on the SAME topic`}
 
 --- RELEVANT CLINICAL KNOWLEDGE ---
 ${relevantKnowledge}
