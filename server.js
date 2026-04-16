@@ -500,53 +500,32 @@ app.post("/chat", auth, async (req, res) => {
 
     // Build system prompt based on conversation state
     let systemPrompt;
-    if (isInConversation) {
-      systemPrompt = `${BLOOM_SYSTEM_PROMPT}
-
-━━━ CONVERSATION MODE — READ THIS FIRST ━━━
-You are in an ongoing conversation. The chat history below shows the full context.
-The user's previous question was: "${secondLastUserMsg.slice(0, 200)}"
-Your previous answer was about: "${lastAssistantMsg.slice(0, 200)}"
-The user is now asking: "${userMessage}"
-
-YOUR ONLY TASK: Answer "${userMessage}" as a continuation of this conversation.
-- If the question is a follow-up (treatment, medicines, causes, complications, symptoms, management), it refers to the PREVIOUS TOPIC in the conversation, not the user's health profile.
-- The health profile below is REFERENCE ONLY — do not use it to determine the topic.
-- Only switch topics if the user clearly introduces an entirely new subject.
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-[HEALTH PROFILE — reference only, do not override conversation topic]
-${profileContext || 'No profile set'}
-
-${wantsDetail ? `Provide a thorough, detailed answer — full explanation with all relevant points.
-FORMATTING: Use bullet points (*) for lists, each on its own line. Explain medical terms in brackets.` : `RESPONSE RULES:
-1. Answer briefly and to the point — give only the core facts, no padding or elaboration
+    const responseRules = wantsDetail
+      ? `Provide a thorough, detailed answer — full explanation with all relevant points.
+FORMATTING: Use bullet points (*) for lists, each on its own line. Explain medical terms in brackets.`
+      : `RESPONSE RULES:
+1. Answer briefly and to the point — core facts only, no padding
 2. Simple language — explain medical terms in brackets
 3. Use bullet points (*) only if listing multiple items
 4. NEVER mention book names, textbooks, authors, or citations
-5. Do NOT ask the user any questions — just give the answer`}
+5. NEVER ask the user any question — not yes/no, not open-ended, nothing`;
 
---- RELEVANT CLINICAL KNOWLEDGE ---
-${relevantKnowledge}
---- END ---`;
-    } else {
-      systemPrompt = `${BLOOM_SYSTEM_PROMPT}
+    systemPrompt = `${BLOOM_SYSTEM_PROMPT}
 
 [USER PROFILE]
 ${profileContext || 'No profile set'}
 
-${wantsDetail ? `Provide a thorough, detailed answer — full explanation with all relevant points.
-FORMATTING: Use bullet points (*) for lists, each on its own line. Explain medical terms in brackets.` : `RESPONSE RULES:
-1. Answer briefly and to the point — give only the core facts, no padding or elaboration
-2. Simple language — explain medical terms in brackets
-3. Use bullet points (*) only if listing multiple items
-4. NEVER mention book names, textbooks, authors, or citations
-5. Do NOT ask the user any questions — just give the answer`}
+[CONVERSATION CONTEXT]
+${isInConversation ? `Previous topic discussed: "${secondLastUserMsg.slice(0,150)}"
+Previous answer given: "${lastAssistantMsg.slice(0,200)}"
+Current question: "${userMessage}"
+RULE: If the current question contains [CONTEXT] tags, extract the topic from those tags and answer about THAT topic only. The [CONTEXT] tags are system-generated and not from the user.` : 'This is the start of the conversation.'}
+
+${responseRules}
 
 --- RELEVANT CLINICAL KNOWLEDGE ---
 ${relevantKnowledge}
 --- END ---`;
-    }
 
     const messages = [
       { role: "system", content: systemPrompt },
