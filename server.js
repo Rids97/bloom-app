@@ -488,9 +488,15 @@ app.post("/chat", auth, async (req, res) => {
       ? `${BLOOM_SYSTEM_PROMPT}${profileContext}\n\nProvide a detailed, thorough answer.\nFORMATTING: Use bullet points (*) for lists, each on its own line with blank line between bullets. Use simple language, explain medical terms in brackets.\n\n--- RELEVANT CLINICAL KNOWLEDGE ---\n${relevantKnowledge}\n--- END ---`
       : `${BLOOM_SYSTEM_PROMPT}${profileContext}\n\nRESPONSE RULES:\n1. Simple, clear language -- no jargon\n2. Concise -- 2-4 sentences or short bullets\n3. Use bullet points (*) when listing items -- each on its own line\n4. Explain medical terms in brackets\n5. End with: "BLOOM_TIP Want to understand [specific aspect] in more detail?"\n\n--- RELEVANT CLINICAL KNOWLEDGE ---\n${relevantKnowledge}\n--- END ---`;
 
+    const conversationHistory = req.body.history || [];
+    const messages = [
+      { role: "system", content: systemPrompt },
+      ...conversationHistory.slice(-10),
+      { role: "user", content: userMessage }
+    ];
     const response = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
-      messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userMessage }],
+      messages: messages,
       max_tokens: wantsDetail ? 1200 : 350,
     });
 
