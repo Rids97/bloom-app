@@ -493,9 +493,12 @@ app.post("/chat", auth, async (req, res) => {
       ? `${BLOOM_SYSTEM_PROMPT}${profileContext}\n\nProvide a detailed, thorough answer.\nFORMATTING: Use bullet points (*) for lists, each on its own line with blank line between bullets. Use simple language, explain medical terms in brackets.\n\n--- RELEVANT CLINICAL KNOWLEDGE ---\n${relevantKnowledge}\n--- END ---`
       : `${BLOOM_SYSTEM_PROMPT}${profileContext}\n\nRESPONSE RULES:\n1. Simple, clear language -- no jargon\n2. Concise -- 2-4 sentences or short bullets\n3. Use bullet points (*) when listing items -- each on its own line\n4. Explain medical terms in brackets\n5. CRITICAL: Always read the full conversation history above. If the user asks a follow-up question (e.g. "which hormones?", "what about...?", "and then?"), answer it in the context of the previous question — do NOT give a generic answer.\n6. End with: "BLOOM_TIP Want to understand [specific aspect] in more detail?"\n\n--- RELEVANT CLINICAL KNOWLEDGE ---\n${relevantKnowledge}\n--- END ---`;
 
-    const conversationHistory = req.body.history || [];
+   const conversationHistory = req.body.history || [];
+    const contextNote = conversationHistory.length > 0
+      ? `\n\nIMPORTANT: The user is currently in an active conversation. The last topic discussed was: "${conversationHistory[conversationHistory.length-2]?.content || conversationHistory[conversationHistory.length-1]?.content || ''}". If the user sends a short follow-up like "treatment for it", "medicines for it", "how to treat", "what causes it" — answer STRICTLY about that previous topic, NOT about their fertility profile.`
+      : '';
     const messages = [
-      { role: "system", content: systemPrompt },
+      { role: "system", content: systemPrompt + contextNote },
       ...conversationHistory.slice(-10),
       { role: "user", content: userMessage }
     ];
