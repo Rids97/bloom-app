@@ -188,7 +188,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
 input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 .mobile-bottom-nav{display:none;}
-#floatingChatBtn{display:none;}
 @media(max-width:700px){
   .mobile-bottom-nav{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(250,246,241,0.97);backdrop-filter:blur(12px);border-top:1px solid var(--border);padding:8px 0 calc(8px + env(safe-area-inset-bottom));justify-content:space-around;align-items:center;}
   .mbn-item{display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;padding:4px 12px;border-radius:10px;transition:background 0.15s;}
@@ -197,11 +196,7 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
   .mbn-label{font-size:10px;color:var(--muted);letter-spacing:0.04em;}
   .mbn-item.active .mbn-label{color:var(--terra-d);font-weight:500;}
   .main{padding-bottom:80px;}
-  #floatingChatBtn{
-  display:flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-}
+ 
 
   .sidebar{display:none;}
   .topbar{padding:0 1rem;}
@@ -2030,7 +2025,7 @@ function runMobileBMI(){
 }
 </script>
 <!-- FLOATING CHAT BUTTON -->
-<div onclick="openMobileChat()" id="floatingChatBtn" style="position:fixed;bottom:100px;right:20px;z-index:998;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#C4704F,#9E5238);box-shadow:0 4px 20px rgba(196,112,79,0.5);align-items:center;justify-content:center;cursor:pointer;animation:floatPulse 2.5s ease-in-out infinite;border:2px solid rgba(255,255,255,0.3);color:#fff;font-size:22px;line-height:1;">
+<div onclick="openMobileChat()" id="floatingChatBtn" style="position:fixed;bottom:100px;right:20px;z-index:998;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#C4704F,#9E5238);box-shadow:0 4px 20px rgba(196,112,79,0.5);display:flex;align-items:center;justify-content:center;cursor:pointer;animation:floatPulse 2.5s ease-in-out infinite;border:2px solid rgba(255,255,255,0.3);color:#fff;font-size:22px;line-height:1;">
   💬
 </div>
 
