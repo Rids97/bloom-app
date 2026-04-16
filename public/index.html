@@ -196,8 +196,7 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
   .mbn-label{font-size:10px;color:var(--muted);letter-spacing:0.04em;}
   .mbn-item.active .mbn-label{color:var(--terra-d);font-weight:500;}
   .main{padding-bottom:80px;}
-  #floatingChatBtn{display:flex !important;}
-  @media(min-width:701px){#floatingChatBtn{display:none !important;}}
+  #floatingChatBtn{display:flex !important;align-items:center !important;justify-content:center !important;}
   .sidebar{display:none;}
   .topbar{padding:0 1rem;}
   .topbar-logo{font-size:24px;}
@@ -1877,15 +1876,11 @@ function openProfileModal(){
   <a class="mbn-item" href="#" onclick="openProfileModal();return false;"><span class="mbn-icon">👤</span><span class="mbn-label">Profile</span></a>
 </nav>
 <script>
-window.addEventListener('load', function(){
-  if(window.innerWidth <= 700){
-    document.getElementById('floatingChatBtn').style.display = 'flex';
-  }
-});
-window.addEventListener('resize', function(){
-  var btn = document.getElementById('floatingChatBtn');
-  btn.style.display = window.innerWidth <= 700 ? 'flex' : 'none';
-});
+(function(){
+  var style = document.createElement('style');
+  style.innerHTML = '@media(max-width:700px){#floatingChatBtn{display:flex !important;}}';
+  document.head.appendChild(style);
+})();
 </script>
 
 <!-- MOBILE BMI OVERLAY -->
