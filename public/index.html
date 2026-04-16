@@ -196,7 +196,8 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
   .mbn-label{font-size:10px;color:var(--muted);letter-spacing:0.04em;}
   .mbn-item.active .mbn-label{color:var(--terra-d);font-weight:500;}
   .main{padding-bottom:80px;}
-  #floatingChatBtn, .floatingChatBtn{display:flex !important;}
+  #floatingChatBtn{display:flex !important;}
+  @media(min-width:701px){#floatingChatBtn{display:none !important;}}
   .sidebar{display:none;}
   .topbar{padding:0 1rem;}
   .topbar-logo{font-size:24px;}
@@ -2025,7 +2026,7 @@ function runMobileBMI(){
 }
 </script>
 <!-- FLOATING CHAT BUTTON -->
-<div onclick="openMobileChat()" id="floatingChatBtn" style="position:fixed;bottom:100px;right:20px;z-index:998;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#C4704F,#9E5238);box-shadow:0 4px 20px rgba(196,112,79,0.5);align-items:center;justify-content:center;cursor:pointer;animation:floatPulse 2.5s ease-in-out infinite;border:2px solid rgba(255,255,255,0.3);display:none;">
+<div onclick="openMobileChat()" id="floatingChatBtn" style="position:fixed;bottom:100px;right:20px;z-index:998;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#C4704F,#9E5238);box-shadow:0 4px 20px rgba(196,112,79,0.5);align-items:center;justify-content:center;cursor:pointer;animation:floatPulse 2.5s ease-in-out infinite;border:2px solid rgba(255,255,255,0.3);">
   <span style="font-size:24px;">🌸</span>
 </div>
 <style>
