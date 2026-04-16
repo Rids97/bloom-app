@@ -1135,6 +1135,7 @@ const TOKEN = localStorage.getItem('bloom_token');
 if(!TOKEN) window.location.href='/login';
 let userData={}, messageCount=0, userPlan='free';
 const FREE_LIMIT=3;
+let conversationHistory=[];
 
 async function init(){
   try{
@@ -1360,11 +1361,16 @@ async function sendChat(wantsDetail=false,originalMessage=null){
   if(!wantsDetail) appendMsg(msg,'user');
   const typing=appendTyping();
   try{
-    const res=await fetch('/chat',{method:'POST',headers:{'Content-Type':'application/json',Authorization:TOKEN},body:JSON.stringify({message:msg,wantsDetail})});
+    const res=await fetch('/chat',{method:'POST',headers:{'Content-Type':'application/json',Authorization:TOKEN},body:JSON.stringify({message:msg,wantsDetail,history:conversationHistory})});
     const data=await res.json();
     typing.remove();
     if(data.limitReached){appendMsg("You've reached your free message limit. Upgrade to Bloom Pro or Bloom Complete to continue 🌸",'bloom');openPaywall();}
-    else if(data.reply){appendBloomMsg(data.reply,data.followup,data.isDetailed,msg);messageCount=data.messageCount||messageCount+1;updateMsgLimit();}
+    else if(data.reply){
+      conversationHistory.push({role:'user',content:msg});
+      conversationHistory.push({role:'assistant',content:data.reply});
+      if(conversationHistory.length>20) conversationHistory=conversationHistory.slice(-20);
+      appendBloomMsg(data.reply,data.followup,data.isDetailed,msg);messageCount=data.messageCount||messageCount+1;updateMsgLimit();
+    }
   }catch(e){typing.remove();appendMsg('Sorry, something went wrong. Please try again 🌸','bloom');}
   document.getElementById('sendBtn').disabled=false;
 }
@@ -2084,7 +2090,7 @@ async function mobileSendChat(wantsDetail=false, originalMessage=null){
   mobileMsgs.scrollTop = mobileMsgs.scrollHeight;
 
   try{
-    const res = await fetch('/chat',{method:'POST',headers:{'Content-Type':'application/json',Authorization:TOKEN},body:JSON.stringify({message:msg,wantsDetail})});
+    const res = await fetch('/chat',{method:'POST',headers:{'Content-Type':'application/json',Authorization:TOKEN},body:JSON.stringify({message:msg,wantsDetail,history:conversationHistory})});
     const data = await res.json();
     typingDiv.remove();
     if(data.limitReached){
