@@ -322,6 +322,7 @@ app.get("/login", (req, res) => res.sendFile(path.join(__dirname, "public", "log
 app.get("/report", (req, res) => res.sendFile(path.join(__dirname, "public", "report.html")));
 app.get("/roadmap", (req, res) => res.sendFile(path.join(__dirname, "public", "roadmap.html")));
 app.get("/reset-password", (req, res) => res.sendFile(path.join(__dirname, "public", "reset-password.html")));
+app.get("/privacy", (req, res) => res.sendFile(path.join(__dirname, "public", "privacy.html")));
 app.use(express.static(path.join(__dirname, "public")));
 
 // ─────────────────────────────────────────────
